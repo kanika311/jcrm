@@ -10,54 +10,64 @@ export default function CurriculumAccordion({ initialSections }: { initialSectio
   };
 
   return (
-    <div className="border rounded-2xl overflow-hidden" style={{ borderColor: 'var(--border-soft)', background: 'var(--bg-surface)' }}>
-       {sections.map((section, i) => (
-          <div key={i} className="border-b last:border-b-0" style={{ borderColor: 'var(--border-soft)' }}>
-             <div 
-               className="px-6 py-5 flex items-center justify-between cursor-pointer hover:bg-black/5 transition-colors"
-               onClick={() => toggleSection(i)}
-             >
-                <div className="flex flex-col md:flex-row md:items-center gap-2 md:gap-6">
-                   <h3 className="font-bold text-lg">{section.title}</h3>
-                   <div className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--text-secondary)' }}>
-                      <span className="flex items-center gap-1">
-                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                         {section.lessons} lessons
-                      </span>
-                      <span>•</span>
-                      <span className="flex items-center gap-1">
-                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                         {section.time}
-                      </span>
-                   </div>
-                </div>
-                <div className={`transform transition-transform ${section.expanded ? 'rotate-180' : ''}`}>
-                   <svg className="w-6 h-6 text-[var(--text-tertiary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
-                </div>
-             </div>
-             
-             {section.expanded && (
-                <div className="px-6 py-4 border-t bg-black/5" style={{ borderColor: 'var(--border-soft)' }}>
-                   <ul className="space-y-3">
-                      {[1, 2, 3].map((lesson) => (
-                         <li key={lesson} className="flex items-start justify-between p-3 rounded-lg hover:bg-black/5 cursor-pointer transition-colors" style={{ background: 'var(--bg-card)' }}>
-                            <div className="flex items-start gap-3">
-                               <div className="mt-0.5 w-6 h-6 rounded-full flex items-center justify-center shrink-0" style={{ background: 'color-mix(in srgb, var(--accent-primary) 15%, transparent)', color: 'var(--accent-primary)' }}>
-                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
-                               </div>
-                               <div>
-                                  <h4 className="font-semibold text-sm leading-tight">Lesson {lesson}: Understanding the basics</h4>
-                                  <p className="text-xs mt-1" style={{ color: 'var(--text-tertiary)' }}>Video • 12:45</p>
-                               </div>
-                            </div>
-                            <button className="text-xs font-bold text-[var(--accent-primary)] hover:underline opacity-0 group-hover:opacity-100">Preview</button>
-                         </li>
-                      ))}
-                   </ul>
-                </div>
-             )}
+    <div className="border border-blue-100 rounded-3xl overflow-hidden bg-white/90 shadow-sm">
+      {sections.map((section, i) => (
+        <div key={i} className="border-b border-blue-100/80 last:border-b-0">
+          
+          {/* Module Header Bar */}
+          <div 
+            className="px-6 py-5 flex items-center justify-between cursor-pointer hover:bg-blue-50/50 transition-colors"
+            onClick={() => toggleSection(i)}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-xl bg-blue-50 border border-blue-100 text-[#0055FF] flex items-center justify-center font-extrabold text-sm shrink-0 shadow-xs">
+                {i + 1}
+              </div>
+              <h3 className="heading-font font-extrabold text-slate-900 text-base sm:text-lg">
+                {section.title}
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:inline-block px-3 py-1 rounded-full text-xs font-extrabold bg-blue-50 text-[#0055FF] border border-blue-100/80">
+                Syllabus Topics
+              </span>
+              <div className={`w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 transition-transform duration-300 ${section.expanded ? 'rotate-180 bg-blue-50 text-[#0055FF]' : ''}`}>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
           </div>
-       ))}
+          
+          {/* Syllabus Topics Content List */}
+          {section.expanded && (
+            <div className="px-6 py-5 bg-gradient-to-b from-blue-50/30 to-white border-t border-blue-100/60">
+              <p className="text-xs font-extrabold text-slate-500 uppercase tracking-wider mb-4">
+                KEY CONCEPTS & SYLLABUS TOPICS COVERED:
+              </p>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {(section.topics || [
+                  "Core Principles & Fundamental Concepts",
+                  "Industry-Standard Architecture & Implementation",
+                  "Hands-on Practical Assignments & Code Reviews",
+                  "Enterprise Integration & Production Best Practices"
+                ]).map((topic: string, idx: number) => (
+                  <div key={idx} className="flex items-start gap-3 p-3.5 rounded-2xl bg-white border border-blue-100/80 shadow-xs">
+                    <div className="w-5 h-5 rounded-full bg-[#0055FF] text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 shadow-xs">
+                      ✓
+                    </div>
+                    <span className="text-xs sm:text-sm font-semibold text-slate-800 leading-relaxed">
+                      {topic}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ))}
     </div>
   );
 }

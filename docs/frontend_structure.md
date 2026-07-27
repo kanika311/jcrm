@@ -1,7 +1,7 @@
 # Frontend Structure & React Architecture
-## Project: CodersSpot LMS Platform
+## Project: JCRM Technology LMS Platform
 
-This document describes the directory tree, routing structure, state management, and design system configuration for the React Single Page Application (SPA) frontend of CodersSpot.
+This document describes the directory tree, routing structure, state management, and design system configuration for the React Single Page Application (SPA) frontend of JCRM Technology.
 
 ---
 
@@ -10,7 +10,7 @@ This document describes the directory tree, routing structure, state management,
 A clean, component-oriented structure separating global setups, hooks, features, and stylesheets.
 
 ```
-codersspot-frontend/
+jcrm technology-frontend/
 ├── public/                    # Static assets (favicons, manifest)
 ├── src/
 │   ├── assets/                # Logos, SVG icons, background vectors
@@ -196,7 +196,7 @@ Attaches JWT Bearer token to request headers, and intercepts 401 Unauthorized er
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || "https://codersspot.com",
+  baseURL: process.env.REACT_APP_API_URL || "https://jcrm technology.com",
   withCredentials: true, // Send cookies (refresh token)
 });
 
@@ -227,4 +227,4 @@ The React SPA router controls private route accessibility using role checking:
 *   `/onboarding` — Role choice & profile registration (Locked to users with `onboarded=false`)
 *   `/student/*` — Student Dashboard, Classroom, Calendar, Live (Locked to `role=STUDENT`)
 *   `/faculty/*` — Faculty console, Submissions queue, Creator builder (Locked to `role=INSTRUCTOR`)
-*   `/admin/*` — Admin panel console, leads dashboard, CMS edits (Locked to `role=ADMIN` - email: `codersspot97@gmail.com`)
+*   `/admin/*` — Admin panel console, leads dashboard, CMS edits (Locked to `role=ADMIN` - email: `jcrm technology97@gmail.com`)

@@ -15,7 +15,7 @@ export default async function PlacementsPage() {
              Career Outcomes
           </div>
           <h1 className="heading-font text-5xl md:text-6xl font-bold mb-6">{cmsData?.heading || "Where our alumni work"}</h1>
-          <p className="text-xl max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>{cmsData?.subtitle || "CodersSpot graduates don't just pass interviews; they hit the ground running on day one. Here's where they are building the future."}</p>
+          <p className="text-xl max-w-2xl mx-auto" style={{ color: 'var(--text-secondary)' }}>{cmsData?.subtitle || "JCRM Technology graduates don't just pass interviews; they hit the ground running on day one. Here's where they are building the future."}</p>
         </div>
 
         {/* Stats */}

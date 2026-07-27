@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 
@@ -46,7 +45,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#0EA5E9] p-0.5">
                          <div className="w-full h-full rounded-full" style={{ background: 'var(--bg-card)' }}></div>
                       </div>
-                      <span className="heading-font text-xl font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-primary)' }}>CodersSpot</span>
+                      <span className="heading-font text-xl font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-primary)' }}>JCRM Technology</span>
                    </Link>
                    <div className="hidden sm:block h-6 w-px" style={{ background: 'var(--border-soft)' }}></div>
                    <span className="badge-danger px-2.5 py-1 rounded-md text-xs font-bold hidden sm:block">Admin Console</span>
@@ -74,7 +73,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-4">
-                   <ThemeToggle />
                    
                    <Link href="/admin/settings" className="relative group ml-2">
                       <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 p-[2px]">

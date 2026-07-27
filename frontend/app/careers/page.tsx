@@ -1,8 +1,5 @@
-import { getSiteContent } from "@/lib/cms";
-import CareersClient from "./CareersClient";
+import JoinUsClient from "../join/JoinUsClient";
 
-export default async function CareersPage() {
-  const cmsData = await getSiteContent("public-careers");
-
-  return <CareersClient cmsData={cmsData} />;
+export default function CareersAliasPage() {
+  return <JoinUsClient />;
 }

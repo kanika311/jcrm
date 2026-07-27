@@ -10,7 +10,7 @@ export default async function TestimonialsPage() {
         
         <div className="text-center max-w-3xl mx-auto mb-16">
           <h1 className="heading-font text-5xl font-bold mb-6">{cmsData?.heading || "Hear from our students"}</h1>
-          <p className="text-xl" style={{ color: 'var(--text-secondary)' }}>{cmsData?.subtitle || "Over 10,000 developers have upgraded their careers with CodersSpot."}</p>
+          <p className="text-xl" style={{ color: 'var(--text-secondary)' }}>{cmsData?.subtitle || "Over 10,000 developers have upgraded their careers with JCRM Technology."}</p>
         </div>
 
         {/* Rating Banner */}

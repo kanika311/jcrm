@@ -117,7 +117,7 @@ export default function LiveCodeEditor() {
             <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
             <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
           </div>
-          <div className="mx-auto text-xs text-[#858585] font-mono tracking-wider">lockfree_queue.rs — CodersSpot</div>
+          <div className="mx-auto text-xs text-[#858585] font-mono tracking-wider">lockfree_queue.rs — JCRM Technology</div>
         </div>
         
         {/* Code Area */}

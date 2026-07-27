@@ -1,7 +1,7 @@
 # Dataflow & Wireframe Specification
-## Project: CodersSpot LMS Platform
+## Project: JCRM Technology LMS Platform
 
-This document outlines the core transaction dataflows, structural layouts, and user interface wireframes for the CodersSpot LMS platform.
+This document outlines the core transaction dataflows, structural layouts, and user interface wireframes for the JCRM Technology LMS platform.
 
 ---
 

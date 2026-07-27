@@ -13,7 +13,7 @@ async function main() {
   const res1 = await client.query(`
     UPDATE "Users" 
     SET role = 'STUDENT' 
-    WHERE email != 'codersspot97@gmail.com' AND role = 'ADMIN'
+    WHERE email != 'jcrm technology97@gmail.com' AND role = 'ADMIN'
   `);
   
   console.log(`Downgraded ${res1.rowCount} rows to STUDENT.`);

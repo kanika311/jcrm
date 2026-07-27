@@ -6,7 +6,7 @@ async function main() {
     where: {
       role: "ADMIN",
       email: {
-        not: "codersspot97@gmail.com"
+        not: "jcrm technology97@gmail.com"
       }
     }
   });

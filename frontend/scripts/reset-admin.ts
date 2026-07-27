@@ -10,7 +10,7 @@ async function main() {
     await prisma.user.update({
       where: { id: admin.id },
       data: { 
-        email: "codersspot97@gmail.com",
+        email: "jcrm technology97@gmail.com",
         passwordHash: hash
       }
     });
@@ -18,7 +18,7 @@ async function main() {
   } else {
     await prisma.user.create({
       data: {
-        email: "codersspot97@gmail.com",
+        email: "jcrm technology97@gmail.com",
         name: "Admin",
         passwordHash: hash,
         role: "ADMIN"

@@ -27,13 +27,13 @@ export default async function AdminSettingsPage() {
           <form className="space-y-6">
             <div>
               <label className="block text-xs font-bold mb-2 uppercase" style={{ color: 'var(--text-secondary)' }}>Platform Name</label>
-              <input type="text" defaultValue="CodersSpot" className="input-premium w-full rounded-xl px-4 py-3 transition-colors" />
+              <input type="text" defaultValue="JCRM Technology" className="input-premium w-full rounded-xl px-4 py-3 transition-colors" />
             </div>
             
             <div className="grid grid-cols-2 gap-6">
               <div>
                 <label className="block text-xs font-bold mb-2 uppercase" style={{ color: 'var(--text-secondary)' }}>Support Email</label>
-                <input type="email" defaultValue="support@codersspot.io" className="input-premium w-full rounded-xl px-4 py-3 transition-colors" />
+                <input type="email" defaultValue="support@jcrm technology.io" className="input-premium w-full rounded-xl px-4 py-3 transition-colors" />
               </div>
               <div>
                 <label className="block text-xs font-bold mb-2 uppercase" style={{ color: 'var(--text-secondary)' }}>Global Currency</label>

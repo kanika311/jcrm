@@ -1,37 +1,40 @@
 import type { Metadata } from "next";
-import { Inter, Space_Grotesk, Geist_Mono } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import { ThemeProvider } from "@/lib/ThemeContext";
-import DynamicBackground from "@/components/DynamicBackground";
+import DynamicBackgroundExtract from "@/components/DynamicBackgroundExtract";
 
-const inter = Inter({
+const fontHeading = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-heading",
+  weight: ["600", "700", "800"],
   display: "swap",
 });
-const spaceGrotesk = Space_Grotesk({
+
+const fontBody = Inter({
   subsets: ["latin"],
-  variable: "--font-space-grotesk",
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-body",
+  weight: ["400", "500", "600"],
   display: "swap",
 });
-const geistMono = Geist_Mono({
+
+const fontButton = Space_Grotesk({
   subsets: ["latin"],
-  variable: "--font-geist-mono",
+  variable: "--font-button",
+  weight: ["600", "700"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
   title: {
-    default: "CodersSpot — Engineering Education for the Future",
-    template: "%s | CodersSpot",
+    default: "JCRM Technologies — Engineering Education for the Future",
+    template: "%s | JCRM Technologies",
   },
   description:
     "Project-based engineering courses taught by the industry's top 1%. Build real products, earn verified credentials, launch your career.",
   keywords: ["LMS", "engineering", "courses", "react", "typescript", "machine learning", "live classes"],
   openGraph: {
-    title: "CodersSpot — Engineering Education for the Future",
+    title: "JCRM Technologies — Engineering Education for the Future",
     description: "Project-based engineering courses taught by the industry's top 1%.",
     type: "website",
   },
@@ -50,16 +53,14 @@ export default async function RootLayout({
   const footerConfig = await getSiteContent("global-footer");
 
   return (
-    <html lang="en" data-theme="dark" className={`${inter.variable} ${spaceGrotesk.variable} ${geistMono.variable}`}>
+    <html lang="en" data-theme="dark" className={`${fontHeading.variable} ${fontBody.variable} ${fontButton.variable}`}>
       <body className="min-h-screen flex flex-col antialiased bg-transparent" style={{ color: "var(--text-primary)" }}>
-        <ThemeProvider>
-          <AuthProvider>
-            <DynamicBackground />
-            <Navbar siteName={globalSettings.siteName} links={navbarConfig.links} logoUrl={globalSettings.logoUrl} />
-            <main className="flex-1 flex flex-col relative z-10">{children}</main>
-            <Footer cmsData={footerConfig} siteName={globalSettings.siteName} />
-          </AuthProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <DynamicBackgroundExtract />
+          <Navbar siteName={globalSettings.siteName} links={navbarConfig.links} logoUrl={globalSettings.logoUrl} />
+          <main className="flex-1 flex flex-col relative z-10">{children}</main>
+          <Footer cmsData={footerConfig} siteName={globalSettings.siteName} />
+        </AuthProvider>
       </body>
     </html>
   );

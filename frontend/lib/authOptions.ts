@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { PrismaAdapter } from "@auth/prisma-adapter";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { Adapter } from "next-auth/adapters";
 import { cookies } from "next/headers";
 import "@/lib/firebaseAdmin"; // Ensures it is initialized
@@ -202,7 +202,7 @@ export const authOptions: NextAuthOptions = {
         token.email = user.email;
         
         // Check if user has completed onboarding (admins are always onboarded)
-        if (user.role === "ADMIN" || token.email === "codersspot97@gmail.com") {
+        if (user.role === "ADMIN" || token.email === "jcrm technology97@gmail.com") {
            token.onboarded = true;
         } else {
            const profile = await prisma.userProfile.findUnique({ where: { userId: user.id } });
@@ -212,7 +212,7 @@ export const authOptions: NextAuthOptions = {
       
       // HARD SECURITY CHECK: Only this specific email can ever be ADMIN.
       // Even if someone hacks the database, NextAuth will forcefully downgrade them if their email doesn't match.
-      const superAdminEmail = "codersspot97@gmail.com"; 
+      const superAdminEmail = "jcrm technology97@gmail.com"; 
       if (token.email === superAdminEmail) {
         token.role = "ADMIN";
         token.onboarded = true;

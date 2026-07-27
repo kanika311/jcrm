@@ -1,7 +1,7 @@
 # Database Schema Specification
-## Project: CodersSpot LMS Platform
+## Project: JCRM Technology LMS Platform
 
-This document defines the exact database structure for the CodersSpot LMS platform. It includes the original PostgreSQL/Prisma structure and maps it directly to the new **Django Models** using Django's built-in PostgreSQL capabilities.
+This document defines the exact database structure for the JCRM Technology LMS platform. It includes the original PostgreSQL/Prisma structure and maps it directly to the new **Django Models** using Django's built-in PostgreSQL capabilities.
 
 ---
 

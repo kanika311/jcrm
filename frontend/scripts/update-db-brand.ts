@@ -13,15 +13,15 @@ async function main() {
 
       // Replace Aushutosh, Ashutosh, Lumina variants
       const replacements = [
-        { from: /JavaCoders/g, to: 'CodersSpot' },
-        { from: /javacoders/g, to: 'codersspot' },
+        { from: /JavaCoders/g, to: 'JCRM Technology' },
+        { from: /javacoders/g, to: 'jcrm technology' },
         { from: /JAVACODERS/g, to: 'CODERSSPOT' },
-        { from: /Aushutosh/g, to: 'CodersSpot' },
-        { from: /aushutosh/g, to: 'codersspot' },
-        { from: /Ashutosh/g, to: 'CodersSpot' },
-        { from: /ashutosh/g, to: 'codersspot' },
-        { from: /Lumina/g, to: 'CodersSpot' },
-        { from: /lumina/g, to: 'codersspot' },
+        { from: /Aushutosh/g, to: 'JCRM Technology' },
+        { from: /aushutosh/g, to: 'jcrm technology' },
+        { from: /Ashutosh/g, to: 'JCRM Technology' },
+        { from: /ashutosh/g, to: 'jcrm technology' },
+        { from: /Lumina/g, to: 'JCRM Technology' },
+        { from: /lumina/g, to: 'jcrm technology' },
         { from: /AUSHUTOSH/g, to: 'CODERSSPOT' },
         { from: /ASHUTOSH/g, to: 'CODERSSPOT' }
       ];
@@ -34,8 +34,8 @@ async function main() {
       }
 
       if (changed) {
-        if (dataStr.includes("pandey.codersspot699")) {
-          dataStr = dataStr.replace(/pandey\.codersspot699/g, "pandey.ashutosh699");
+        if (dataStr.includes("pandey.jcrm technology699")) {
+          dataStr = dataStr.replace(/pandey\.jcrm technology699/g, "pandey.ashutosh699");
         }
 
         await prisma.siteContent.update({

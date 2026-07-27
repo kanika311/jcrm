@@ -116,8 +116,8 @@ export const CMS_SCHEMAS: PageSchema[] = [
     name: "Global Site Settings",
     category: "global",
     schema: {
-      siteName: { type: "string", label: "Website Name", default: "CodersSpot" },
-      logoUrl: { type: "string", label: "Logo URL (Optional)", default: "" },
+      siteName: { type: "string", label: "Website Name", default: "JCRM Technologies" },
+      logoUrl: { type: "string", label: "Logo URL (Optional)", default: "/logo - JCRM.png" },
       primaryColor: { type: "string", label: "Primary Brand Color (Hex)", default: "#7C3AED" },
     }
   },
@@ -281,7 +281,7 @@ export const CMS_SCHEMAS: PageSchema[] = [
     name: "About Us Page",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Page Heading", default: "About CodersSpot" },
+      heading: { type: "string", label: "Page Heading", default: "About JCRM Technology" },
       story: { type: "text", label: "Our Story", default: "We started with a simple idea..." },
       team: {
         type: "array",
@@ -601,7 +601,7 @@ export const CMS_SCHEMAS: PageSchema[] = [
     category: "global",
     schema: {
       brandDescription: { type: "text", label: "Brand Description", default: "Engineering education for the future. Built by engineers, for engineers." },
-      copyright: { type: "string", label: "Copyright Text", default: "© 2026 CodersSpot Education Inc. All rights reserved." },
+      copyright: { type: "string", label: "Copyright Text", default: "© 2026 JCRM Technology Education Inc. All rights reserved." },
       learnLinks: {
         type: "array",
         label: "Learn Section Links",
@@ -670,7 +670,7 @@ export const CMS_SCHEMAS: PageSchema[] = [
         default: [
           {
             id: "demo-post-1",
-            title: "Welcome to CodersSpot Insights",
+            title: "Welcome to JCRM Technology Insights",
             content: "This is our new public feed where we share the latest updates, tutorials, and course posters.",
             codeSnippet: "console.log('Hello, World!');",
             imageUrl: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=800&q=80",

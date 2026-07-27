@@ -1,0 +1,120 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   CODERS SPOT — EXTRACTED THEME & BACKGROUND STYLES
+   Drop this into your `index.css`, `App.css`, or `globals.css` in any project!
+───────────────────────────────────────────────────────────────────────────── */
+
+/* ── LIGHT THEME ── */
+:root {
+  /* Backgrounds */
+  --bg-base:     #faf9f7;   /* warm off-white canvas */
+  --bg-card:     #ffffff;   /* white card background */
+  --bg-surface:  #f3f0eb;   /* warm light grey surface */
+  --bg-elevated: #edeae3;   /* elevated elements / badges */
+
+  /* Typography Colors */
+  --text-primary:   #1a1a2e;  /* deep navy */
+  --text-secondary: #4a4060;  /* muted purple-navy */
+  --text-tertiary:  #8b7fa8;  /* lilac grey */
+
+  /* Borders */
+  --border-soft:   #e8e3db;
+  --border-med:    #d4ccbf;
+  --border-strong: #b8ae9f;
+
+  /* Accent Spectrum */
+  --accent-primary: #4f46e5;  /* electric indigo */
+  --accent-light:   #7c71f8;  /* light indigo */
+  --accent-green:   #059669;  /* emerald green */
+  --accent-cyan:    #0891b2;  /* ocean cyan */
+  --accent-amber:   #d97706;  /* warm amber */
+
+  /* Glow Effects */
+  --glow-primary: rgba(79, 70, 229, 0.18);
+  --glow-green:   rgba(5, 150, 105, 0.15);
+  --glow-cyan:    rgba(8, 145, 178, 0.15);
+}
+
+/* ── DARK THEME ── */
+.dark {
+  /* Backgrounds — obsidian terminal stack */
+  --bg-base:     #080a0f;   /* near-black terminal background */
+  --bg-card:     #0d1117;   /* GitHub dark card */
+  --bg-surface:  #161b22;   /* surface panel */
+  --bg-elevated: #21262d;   /* elevated menu/badge */
+
+  /* Typography Colors */
+  --text-primary:   #e6edf3;  /* bright readable terminal text */
+  --text-secondary: #8b949e;  /* muted grey comments */
+  --text-tertiary:  #484f58;  /* disabled text */
+
+  /* Borders */
+  --border-soft:   #21262d;
+  --border-med:    #30363d;
+  --border-strong: #484f58;
+
+  /* Accent Spectrum */
+  --accent-primary: #7c3aed;   /* violet plasma CTA */
+  --accent-light:   #a78bfa;   /* light violet hover */
+  --accent-green:   #3fb950;   /* terminal green */
+  --accent-cyan:    #58e6d9;   /* electric cyan */
+  --accent-amber:   #f0a30a;   /* terminal amber */
+
+  /* Glow Effects */
+  --glow-primary: rgba(124, 58, 237, 0.25);
+  --glow-green:   rgba(63, 185, 80, 0.20);
+  --glow-cyan:    rgba(88, 230, 217, 0.18);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   GLASSMORPHISM UTILITIES
+───────────────────────────────────────────────────────────────────────────── */
+.glass {
+  background: color-mix(in srgb, var(--bg-card) 72%, transparent);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--border-soft);
+  border-radius: 24px;
+}
+
+.glass-md {
+  background: color-mix(in srgb, var(--bg-card) 55%, transparent);
+  backdrop-filter: blur(32px) saturate(200%);
+  -webkit-backdrop-filter: blur(32px) saturate(200%);
+  border: 1px solid var(--border-med);
+  border-radius: 20px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   BACKGROUND TEXTURE UTILITIES
+───────────────────────────────────────────────────────────────────────────── */
+.dot-grid {
+  background-image: radial-gradient(
+    color-mix(in srgb, var(--border-strong) 25%, transparent) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   SHIMMER TEXT ANIMATION
+───────────────────────────────────────────────────────────────────────────── */
+.shimmer-text {
+  background: linear-gradient(
+    90deg,
+    var(--accent-primary)  0%,
+    var(--accent-light)   25%,
+    var(--accent-cyan)    50%,
+    var(--accent-light)   75%,
+    var(--accent-primary) 100%
+  );
+  background-size: 300% auto;
+  color: transparent;
+  background-clip: text;
+  -webkit-background-clip: text;
+  animation: shimmer-flow 5s linear infinite;
+}
+
+@keyframes shimmer-flow {
+  0%   { background-position: 0%   center; }
+  100% { background-position: 300% center; }
+}

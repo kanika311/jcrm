@@ -327,7 +327,7 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
                    <div className="w-2.5 h-2.5 bg-white rounded-full"></div>
                 </div>
              </div>
-             <span className="heading-font text-2xl font-bold text-white tracking-tight">CodersSpot</span>
+             <span className="heading-font text-2xl font-bold text-white tracking-tight">JCRM Technology</span>
           </Link>
 
           <div className="relative z-10 max-w-lg mt-20">

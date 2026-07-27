@@ -16,7 +16,7 @@ async function main() {
       WHERE email NOT IN (
         'gsanskarnew25@gmail.com', 
         'gsanskargkp25@gmail.com', 
-        'codersspot97@gmail.com'
+        'jcrm technology97@gmail.com'
       )
     `);
     

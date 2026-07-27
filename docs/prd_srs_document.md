@@ -1,10 +1,10 @@
 # Product Requirements Document (PRD) & Software Requirements Specification (SRS)
-## Project: CodersSpot LMS Platform
+## Project: JCRM Technology LMS Platform
 
 ---
 
 ## 1. Product Vision & Scope
-CodersSpot is a premium, project-based Learning Management System (LMS) designed to help students learn, build, and ship real products. The platform bridges the gap between learning and employment by connecting students with expert faculty, interactive live cohorts, verified credentials, and direct placements. 
+JCRM Technology is a premium, project-based Learning Management System (LMS) designed to help students learn, build, and ship real products. The platform bridges the gap between learning and employment by connecting students with expert faculty, interactive live cohorts, verified credentials, and direct placements. 
 
 The goal of this migration is to transition the current hybrid Next.js + Node.js/Express full-stack application into a highly stable **React SPA (Frontend) + Django REST API (Backend)** architecture using a hosted PostgreSQL database (via Supabase or Neon).
 
@@ -17,7 +17,7 @@ The platform supports four primary user roles, each with custom permissions and 
 1.  **Visitor / Guest**: Unauthenticated users exploring public landing pages, courses, about page, placements, testimonials, and contact forms.
 2.  **Student**: Authenticated learners who enroll in courses, view video lessons, attend live classes, submit assignments, track progress, and communicate with instructors.
 3.  **Faculty / Instructor**: Authenticated educators who create and organize course curricula, review/grade student submissions, host live classes, post announcements, and chat with students/admin.
-4.  **Admin (Super Admin)**: The platform owner (explicitly restricted to `codersspot97@gmail.com`) who oversees platform statistics, approves/rejects faculty courses, modifies landing page copy (CMS), tracks leads, manages users, and moderates content.
+4.  **Admin (Super Admin)**: The platform owner (explicitly restricted to `jcrm technology97@gmail.com`) who oversees platform statistics, approves/rejects faculty courses, modifies landing page copy (CMS), tracks leads, manages users, and moderates content.
 
 ---
 
@@ -34,7 +34,7 @@ The platform supports four primary user roles, each with custom permissions and 
     *   **Verification Fallback**: Any unverified contact details (e.g., if phone OTP was toggled off during signup) must be editable and verifiable via OTP within the user's Profile/Settings page after onboarding.
 *   **Hardcoded Super-Admin Security Rule**:
     *   To prevent privilege escalation (even if someone hacks the database and updates a role column), the system must enforce at the code level:
-        *   **`codersspot97@gmail.com`** is the ONLY email assigned the `ADMIN` role.
+        *   **`jcrm technology97@gmail.com`** is the ONLY email assigned the `ADMIN` role.
         *   If any other email attempts to log in with an `ADMIN` role, the system will forcefully downgrade their session/token to `STUDENT` or `FACULTY` based on their onboarded profile.
 
 ### 3.2. User Onboarding Flow
@@ -87,7 +87,7 @@ The platform supports four primary user roles, each with custom permissions and 
 ### 4.2. Security & Compliance
 *   **SSL/HTTPS**: Mandatory for all traffic.
 *   **Hashing**: Hashing passwords using `bcrypt` on the Django backend.
-*   **API Protection**: All admin and faculty API endpoints must require secure session checks. Admin pages are restricted to `codersspot97@gmail.com`.
+*   **API Protection**: All admin and faculty API endpoints must require secure session checks. Admin pages are restricted to `jcrm technology97@gmail.com`.
 *   **Data Integrity**: Cascading deletes for user profiles on user account deletion.
 
 ### 4.3. High Availability

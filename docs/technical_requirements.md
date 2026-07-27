@@ -1,7 +1,7 @@
 # Technical Requirements Document (TRD)
-## Project: CodersSpot LMS Platform
+## Project: JCRM Technology LMS Platform
 
-This document outlines the core technical dependencies, runtime environments, deployment infrastructure, and stability checklist for the CodersSpot React + Django migration.
+This document outlines the core technical dependencies, runtime environments, deployment infrastructure, and stability checklist for the JCRM Technology React + Django migration.
 
 ---
 
@@ -99,10 +99,10 @@ To authenticate users via their Phone Number / OTP, the platform splits Firebase
 *   [ ] **CORS Configuration**: The Django backend must specify strict allowed origins:
     ```python
     CORS_ALLOWED_ORIGINS = [
-        "https://codersspot.com",
-        "https://www.codersspot.com",
+        "https://jcrm technology.com",
+        "https://www.jcrm technology.com",
     ]
     CORS_ALLOW_CREDENTIALS = True
     ```
 *   [ ] **Database Connection Pools**: Ensure that the database URL has pooling parameters configured (e.g., `?sslmode=require&pool_timeout=30`) to prevent connection exhaustion.
-*   [ ] **Auto-Downgrade Super Admin Guard**: Replicate the exact email role check inside the Custom User `save()` hook in Django to enforce `codersspot97@gmail.com` as the only Super Admin.
+*   [ ] **Auto-Downgrade Super Admin Guard**: Replicate the exact email role check inside the Custom User `save()` hook in Django to enforce `jcrm technology97@gmail.com` as the only Super Admin.

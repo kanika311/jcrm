@@ -20,7 +20,7 @@ async function main() {
     if (facultyRes.rows.length === 0) {
       const insRes = await client.query(`
         INSERT INTO "Users" (user_id, full_name, name, email, password_hash, role, created_at)
-        VALUES (gen_random_uuid(), 'Sarah Jenkins', 'Sarah Jenkins', 'sarah@codersspot.dev', $1, 'INSTRUCTOR', NOW())
+        VALUES (gen_random_uuid(), 'Sarah Jenkins', 'Sarah Jenkins', 'sarah@jcrm technology.dev', $1, 'INSTRUCTOR', NOW())
         RETURNING user_id
       `, [passwordHash]);
       facultyId = insRes.rows[0].user_id;

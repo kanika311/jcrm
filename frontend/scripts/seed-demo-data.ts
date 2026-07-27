@@ -29,7 +29,7 @@ async function main() {
         { step: "3", title: "Get Hired", description: "Ace your interviews with our dedicated placement support and mock interviews.", isActive: true }
       ],
       testimonials: [
-        { name: "Alex Chen", role: "Software Engineer @ Google", quote: "CodersSpot completely transformed my career. I went from a junior role to L4 at Google in just 6 months.", isActive: true },
+        { name: "Alex Chen", role: "Software Engineer @ Google", quote: "JCRM Technology completely transformed my career. I went from a junior role to L4 at Google in just 6 months.", isActive: true },
         { name: "Sarah Jenkins", role: "Frontend Lead @ Stripe", quote: "The curriculum is exactly what the industry needs. The project-based approach makes all the difference.", isActive: true },
         { name: "Michael O.", role: "Backend Engineer @ Amazon", quote: "The mentorship I received was invaluable. Highly recommend this to anyone serious about engineering.", isActive: true }
       ]
@@ -56,14 +56,14 @@ async function main() {
         { name: "Netflix", isActive: true }
       ],
       alumni: [
-        { name: "Rahul S.", role: "SDE II @ Amazon", quote: "CodersSpot helped me transition from a service-based company to a product-based giant.", isActive: true },
+        { name: "Rahul S.", role: "SDE II @ Amazon", quote: "JCRM Technology helped me transition from a service-based company to a product-based giant.", isActive: true },
         { name: "Emily W.", role: "Frontend Engineer @ Meta", quote: "The focus on System Design and advanced React concepts was exactly what I needed.", isActive: true },
         { name: "Jason K.", role: "Backend Developer @ Netflix", quote: "The intense focus on system architecture helped me ace my design interviews effortlessly.", isActive: true }
       ]
     },
     "public-testimonials": {
       testimonials: [
-        { name: "Alex Chen", role: "Software Engineer @ Google", quote: "CodersSpot completely transformed my career.", rating: "5", isActive: true },
+        { name: "Alex Chen", role: "Software Engineer @ Google", quote: "JCRM Technology completely transformed my career.", rating: "5", isActive: true },
         { name: "Sarah Jenkins", role: "Frontend Lead @ Stripe", quote: "The curriculum is exactly what the industry needs.", rating: "5", isActive: true },
         { name: "Michael O.", role: "Backend Engineer @ Amazon", quote: "The mentorship I received was invaluable.", rating: "5", isActive: true },
         { name: "David K.", role: "Full Stack Developer", quote: "Best investment I ever made in my career.", rating: "4", isActive: true },

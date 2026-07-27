@@ -1,7 +1,7 @@
 # Backend Structure & Django Architecture
-## Project: CodersSpot LMS Platform
+## Project: JCRM Technology LMS Platform
 
-This document describes the structure, architecture, and module configurations of the Django REST API backend for CodersSpot.
+This document describes the structure, architecture, and module configurations of the Django REST API backend for JCRM Technology.
 
 ---
 
@@ -10,11 +10,11 @@ This document describes the structure, architecture, and module configurations o
 A clean, modular structure separating business domains into discrete Django applications.
 
 ```
-codersspot-backend/
+jcrm technology-backend/
 ├── manage.py
 ├── requirements.txt
 ├── .env
-├── codersspot/                # Main Settings & Core Configurations
+├── jcrm technology/                # Main Settings & Core Configurations
 │   ├── __init__.py
 │   ├── settings.py            # Main settings (database, JWT, apps, cors)
 │   ├── urls.py                # Core URL routing entry point
@@ -146,7 +146,7 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         # HARD SECURITY RULE: Explicit super admin validation
-        super_admin_email = "codersspot97@gmail.com"
+        super_admin_email = "jcrm technology97@gmail.com"
         if self.email == super_admin_email:
             self.role = "ADMIN"
             self.is_staff = True

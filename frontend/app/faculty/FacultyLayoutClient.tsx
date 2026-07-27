@@ -1,7 +1,6 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 
@@ -44,7 +43,7 @@ export default function FacultyLayoutClient({ children, cmsData }: { children: R
                       <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#0EA5E9] p-0.5">
                          <div className="w-full h-full rounded-full" style={{ background: 'var(--bg-card)' }}></div>
                       </div>
-                      <span className="heading-font text-xl font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-primary)' }}>CodersSpot</span>
+                      <span className="heading-font text-xl font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-primary)' }}>JCRM Technology</span>
                    </Link>
                    <div className="hidden sm:block h-6 w-px" style={{ background: 'var(--border-soft)' }}></div>
                    <span className="badge-warning px-2.5 py-1 rounded-md text-xs font-bold hidden sm:block">Instructor Portal</span>
@@ -77,7 +76,6 @@ export default function FacultyLayoutClient({ children, cmsData }: { children: R
 
                 {/* Right Actions */}
                 <div className="flex items-center gap-4">
-                   <ThemeToggle />
                    
                    {cmsData?.showNotifications !== false && (
                       <div className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-surf-elevated text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
