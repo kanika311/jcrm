@@ -4,15 +4,21 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function FacultyDashboard() {
   const session = await getServerSession(authOptions);
   const cmsData = await getSiteContent("faculty-dashboard");
   
   let userName = "Instructor";
   if (session?.user?.id) {
-    const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, fullName: true } });
-    if (dbUser) {
-      userName = (dbUser.name || dbUser.fullName || "Instructor").split(" ")[0];
+    try {
+      const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, fullName: true } });
+      if (dbUser) {
+        userName = (dbUser.name || dbUser.fullName || "Instructor").split(" ")[0];
+      }
+    } catch (error) {
+      console.error("Failed to load faculty profile:", error);
     }
   }
 

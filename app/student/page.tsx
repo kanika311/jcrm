@@ -5,6 +5,8 @@ import { authOptions } from "@/lib/authOptions";
 import { getSiteContent } from "@/lib/cms";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 export default async function StudentDashboard() {
   const session = await getServerSession(authOptions);
   const data = await getStudentDashboard();
@@ -12,9 +14,13 @@ export default async function StudentDashboard() {
   
   let userName = "Student";
   if (session?.user?.id) {
-    const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, fullName: true } });
-    if (dbUser) {
-      userName = (dbUser.name || dbUser.fullName || "Student").split(" ")[0];
+    try {
+      const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, fullName: true } });
+      if (dbUser) {
+        userName = (dbUser.name || dbUser.fullName || "Student").split(" ")[0];
+      }
+    } catch (error) {
+      console.error("Failed to load student profile:", error);
     }
   }
 

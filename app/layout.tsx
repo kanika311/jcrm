@@ -44,13 +44,17 @@ import AuthProvider from "@/components/AuthProvider";
 import { getSiteContent } from "@/lib/cms";
 import Footer from "@/components/Footer";
 
+// CMS + auth are request-time; avoid DB connections during static page generation.
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  // Fetch global settings and navbar config
-  const globalSettings = await getSiteContent("global-settings");
-  const navbarConfig = await getSiteContent("public-navbar");
-  const footerConfig = await getSiteContent("global-footer");
+  const [globalSettings, navbarConfig, footerConfig] = await Promise.all([
+    getSiteContent("global-settings"),
+    getSiteContent("public-navbar"),
+    getSiteContent("global-footer"),
+  ]);
 
   return (
     <html lang="en" data-theme="dark" className={`${fontHeading.variable} ${fontBody.variable} ${fontButton.variable}`}>
