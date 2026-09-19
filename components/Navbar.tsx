@@ -5,11 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 
-export default function Navbar({ siteName, links, logoUrl }: { siteName?: string, links?: any[], logoUrl?: string }) {
+export default function Navbar({ siteName, links }: { siteName?: string, links?: any[], logoUrl?: string }) {
   const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [imgError, setImgError] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -20,8 +19,16 @@ export default function Navbar({ siteName, links, logoUrl }: { siteName?: string
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Hide on dashboard, auth, and onboarding routes
-  if (pathname === "/auth" || pathname === "/onboarding" || pathname?.startsWith("/student") || pathname?.startsWith("/faculty") || pathname?.startsWith("/admin")) {
+  // Hide on dashboard, auth, onboarding, and admin login routes
+  if (
+    pathname === "/auth" ||
+    pathname === "/onboarding" ||
+    pathname?.startsWith("/student") ||
+    pathname?.startsWith("/faculty") ||
+    pathname?.startsWith("/admin") ||
+    pathname === "/jcrm-sushant" ||
+    pathname?.startsWith("/jcrm-sushant")
+  ) {
     return null;
   }
 
@@ -29,17 +36,28 @@ export default function Navbar({ siteName, links, logoUrl }: { siteName?: string
     { name: "Home", href: "/", isActive: true },
     { name: "Courses", href: "/courses", isActive: true },
     { name: "ERP Solutions", href: "/erp-solutions", isActive: true },
-    { name: "Our Team", href: "/im", isActive: true },
+    { name: "Our Team", href: "/ourteam", isActive: true },
     { name: "Workshop", href: "/workshop", isActive: true },
-    { name: "Join Us", href: "/join", isActive: true },
+    { name: "Join Us", href: "/joinus", isActive: true },
     { name: "About Us", href: "/about", isActive: true },
     { name: "Contact", href: "/contact", isActive: true },
   ];
 
+  const isLinkActive = (href: string) => {
+    if (href === "/") return pathname === "/";
+    if (href === "/ourteam") {
+      return pathname === "/ourteam" || pathname === "/our-team" || pathname?.startsWith("/im");
+    }
+    if (href === "/joinus") {
+      return pathname === "/joinus" || pathname === "/join" || pathname === "/join-us";
+    }
+    return pathname === href || (href !== "/" && pathname?.startsWith(href));
+  };
+
   const rawLinks = links && links.length > 0 ? links : defaultLinks;
   const activeLinks = rawLinks.filter((link: any) => link.isActive !== false);
 
-  const displayLogoUrl = logoUrl || "/logo - JCRM.jpeg";
+  const displayLogoUrl = "/logo - JCRM.jpeg";
 
   return (
     <nav
@@ -54,18 +72,11 @@ export default function Navbar({ siteName, links, logoUrl }: { siteName?: string
           
           {/* Logo & Brand Name - Directly placed image scaled to occupy navbar height */}
           <Link href="/" className="flex items-center gap-3.5 shrink-0 group relative z-20">
-            {!imgError ? (
-              <img
-                src={displayLogoUrl}
-                alt={siteName || "JCRM Logo"}
-                className="h-14 sm:h-16 w-auto object-contain shrink-0 group-hover:scale-105 transition-transform"
-                onError={() => setImgError(true)}
-              />
-            ) : (
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-tr from-[#0055FF] to-sky-400 flex items-center justify-center font-black text-white text-lg shrink-0">
-                JCRM
-              </div>
-            )}
+            <img
+              src={displayLogoUrl}
+              alt={siteName || "JCRM Logo"}
+              className="h-14 sm:h-16 w-14 sm:w-16 rounded-full object-contain bg-white shrink-0 group-hover:scale-105 transition-transform"
+            />
             
             <span className="heading-font text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#0055FF] transition-colors">
               {siteName || "JCRM Technologies"}
@@ -75,10 +86,7 @@ export default function Navbar({ siteName, links, logoUrl }: { siteName?: string
           {/* Desktop Links with Glowing Blue Indicator Bar */}
           <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
             {activeLinks.map((link: any) => {
-              const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname === link.href || (link.href !== "/" && pathname?.startsWith(link.href));
+              const isActive = isLinkActive(link.href);
 
               return (
                 <Link
@@ -111,20 +119,22 @@ export default function Navbar({ siteName, links, logoUrl }: { siteName?: string
             </Link>
           </div>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center gap-4">
+          {/* Mobile Hamburger Toggle */}
+          <div className="lg:hidden flex items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-xl text-slate-800 hover:bg-blue-50 transition-colors"
-              aria-label="Toggle Mobile Menu"
+              className="p-2.5 rounded-xl bg-blue-50 text-slate-800 hover:bg-blue-100 transition-colors cursor-pointer"
+              aria-label="Toggle Menu"
             >
-              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                {mobileMenuOpen ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 6h16M4 12h16M4 18h16" />
-                )}
-              </svg>
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
             </button>
           </div>
         </div>
@@ -135,10 +145,7 @@ export default function Navbar({ siteName, links, logoUrl }: { siteName?: string
         <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl border-b border-blue-100 shadow-2xl">
           <div className="px-5 pt-3 pb-6 space-y-2">
             {activeLinks.map((link: any) => {
-              const isActive =
-                link.href === "/"
-                  ? pathname === "/"
-                  : pathname === link.href || (link.href !== "/" && pathname?.startsWith(link.href));
+              const isActive = isLinkActive(link.href);
 
               return (
                 <Link

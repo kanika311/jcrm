@@ -80,15 +80,11 @@ export default function ErpCatalogClient({ products }: { products: any[] }) {
         
         {/* Header & Tagline */}
         <div className="text-center max-w-3xl mx-auto mb-16 animate-fade-in-up">
-          <span className="inline-block px-4 py-1.5 mb-4 text-xs font-extrabold uppercase tracking-widest text-[#0055FF] bg-blue-50/90 rounded-full border border-blue-100/90 shadow-xs">
-            ⚡ 100% SELF-CUSTOMIZABLE ENTERPRISE ERP SUITES
-          </span>
+       
           <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight">
             Smart ERP Solutions Built for <span className="text-[#0055FF]">Scale & Autonomy</span>
           </h1>
-          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
-            Automate core business processes, eliminate software bloat, and take complete control of your data with modular, self-hostable ERP software tailored to your enterprise.
-          </p>
+
         </div>
 
         {/* Business-Type Industry Filter Tabs & Search Bar */}

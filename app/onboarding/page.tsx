@@ -108,9 +108,11 @@ export default function OnboardingPage() {
       {/* Header */}
       <header className="p-6 flex justify-between items-center absolute top-0 w-full">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#0EA5E9] p-0.5">
-             <div className="w-full h-full rounded-full" style={{ background: 'var(--bg-base)' }}></div>
-          </div>
+          <img
+            src="/logo - JCRM.jpeg"
+            alt="JCRM Technologies"
+            className="w-10 h-10 rounded-full object-contain bg-white shrink-0"
+          />
           <span className="heading-font font-bold text-xl tracking-tight">JCRM Technology</span>
         </div>
         <div className="flex items-center gap-4">

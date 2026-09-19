@@ -165,19 +165,19 @@ code, pre, .font-mono {
 /* ── KEYFRAME ANIMATIONS ─────────────────────────────────── */
 @keyframes fadeInUp {
   0%   { opacity: 0; transform: translateY(28px); }
-  100% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 1; transform: none; }
 }
 @keyframes slideInRight {
   0%   { opacity: 0; transform: translateX(24px); }
-  100% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 1; transform: none; }
 }
 @keyframes slideInLeft {
   0%   { opacity: 0; transform: translateX(-24px); }
-  100% { opacity: 1; transform: translateX(0); }
+  100% { opacity: 1; transform: none; }
 }
 @keyframes scaleIn {
   0%   { opacity: 0; transform: scale(0.92); }
-  100% { opacity: 1; transform: scale(1); }
+  100% { opacity: 1; transform: none; }
 }
 @keyframes shimmer {
   0%   { background-position: -200% center; }

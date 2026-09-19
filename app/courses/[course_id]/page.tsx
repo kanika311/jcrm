@@ -1,8 +1,11 @@
 import Link from "next/link";
 import CurriculumAccordion from "./CurriculumAccordion";
+import { prisma } from "@/lib/prisma";
+
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
-  return [
+  const staticList = [
     { course_id: 'frontend-development' },
     { course_id: 'backend-development' },
     { course_id: 'ai-machine-learning' },
@@ -14,6 +17,19 @@ export async function generateStaticParams() {
     { course_id: 'digital-marketing' },
     { course_id: 'zen-ai' }
   ];
+
+  try {
+    const dbCourses = await prisma.course.findMany({
+      select: { id: true, title: true }
+    });
+    const dbParams = dbCourses.flatMap(c => {
+      const slug = c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+      return [{ course_id: c.id }, { course_id: slug }];
+    });
+    return [...staticList, ...dbParams];
+  } catch {
+    return staticList;
+  }
 }
 
 const COURSES_DATA: Record<string, any> = {
@@ -692,39 +708,135 @@ const COURSES_DATA: Record<string, any> = {
 export default async function CourseDetailPage({ params }: { params: Promise<{ course_id: string }> }) {
   const { course_id } = await params;
   
-  // Get course data or fallback
-  const course = COURSES_DATA[course_id] || {
-    title: course_id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
-    badge: "100% Placement Track",
-    level: "Intermediate",
-    instructor: "JCRM Senior Tech Lead",
-    instructorRole: "Industry Expert Instructor",
-    rating: "4.9",
-    ratingsCount: "1,500",
-    studentsCount: "12,000",
-    lastUpdated: "Jan 2026",
-    price: "₹14,999",
-    duration: "3 Months • 120 Hours",
-    image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
-    description: "Master industry-standard engineering tools and technologies through hands-on project building and personalized 1-on-1 mentorship.",
-    whatYouLearn: [
-      "Build production-grade real world applications",
-      "Implement industry-standard architectural patterns",
-      "Master core technologies and frameworks",
-      "Receive 100% placement assistance & referral support"
-    ],
-    curriculum: [
-      {
-        title: "Module 1: Core Fundamentals & Environment Setup",
-        expanded: true,
-        topics: [
-          "Core Principles & Setup",
-          "Hands-on Implementation",
-          "Enterprise Best Practices"
-        ]
+  // 1. Check if course exists in Database
+  let dbCourse = null;
+  try {
+    dbCourse = await prisma.course.findUnique({
+      where: { id: course_id }
+    });
+  } catch {
+    // If not a valid ObjectId or other error, fallback to searching by slug or title
+  }
+
+  if (!dbCourse) {
+    try {
+      const allDbCourses = await prisma.course.findMany();
+      dbCourse = allDbCourses.find(c => {
+        const slug = c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        return slug === course_id.toLowerCase() || c.id === course_id || c.title.toLowerCase() === course_id.toLowerCase();
+      });
+    } catch {
+      // Prisma error fallback
+    }
+  }
+
+  // Determine course data
+  let course: any;
+
+  if (dbCourse) {
+    let parsedCurriculum: any[] = [];
+    if (Array.isArray(dbCourse.curriculum)) {
+      parsedCurriculum = dbCourse.curriculum;
+    } else if (typeof dbCourse.curriculum === 'string') {
+      try {
+        parsedCurriculum = JSON.parse(dbCourse.curriculum);
+      } catch {
+        parsedCurriculum = [];
       }
-    ]
-  };
+    }
+
+    if (!parsedCurriculum || parsedCurriculum.length === 0) {
+      parsedCurriculum = [
+        {
+          title: `Module 1: Foundations of ${dbCourse.title}`,
+          expanded: true,
+          topics: [
+            `Core Fundamentals & Overview of ${dbCourse.title}`,
+            "Environment Setup & Tooling Configuration",
+            "Essential Syntax, Data Structures & Architecture",
+            "Hands-on Lab Exercises & Best Practices"
+          ]
+        },
+        {
+          title: `Module 2: Advanced ${dbCourse.title} & Industry Project`,
+          expanded: false,
+          topics: [
+            "Advanced Design Patterns & Production Scalability",
+            "Full-Stack Enterprise Integration Workflow",
+            "Automated Testing, CI/CD Pipeline & Deployment",
+            "Live Capstone Project & Mock Technical Interview"
+          ]
+        }
+      ];
+    }
+
+    const whatYouLearn = (dbCourse.whatYouLearn && dbCourse.whatYouLearn.length > 0)
+      ? dbCourse.whatYouLearn
+      : [
+          `Master core to advanced concepts in ${dbCourse.title}`,
+          "Build production-grade real-world software applications",
+          "Learn industry best practices from experienced tech mentors",
+          "100% Placement assistance and dedicated mock interviews"
+        ];
+
+    const priceDisplay = typeof dbCourse.price === 'number'
+      ? `₹${dbCourse.price.toLocaleString('en-IN')}`
+      : String(dbCourse.price).startsWith('₹') ? dbCourse.price : `₹${dbCourse.price}`;
+
+    course = {
+      title: dbCourse.title,
+      badge: dbCourse.badge || "100% Placement Track",
+      level: dbCourse.level || "Beginner to Advanced",
+      instructor: dbCourse.instructor || "JCRM Senior Tech Lead",
+      instructorRole: dbCourse.instructorRole || "Senior Industry Practitioner",
+      rating: "4.9",
+      ratingsCount: "1,640",
+      studentsCount: "12,500",
+      lastUpdated: "Recently Updated",
+      price: priceDisplay,
+      duration: dbCourse.duration || "3 Months • 120 Hours",
+      image: dbCourse.image || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
+      description: dbCourse.description || `Master ${dbCourse.title} through hands-on project building and personalized 1-on-1 mentorship.`,
+      whatYouLearn,
+      curriculum: parsedCurriculum
+    };
+  } else if (COURSES_DATA[course_id]) {
+    course = COURSES_DATA[course_id];
+  } else {
+    // Generic fallback for any unlisted course id
+    course = {
+      title: course_id.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+      badge: "100% Placement Track",
+      level: "Intermediate",
+      instructor: "JCRM Senior Tech Lead",
+      instructorRole: "Industry Expert Instructor",
+      rating: "4.9",
+      ratingsCount: "1,500",
+      studentsCount: "12,000",
+      lastUpdated: "Jan 2026",
+      price: "₹14,999",
+      duration: "3 Months • 120 Hours",
+      image: "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
+      description: "Master industry-standard engineering tools and technologies through hands-on project building and personalized 1-on-1 mentorship.",
+      whatYouLearn: [
+        "Build production-grade real world applications",
+        "Implement industry-standard architectural patterns",
+        "Master core technologies and frameworks",
+        "Receive 100% placement assistance & referral support"
+      ],
+      curriculum: [
+        {
+          title: "Module 1: Core Fundamentals & Environment Setup",
+          expanded: true,
+          topics: [
+            "Core Principles & Setup",
+            "Hands-on Implementation",
+            "Enterprise Best Practices"
+          ]
+        }
+      ]
+    };
+  }
 
   return (
     <div className="min-h-screen pt-32 pb-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">

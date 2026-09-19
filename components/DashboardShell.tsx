@@ -41,9 +41,11 @@ export default function DashboardShell({
       <aside className="w-[260px] bg-[#0B0F19]/80 backdrop-blur-2xl border-r border-bdr-soft h-full flex flex-col hidden lg:flex relative z-20 shrink-0 shadow-2xl">
         <div className="pt-8 pb-6 px-6 border-b border-bdr-soft">
           <Link href="/" className="flex items-center gap-3 mb-6 group">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-[0_0_15px_rgba(139,92,246,0.3)] group-hover:shadow-[0_0_25px_rgba(139,92,246,0.6)] transition-all transform group-hover:scale-105">
-              <div className="w-3 h-3 bg-white rounded-full"></div>
-            </div>
+            <img
+              src="/logo - JCRM.jpeg"
+              alt="JCRM Technologies"
+              className="w-9 h-9 rounded-full object-contain bg-white shrink-0 group-hover:scale-105 transition-transform"
+            />
             <span className="text-2xl font-bold text-txt-primary tracking-tight heading-font">JCRM Technology</span>
           </Link>
           <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-surf-elevated border border-bdr-soft text-[10px] font-bold text-violet-300 uppercase tracking-widest shadow-inner">

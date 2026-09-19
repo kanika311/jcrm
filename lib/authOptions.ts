@@ -10,6 +10,7 @@ import "@/lib/firebaseAdmin"; // Ensures it is initialized
 import { getAuth } from "firebase-admin/auth";
 
 export const authOptions: NextAuthOptions = {
+  secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
   adapter: PrismaAdapter(prisma) as Adapter,
   session: {
     strategy: "jwt",
@@ -210,15 +211,10 @@ export const authOptions: NextAuthOptions = {
         }
       }
       
-      // HARD SECURITY CHECK: Only this specific email can ever be ADMIN.
-      // Even if someone hacks the database, NextAuth will forcefully downgrade them if their email doesn't match.
       const superAdminEmail = "jcrm technology97@gmail.com"; 
-      if (token.email === superAdminEmail) {
+      if (token.email === superAdminEmail || token.role === "ADMIN") {
         token.role = "ADMIN";
         token.onboarded = true;
-      } else if (token.role === "ADMIN") {
-        // If they are ADMIN in DB but not the super admin email, downgrade them to prevent unauthorized access
-        token.role = "STUDENT";
       }
 
       return token;

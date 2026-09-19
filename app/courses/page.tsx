@@ -144,7 +144,35 @@ export const courses = [
   }
 ];
 
+import { prisma } from "@/lib/prisma";
+
+export const dynamic = "force-dynamic";
+
 export default async function CoursesCatalog() {
-  const cmsData = await getSiteContent("public-courses");
-  return <CoursesCatalogClient cmsData={cmsData} courses={courses} />;
+  const [cmsData, dbCourses] = await Promise.all([
+    getSiteContent("public-courses"),
+    prisma.course.findMany({
+      where: { status: "PUBLISHED" },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
+
+  const activeCourses = dbCourses.length > 0
+    ? dbCourses.map((c) => ({
+        id: c.id,
+        title: c.title,
+        instructor: c.instructor || "JCRM Faculty",
+        rating: "4.9",
+        level: c.level || "Beginner",
+        tags: c.tags && c.tags.length > 0 ? c.tags : ["Engineering"],
+        price: typeof c.price === "number" ? `₹${c.price.toLocaleString()}` : String(c.price),
+        badge: c.badge || "Popular",
+        badgeClass: "badge-warning",
+        color: "from-[#0055FF] to-sky-400",
+        image: c.image || "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
+        description: c.description,
+      }))
+    : courses;
+
+  return <CoursesCatalogClient cmsData={cmsData} courses={activeCourses} />;
 }

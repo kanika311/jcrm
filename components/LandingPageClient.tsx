@@ -511,9 +511,7 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
             <h2 className="heading-font text-4xl md:text-5xl font-extrabold mb-4 text-slate-900">
               Why Choose <span className="text-[#0055FF]">JCRM Technologies</span>
             </h2>
-            <p className="text-lg text-slate-600 font-medium max-w-3xl mx-auto">
-              We focus on real-world skills, enterprise-grade ERP solutions, and long-term career & business growth.
-            </p>
+
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -647,9 +645,7 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
             <h2 className="heading-font text-4xl sm:text-5xl font-extrabold mb-4 text-slate-900">
               Training & <span className="text-[#0055FF]">100% Placement Assistance</span>
             </h2>
-            <p className="text-lg md:text-xl text-slate-600 font-medium max-w-3xl mx-auto">
-              Hands-on learning with real projects and strong hiring support in India and abroad.
-            </p>
+
           </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
@@ -710,9 +706,7 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
               </div>
 
               <div className="pt-4 border-t border-blue-100/80 text-center sm:text-left">
-                <p className="text-xs md:text-sm font-semibold text-slate-500 tracking-wide">
-                  Real-time projects • Mentor guidance • Interview preparation • Hiring partner referrals
-                </p>
+             
               </div>
             </motion.div>
 
@@ -766,9 +760,7 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
                     <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
                   </svg>
                 </Link>
-                <p className="text-xs italic text-slate-500 text-center font-medium">
-                  We provide training & placement support across multiple IT domains.
-                </p>
+           
               </div>
             </motion.div>
           </div>
@@ -789,9 +781,7 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
               <h2 className="heading-font text-4xl sm:text-5xl font-extrabold text-slate-900 mb-3">
                 Successfully Placed <span className="text-[#0055FF]">Candidates</span>
               </h2>
-              <p className="text-lg text-slate-600 font-medium">
-                Our students are working with leading companies across India.
-              </p>
+          
             </div>
 
             {/* Drag Hint & Controls */}
@@ -1093,31 +1083,33 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
       {/* Video Modal Overlay */}
       {mounted && isVideoOpen && createPortal(
         <div
-          className="fixed inset-0 z-[99999] flex items-center justify-center bg-black/85 backdrop-blur-md p-4 sm:p-6"
+          className="fixed inset-0 z-[99999] overflow-y-auto bg-black/85 backdrop-blur-md animate-fade-in"
           onClick={() => setIsVideoOpen(false)}
         >
-          <div
-            className="relative w-full max-w-4xl bg-black rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border-2 border-red-600/60"
-            style={{ boxShadow: '0 0 50px rgba(255, 0, 0, 0.5)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={() => setIsVideoOpen(false)}
-              className="absolute top-3 right-3 z-50 p-2.5 rounded-full bg-black/70 text-white hover:bg-red-600 transition-colors cursor-pointer flex items-center justify-center border border-white/20 shadow-lg"
-              aria-label="Close Video"
+          <div className="flex min-h-full items-center justify-center p-4 sm:p-6 text-center">
+            <div
+              className="relative w-full max-w-4xl my-6 text-left bg-black rounded-2xl md:rounded-3xl overflow-hidden shadow-2xl border-2 border-red-600/60"
+              style={{ boxShadow: '0 0 50px rgba(255, 0, 0, 0.5)' }}
+              onClick={(e) => e.stopPropagation()}
             >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <div className="relative w-full pt-[56.25%] bg-black">
-              <iframe
-                className="absolute top-0 left-0 w-full h-full border-0"
-                src="https://www.youtube.com/embed/AHzgyPR-Cy4?autoplay=1&rel=0"
-                title="Why JCRM?"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-              ></iframe>
+              <button
+                onClick={() => setIsVideoOpen(false)}
+                className="absolute top-3 right-3 z-50 p-2.5 rounded-full bg-black/70 text-white hover:bg-red-600 transition-colors cursor-pointer flex items-center justify-center border border-white/20 shadow-lg"
+                aria-label="Close Video"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="relative w-full pt-[56.25%] bg-black">
+                <iframe
+                  className="absolute top-0 left-0 w-full h-full border-0"
+                  src="https://www.youtube.com/embed/AHzgyPR-Cy4?autoplay=1&rel=0"
+                  title="Why JCRM?"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
           </div>
         </div>,

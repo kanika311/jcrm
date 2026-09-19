@@ -78,6 +78,31 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  async redirects() {
+    return [
+      {
+        source: '/join',
+        destination: '/joinus',
+        permanent: true,
+      },
+      {
+        source: '/join-us',
+        destination: '/joinus',
+        permanent: true,
+      },
+      {
+        source: '/im',
+        destination: '/ourteam',
+        permanent: true,
+      },
+      {
+        source: '/our-team',
+        destination: '/ourteam',
+        permanent: true,
+      },
+    ];
+  },
 };
 
+// Next.js configuration reloaded for prisma query engine client
 export default nextConfig;

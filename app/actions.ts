@@ -35,22 +35,37 @@ export async function getCourseById(id: string) {
 // --- STUDENT ACTIONS ---
 export async function getStudentDashboard() {
   const session = await getSession();
-  if (!session || session.user.role !== "STUDENT") throw new Error("Unauthorized");
+  if (!session || !session.user) {
+    return {
+      enrollments: [],
+      activeCount: 0,
+      completedCount: 0,
+    };
+  }
 
-  const enrollments = await prisma.enrollment.findMany({
-    where: { studentId: session.user.id },
-    include: {
-      course: {
-        include: { faculty: { select: { fullName: true } } }
+  try {
+    const enrollments = await prisma.enrollment.findMany({
+      where: { studentId: session.user.id },
+      include: {
+        course: {
+          include: { faculty: { select: { fullName: true } } }
+        }
       }
-    }
-  });
+    });
 
-  return {
-    enrollments,
-    activeCount: enrollments.length,
-    completedCount: enrollments.filter(e => e.progressPercent === 100).length,
-  };
+    return {
+      enrollments: enrollments || [],
+      activeCount: enrollments?.length || 0,
+      completedCount: enrollments?.filter(e => e.progressPercent === 100).length || 0,
+    };
+  } catch (err) {
+    console.error("Error in getStudentDashboard:", err);
+    return {
+      enrollments: [],
+      activeCount: 0,
+      completedCount: 0,
+    };
+  }
 }
 
 export async function enrollInCourse(courseId: string) {
@@ -85,37 +100,61 @@ export async function enrollInCourse(courseId: string) {
 // --- INSTRUCTOR ACTIONS ---
 export async function getFacultyDashboard() {
   const session = await getSession();
-  if (!session || session.user.role !== "INSTRUCTOR") throw new Error("Unauthorized");
+  if (!session || session.user.role !== "INSTRUCTOR") {
+    return { courses: [], totalStudents: 0 };
+  }
 
-  const courses = await prisma.course.findMany({
-    where: { facultyId: session.user.id },
-    include: {
-      _count: { select: { enrollments: true } },
-    }
-  });
+  try {
+    const courses = await prisma.course.findMany({
+      where: { facultyId: session.user.id },
+      include: {
+        _count: { select: { enrollments: true } },
+      }
+    });
 
-  return {
-    courses,
-    totalStudents: courses.reduce((acc, c) => acc + c._count.enrollments, 0),
-  };
+    return {
+      courses: courses || [],
+      totalStudents: courses ? courses.reduce((acc, c) => acc + (c._count?.enrollments || 0), 0) : 0,
+    };
+  } catch (err) {
+    console.error("Error in getFacultyDashboard:", err);
+    return { courses: [], totalStudents: 0 };
+  }
 }
 
 // --- ADMIN ACTIONS ---
 export async function getAdminDashboard() {
   const session = await getSession();
-  if (!session || session.user.role !== "ADMIN") throw new Error("Unauthorized");
+  if (!session || session.user.role !== "ADMIN") {
+    return {
+      totalStudents: 0,
+      totalInstructors: 0,
+      totalCourses: 0,
+      totalEnrollments: 0,
+    };
+  }
 
-  const [totalStudents, totalInstructors, totalCourses, totalEnrollments] = await Promise.all([
-    prisma.user.count({ where: { role: "STUDENT" } }),
-    prisma.user.count({ where: { role: "INSTRUCTOR" } }),
-    prisma.course.count(),
-    prisma.enrollment.count(),
-  ]);
+  try {
+    const [totalStudents, totalInstructors, totalCourses, totalEnrollments] = await Promise.all([
+      prisma.user.count({ where: { role: "STUDENT" } }),
+      prisma.user.count({ where: { role: "INSTRUCTOR" } }),
+      prisma.course.count(),
+      prisma.enrollment.count(),
+    ]);
 
-  return {
-    totalStudents,
-    totalInstructors,
-    totalCourses,
-    totalEnrollments,
-  };
+    return {
+      totalStudents,
+      totalInstructors,
+      totalCourses,
+      totalEnrollments,
+    };
+  } catch (err) {
+    console.error("Error in getAdminDashboard:", err);
+    return {
+      totalStudents: 0,
+      totalInstructors: 0,
+      totalCourses: 0,
+      totalEnrollments: 0,
+    };
+  }
 }

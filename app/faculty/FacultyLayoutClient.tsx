@@ -40,9 +40,11 @@ export default function FacultyLayoutClient({ children, cmsData }: { children: R
                 {/* Logo & Branding */}
                 <div className="flex items-center gap-6">
                    <Link href="/faculty" className="flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-[#7C3AED] to-[#0EA5E9] p-0.5">
-                         <div className="w-full h-full rounded-full" style={{ background: 'var(--bg-card)' }}></div>
-                      </div>
+                      <img
+                        src="/logo - JCRM.jpeg"
+                        alt="JCRM Technologies"
+                        className="h-10 w-10 rounded-full object-contain bg-white shrink-0"
+                      />
                       <span className="heading-font text-xl font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-primary)' }}>JCRM Technology</span>
                    </Link>
                    <div className="hidden sm:block h-6 w-px" style={{ background: 'var(--border-soft)' }}></div>

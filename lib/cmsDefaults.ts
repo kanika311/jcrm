@@ -113,12 +113,31 @@ export const CMS_SCHEMAS: PageSchema[] = [
   },
   {
     id: "global-settings",
-    name: "Global Site Settings",
+    name: "Global Site Settings & Branding",
     category: "global",
     schema: {
       siteName: { type: "string", label: "Website Name", default: "JCRM Technologies" },
-      logoUrl: { type: "string", label: "Logo URL (Optional)", default: "/logo - JCRM.png" },
-      primaryColor: { type: "string", label: "Primary Brand Color (Hex)", default: "#7C3AED" },
+      logoUrl: { type: "image", label: "Brand Logo (Upload image or choose file)", default: "/logo - JCRM.jpeg" },
+      faviconUrl: { type: "image", label: "Website Favicon (Upload icon)", default: "/favicon.ico" },
+      tagline: { type: "string", label: "Hero / Brand Tagline", default: "Building high-performance software engineering talents and enterprise ERP solutions." },
+      primaryColor: { type: "string", label: "Primary Brand Color (Hex)", default: "#0055FF" },
+      supportEmail: { type: "string", label: "Official Support Email", default: "support@jcrmtechnologies.com" },
+      supportPhone: { type: "string", label: "Official Support Phone", default: "+91 98765 43210" },
+      officeAddress: { type: "text", label: "Headquarters / Corporate Address", default: "JCRM Technologies, Cyber City, Bangalore, Karnataka 560100" },
+      copyrightText: { type: "string", label: "Copyright Notice Text", default: "© 2026 JCRM Technologies. All rights reserved." },
+    }
+  },
+  {
+    id: "global-footer",
+    name: "Global Footer & Links",
+    category: "global",
+    schema: {
+      footerDescription: { type: "text", label: "Footer Company Description", default: "JCRM Technologies is an advanced engineering academy and software consulting enterprise providing production-ready training and enterprise automation solutions." },
+      newsletterHeading: { type: "string", label: "Newsletter Box Heading", default: "Stay Ahead in Tech" },
+      newsletterSubtext: { type: "string", label: "Newsletter Subtext", default: "Get weekly tech roadmaps, internship updates & placement insights." },
+      contactEmail: { type: "string", label: "Footer Contact Email", default: "info@jcrmtechnologies.com" },
+      contactPhone: { type: "string", label: "Footer Contact Phone", default: "+91 98765 43210" },
+      locationText: { type: "string", label: "Footer Location", default: "Bangalore, India" },
     }
   },
   {
@@ -694,38 +713,111 @@ export const CMS_SCHEMAS: PageSchema[] = [
   },
   {
     id: "public-privacy",
-    name: "Privacy Policy",
+    name: "Privacy Policy Page",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Heading", default: "Privacy Policy" },
-      content: { type: "text", label: "Content", default: "This is our privacy policy. It can be updated here." }
+      heading: { type: "string", label: "Page Heading", default: "Privacy Policy" },
+      lastUpdated: { type: "string", label: "Last Updated Date", default: "September 2026" },
+      summary: { type: "text", label: "Policy Summary & Overview", default: "JCRM Technologies is committed to safeguarding your personal data and privacy. This policy details how we collect, process, and secure user information across our platform and ERP solutions." },
+      content: { type: "text", label: "Introduction & General Terms", default: "We value the trust you place in JCRM Technologies Private Limited. Please review this Privacy Policy to understand how your information is handled when you access our courses, software, and services." },
+      sections: {
+        type: "array",
+        label: "Policy Clauses & Sections",
+        itemSchema: {
+          title: { type: "string", label: "Clause / Section Title", default: "1. Information We Collect" },
+          content: { type: "text", label: "Clause Details & Rules", default: "We collect information provided directly by you during account registration, including your full name, email address, contact phone number, and academic background." },
+        },
+        default: [
+          {
+            title: "1. Information We Collect",
+            content: "We collect information provided directly by you during account registration, including your full name, email address, contact phone number, and academic background. Technical metrics like IP address and session cookies may be logged for security."
+          },
+          {
+            title: "2. How We Use Your Data",
+            content: "Your data is used to provide LMS course access, deliver learning certificates, process payment invoices, communicate platform notices, and coordinate placement interview scheduling."
+          },
+          {
+            title: "3. Data Security & Retention",
+            content: "We implement industry-standard 256-bit TLS encryption, role-based access restrictions, and secure database hosting to prevent unauthorized access or accidental disclosure of user data."
+          },
+          {
+            title: "4. Third-Party Service Providers",
+            content: "We do not sell or rent personal information to advertisers. We share minimal data with trusted infrastructure providers (cloud hosting, transactional email, payment gateways) strictly to provide our services."
+          },
+          {
+            title: "5. User Rights & Data Deletion",
+            content: "You retain the right to access, rectify, or request permanent deletion of your personal account data at any time by contacting privacy@jcrmtechnologies.com."
+          }
+        ]
+      },
+      contactEmail: { type: "string", label: "Privacy / Grievance Officer Email", default: "privacy@jcrmtechnologies.com" },
+      officeAddress: { type: "text", label: "Grievance Office Address", default: "JCRM Technologies, Cyber City, Bangalore, Karnataka 560100" }
     }
   },
   {
     id: "public-terms",
-    name: "Terms of Service",
+    name: "Terms of Service & Conditions",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Heading", default: "Terms of Service" },
-      content: { type: "text", label: "Content", default: "These are our terms of service. They can be updated here." }
+      heading: { type: "string", label: "Page Heading", default: "Terms and Conditions" },
+      lastUpdated: { type: "string", label: "Effective / Last Revised Date", default: "September 2026" },
+      summary: { type: "text", label: "Agreement Overview", default: "These Terms govern your use of JCRM Technologies' website, LMS student portals, learning content, and enterprise ERP automation software." },
+      content: { type: "text", label: "General Terms Introduction", default: "By accessing or utilizing any part of JCRM Technologies, you agree to comply with and be legally bound by these Terms of Service. If you do not agree, you must discontinue using our services." },
+      sections: {
+        type: "array",
+        label: "Terms & Conditions Articles",
+        itemSchema: {
+          title: { type: "string", label: "Article Title", default: "1. Account Registration & Conduct" },
+          content: { type: "text", label: "Article Terms", default: "Users must provide accurate, current, and complete registration details and safeguard their credentials against unauthorized third-party access." },
+        },
+        default: [
+          {
+            title: "1. Account Registration & Conduct",
+            content: "Users must provide accurate, current, and complete registration details and safeguard their credentials against unauthorized third-party access. Account sharing or selling access is strictly prohibited."
+          },
+          {
+            title: "2. Intellectual Property Rights",
+            content: "All video lectures, course curriculum, code samples, documentation, and proprietary ERP modules are the exclusive property of JCRM Technologies and protected by intellectual property laws."
+          },
+          {
+            title: "3. Payments & Billing",
+            content: "Course enrollments and software licenses are subject to fees listed during checkout. All payments are processed securely through authorized payment gateway partners."
+          },
+          {
+            title: "4. Code of Conduct & Honor Code",
+            content: "Students agree to respect mentors, peers, and forum members. Harassment, plagiarism, or malicious activity will result in immediate termination without refund."
+          },
+          {
+            title: "5. Limitation of Liability & Disclaimers",
+            content: "JCRM Technologies provides high-quality industry training and placement assistance, but does not guarantee employment offers if academic requirements or interview rounds are unfulfilled."
+          },
+          {
+            title: "6. Governing Law & Dispute Resolution",
+            content: "These Terms shall be construed in accordance with the laws of India. Any legal dispute shall be subject to the exclusive jurisdiction of the competent courts in Bangalore, Karnataka."
+          }
+        ]
+      },
+      contactEmail: { type: "string", label: "Legal Support Email", default: "legal@jcrmtechnologies.com" }
     }
   },
   {
     id: "public-cookie",
-    name: "Cookie Policy",
+    name: "Cookie Policy Page",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Heading", default: "Cookie Policy" },
-      content: { type: "text", label: "Content", default: "This is our cookie policy. It can be updated here." }
+      heading: { type: "string", label: "Page Heading", default: "Cookie Policy" },
+      lastUpdated: { type: "string", label: "Last Updated Date", default: "September 2026" },
+      content: { type: "text", label: "Cookie Policy Details", default: "JCRM Technologies uses essential session cookies, preference cookies, and security tokens to maintain your authentication state and ensure optimal website performance. You may disable cookies through your browser settings, though some interactive features may not function properly." }
     }
   },
   {
     id: "public-refund",
-    name: "Refund Policy",
+    name: "Refund & Cancellation Policy",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Heading", default: "Refund Policy" },
-      content: { type: "text", label: "Content", default: "This is our refund policy. It can be updated here." }
+      heading: { type: "string", label: "Page Heading", default: "Refund & Cancellation Policy" },
+      lastUpdated: { type: "string", label: "Last Updated Date", default: "September 2026" },
+      content: { type: "text", label: "Refund Policy Details", default: "Students may request a full refund within 7 calendar days of initial course purchase provided fewer than 20% of curriculum lessons have been viewed. Enterprise ERP setup fees, custom software deployments, and 1-on-1 mentorship charges are non-refundable once work has commenced. Approved refunds are credited to the original payment source within 5-7 business days." }
     }
   }
 ];

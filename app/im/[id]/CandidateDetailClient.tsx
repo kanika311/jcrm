@@ -21,13 +21,13 @@ export default function CandidateDetailClient({ member }: { member: TeamMember }
           <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-slate-500">
             <Link href="/" className="hover:text-[#0055FF] transition-colors">Home</Link>
             <span>/</span>
-            <Link href="/im" className="hover:text-[#0055FF] transition-colors">Our Team</Link>
+            <Link href="/ourteam" className="hover:text-[#0055FF] transition-colors">Our Team</Link>
             <span>/</span>
             <span className="text-[#0055FF] font-extrabold">{member.name}</span>
           </div>
 
           <Link
-            href="/im"
+            href="/ourteam"
             className="text-xs sm:text-sm font-extrabold text-[#0055FF] hover:underline flex items-center gap-1.5"
           >
             ← Back to Team Directory

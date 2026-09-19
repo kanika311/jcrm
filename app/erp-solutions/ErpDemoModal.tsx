@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 interface ErpDemoModalProps {
   isOpen: boolean;
@@ -10,6 +11,22 @@ interface ErpDemoModalProps {
 }
 
 export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Enterprise ERP", productId }: ErpDemoModalProps) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [isOpen]);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -61,33 +78,45 @@ export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Ente
     }
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
-      <div className="relative w-full max-w-xl rounded-[36px] bg-white/95 backdrop-blur-2xl border border-white/90 shadow-[0_20px_60px_rgba(0,85,255,0.2)] overflow-hidden p-6 sm:p-10">
-        
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-6 right-6 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-lg font-black transition-colors"
-        >
-          ✕
-        </button>
+  if (!isOpen || !mounted) return null;
+
+  return createPortal(
+    <div 
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/70 backdrop-blur-sm animate-fade-in" 
+      style={{ margin: 0 }}
+      onClick={onClose}
+    >
+      <div 
+        className="relative w-full max-w-xl rounded-3xl bg-white shadow-[0_20px_60px_rgba(0,85,255,0.2)] border border-blue-100 flex flex-col max-h-[85vh] overflow-hidden m-auto"
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="px-6 py-4 sm:px-8 sm:py-5 border-b border-blue-100 flex items-start justify-between shrink-0 bg-blue-50/40">
+          <div>
+            <span className="inline-block px-3 py-1 text-xs font-extrabold uppercase tracking-widest text-[#0055FF] bg-blue-50 rounded-full border border-blue-100">
+              1-CLICK DEMO & ROI CONSULTATION
+            </span>
+            <h2 className="heading-font text-xl sm:text-2xl font-extrabold text-slate-900 mt-2 leading-tight">
+              Request Demo for <span className="text-[#0055FF]">{productName}</span>
+            </h2>
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-9 h-9 rounded-full bg-white hover:bg-slate-100 text-slate-600 flex items-center justify-center font-black text-lg transition-colors cursor-pointer shrink-0 ml-3 shadow-sm border border-slate-200"
+          >
+            ✕
+          </button>
+        </div>
 
         {step === "form" && (
-          <div>
-            <div className="mb-6">
-              <span className="inline-block px-3.5 py-1 mb-2 text-xs font-extrabold uppercase tracking-widest text-[#0055FF] bg-blue-50 rounded-full border border-blue-100">
-                1-CLICK DEMO & ROI CONSULTATION
-              </span>
-              <h2 className="heading-font text-2xl sm:text-3xl font-extrabold text-slate-900 leading-tight">
-                Request Demo for <span className="text-[#0055FF]">{productName}</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-slate-600 font-semibold mt-1">
+          <form onSubmit={handleSubmitForm} className="flex flex-col flex-1 min-h-0 overflow-hidden">
+            <div className="p-6 sm:p-8 overflow-y-auto space-y-4 flex-1 min-h-0">
+              <p className="text-xs sm:text-sm text-slate-600 font-semibold mb-2">
                 See how our self-customizable ERP solution can automate your business operations.
               </p>
-            </div>
 
-            <form onSubmit={handleSubmitForm} className="space-y-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
@@ -179,24 +208,26 @@ export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Ente
                   </select>
                 </div>
               </div>
+            </div>
 
+            {/* Sticky Footer */}
+            <div className="px-6 py-4 sm:px-8 sm:py-4 border-t border-blue-100 bg-slate-50 shrink-0">
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-4 rounded-2xl text-sm font-extrabold text-white bg-[#0055FF] hover:bg-blue-600 transition-all shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2 cursor-pointer mt-4"
+                className="w-full py-3.5 rounded-2xl text-sm font-extrabold text-white bg-[#0055FF] hover:bg-blue-600 transition-all shadow-lg hover:shadow-blue-500/30 flex items-center justify-center gap-2 cursor-pointer"
               >
                 {loading ? "Sending Verification OTP..." : "Get Instant Live Demo Access 🚀"}
               </button>
-            </form>
-
-            <p className="text-[11px] font-semibold text-slate-400 text-center mt-3">
-              🔒 Zero commitment. Free custom feature consultation included.
-            </p>
-          </div>
+              <p className="text-[11px] font-semibold text-slate-400 text-center mt-2">
+                🔒 Zero commitment. Free custom feature consultation included.
+              </p>
+            </div>
+          </form>
         )}
 
         {step === "otp" && (
-          <div className="text-center py-4">
+          <div className="p-6 sm:p-8 overflow-y-auto flex-1 min-h-0 flex flex-col justify-center text-center">
             <div className="w-16 h-16 rounded-full bg-blue-50 text-[#0055FF] flex items-center justify-center mx-auto mb-4 text-2xl font-black shadow-md border border-blue-100">
               💬
             </div>
@@ -208,7 +239,7 @@ export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Ente
               We sent a 4-digit verification code to <span className="font-extrabold text-slate-900">{formData.phone}</span>
             </p>
 
-            <form onSubmit={handleVerifyOtp} className="max-w-xs mx-auto space-y-6">
+            <form onSubmit={handleVerifyOtp} className="max-w-xs mx-auto space-y-6 w-full">
               <div className="flex justify-center gap-3">
                 {otp.map((digit, i) => (
                   <input
@@ -235,16 +266,16 @@ export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Ente
         )}
 
         {step === "success" && (
-          <div className="text-center py-8 space-y-4">
+          <div className="p-6 sm:p-8 overflow-y-auto flex-1 min-h-0 text-center py-8 space-y-4">
             <div className="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto text-3xl font-black shadow-lg border border-emerald-100 animate-bounce">
               ✓
             </div>
 
-            <h3 className="heading-font text-3xl font-extrabold text-slate-900">
+            <h3 className="heading-font text-2xl sm:text-3xl font-extrabold text-slate-900">
               Demo Request Confirmed!
             </h3>
 
-            <p className="text-sm text-slate-600 font-semibold max-w-md mx-auto leading-relaxed">
+            <p className="text-xs sm:text-sm text-slate-600 font-semibold max-w-md mx-auto leading-relaxed">
               Thank you <span className="font-extrabold text-slate-900">{formData.name}</span>. Our Senior Solutions Engineer will connect with you on <span className="font-extrabold text-[#0055FF]">{formData.phone}</span> within 15 minutes to configure your customized <span className="font-extrabold text-slate-900">{productName}</span> sandbox instance.
             </p>
 
@@ -262,6 +293,7 @@ export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Ente
         )}
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

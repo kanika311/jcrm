@@ -8,7 +8,7 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
 
   // Fallbacks if CMS content is not yet populated
   const heroTitle = cmsData?.heroTitle || "Bridging Enterprise Technology with Next-Gen Engineering Talent";
-  const heroSubtitle = cmsData?.heroSubtitle || "JCRM Technologies is a pioneer in self-customizable enterprise ERP software solutions and hands-on software engineering incubators for ambitious tech talent.";
+  const heroSubtitle = cmsData?.heroSubtitle || "";
 
   const milestones = [
     {
@@ -81,7 +81,7 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
               Explore Enterprise ERP Solutions 🚀
             </Link>
             <Link
-              href="/join"
+              href="/joinus"
               className="px-8 py-4 rounded-2xl text-sm font-extrabold text-[#0055FF] bg-white border border-blue-200 hover:bg-blue-50 transition-all shadow-md hover:scale-105"
             >
               Join Engineering Program 🎓
@@ -208,7 +208,7 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
                   Direct Placement Talent Directory
                 </h3>
                 <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                  Verified alumni are showcased in our Hiring Talent Directory (<Link href="/im" className="text-[#0055FF] underline font-bold">/im</Link>) where partner recruiters schedule interviews directly via WhatsApp.
+                  Verified alumni are showcased in our Hiring Talent Directory (<Link href="/ourteam" className="text-[#0055FF] underline font-bold">/ourteam</Link>) where partner recruiters schedule interviews directly via WhatsApp.
                 </p>
               </div>
             </div>
@@ -292,7 +292,7 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
               <span className="text-xs font-extrabold text-emerald-400 uppercase tracking-widest block">FOR STUDENTS & ENGINEERS</span>
               <h3 className="heading-font text-2xl sm:text-3xl font-extrabold text-white">Ready to Build Real Software & Get Placed?</h3>
               <p className="text-xs text-slate-300 font-medium">Apply for our hands-on engineering incubator & talent directory.</p>
-              <Link href="/join" className="inline-block px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all">
+              <Link href="/joinus" className="inline-block px-6 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md transition-all">
                 Apply for Engineering Program ➔
               </Link>
             </div>

@@ -24,9 +24,11 @@ export default function CertificatePreview({ workshopTitle, certificateCode, dom
         {/* Certificate Header */}
         <div className="flex items-center justify-between pb-4 border-b border-blue-100 mb-6">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#0055FF] text-white font-black flex items-center justify-center text-sm shadow-md">
-              JCRM
-            </div>
+            <img
+              src="/logo - JCRM.jpeg"
+              alt="JCRM Technologies"
+              className="w-10 h-10 rounded-full object-contain bg-white shrink-0 shadow-md"
+            />
             <div>
               <span className="heading-font font-extrabold text-slate-900 text-sm tracking-wide block">
                 JCRM TECHNOLOGIES

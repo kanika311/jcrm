@@ -14,18 +14,14 @@ export default function JoinUsClient() {
         
         {/* 1. Hero Section */}
         <div className="text-center max-w-4xl mx-auto space-y-6 animate-fade-in-up">
-          <span className="inline-block px-4 py-1.5 text-xs font-extrabold uppercase tracking-widest text-[#0055FF] bg-blue-50/90 rounded-full border border-blue-100/90 shadow-xs">
-            ⚡ JCRM ENGINEERING CAREERS & INTERNSHIP PROGRAM
-          </span>
+        
 
           <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">
             Build Real Enterprise Software. <br className="hidden sm:inline" />
             Launch Your Career at <span className="text-[#0055FF]">JCRM Technologies</span>
           </h1>
 
-          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed max-w-3xl mx-auto">
-            Join an elite engineering environment where interns and software engineers build production ERP software, train on cutting-edge AI models, receive 1-on-1 code reviews, and get recruited by top technology companies.
-          </p>
+
 
           {/* Quick Stats Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6">
@@ -54,9 +50,7 @@ export default function JoinUsClient() {
             <h2 className="heading-font text-3xl sm:text-4xl font-extrabold text-slate-900">
               Why Engineers & Interns Choose <span className="text-[#0055FF]">JCRM</span>
             </h2>
-            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-2">
-              We bridge the gap between academic theory and high-paying industry software roles.
-            </p>
+          
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -104,7 +98,7 @@ export default function JoinUsClient() {
                 Recruiter Direct Access
               </h3>
               <p className="text-xs text-slate-600 font-medium leading-relaxed">
-                Top performing candidates get indexed on our Our Team Talent Directory (<Link href="/im" className="text-[#0055FF] underline font-bold">/im</Link>) where hiring managers schedule interviews directly!
+                Top performing candidates get indexed on our Our Team Talent Directory (<Link href="/ourteam" className="text-[#0055FF] underline font-bold">/ourteam</Link>) where hiring managers schedule interviews directly!
               </p>
             </div>
           </div>

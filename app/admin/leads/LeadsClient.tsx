@@ -1,11 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 
 export default function LeadsClient({ initialLeads, cmsData }: { initialLeads: any[], cmsData: any }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sourceFilter, setSourceFilter] = useState("ALL");
   const [selectedLead, setSelectedLead] = useState<any>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (selectedLead) {
+      const orig = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = orig;
+      };
+    }
+  }, [selectedLead]);
 
   const filteredLeads = initialLeads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -112,28 +128,38 @@ export default function LeadsClient({ initialLeads, cmsData }: { initialLeads: a
        </div>
 
        {/* Lead Details Modal */}
-       {selectedLead && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-             <div className="w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}>
-                
+       {mounted && selectedLead && createPortal(
+          <div 
+            className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-sm animate-fade-in" 
+            style={{ margin: 0 }}
+            onClick={() => setSelectedLead(null)}
+          >
+             <div 
+               className="relative w-full max-w-2xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[85vh] overflow-hidden m-auto" 
+               style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}
+               onClick={e => e.stopPropagation()}
+             >
                 {/* Header */}
-                <div className="p-6 border-b flex justify-between items-center" style={{ borderColor: 'var(--border-soft)', background: 'var(--bg-surface)' }}>
+                <div className="px-6 py-4 border-b flex justify-between items-center shrink-0" style={{ borderColor: 'var(--border-soft)', background: 'var(--bg-surface)' }}>
                    <div>
                       <h3 className="text-xl font-bold">{selectedLead.name}</h3>
-                      <p className="text-sm text-[var(--text-secondary)]">{selectedLead.source} • {new Date(selectedLead.createdAt).toLocaleString()}</p>
+                      <p className="text-xs text-[var(--text-secondary)] mt-0.5">{selectedLead.source} • {new Date(selectedLead.createdAt).toLocaleString()}</p>
                    </div>
-                   <button onClick={() => setSelectedLead(null)} className="p-2 rounded-lg hover:bg-white/10 transition-colors">
-                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                   <button 
+                     onClick={() => setSelectedLead(null)} 
+                     className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                   >
+                      ✕
                    </button>
                 </div>
 
                 {/* Body */}
-                <div className="p-6 overflow-y-auto space-y-6">
+                <div className="p-6 overflow-y-auto space-y-6 flex-1 min-h-0">
                    {/* Basic Contact Info */}
-                   <div className="grid grid-cols-2 gap-4">
+                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="p-4 rounded-xl" style={{ background: 'var(--bg-base)' }}>
                          <div className="text-xs font-bold text-[var(--text-secondary)] mb-1">Email</div>
-                         <div className="font-medium text-sm">{selectedLead.email}</div>
+                         <div className="font-medium text-sm break-all">{selectedLead.email}</div>
                       </div>
                       <div className="p-4 rounded-xl" style={{ background: 'var(--bg-base)' }}>
                          <div className="text-xs font-bold text-[var(--text-secondary)] mb-1">Phone</div>
@@ -143,10 +169,9 @@ export default function LeadsClient({ initialLeads, cmsData }: { initialLeads: a
 
                    {/* Raw Data Fields */}
                    <div className="space-y-4">
-                      <h4 className="font-bold border-b pb-2" style={{ borderColor: 'var(--border-soft)' }}>Submitted Data</h4>
+                      <h4 className="font-bold border-b pb-2 text-sm uppercase tracking-wider" style={{ borderColor: 'var(--border-soft)' }}>Submitted Details</h4>
                       <div className="grid grid-cols-1 gap-4">
                          {Object.entries(selectedLead.rawData || {}).map(([key, value]) => {
-                            // Skip rendering these generic/repetitive keys
                             if (["id", "createdAt", "updatedAt", "firstName", "lastName", "fullName", "email", "phone", "phoneNumber"].includes(key)) return null;
                             if (!value) return null;
                             
@@ -155,7 +180,7 @@ export default function LeadsClient({ initialLeads, cmsData }: { initialLeads: a
                                   <span className="font-bold text-[var(--text-secondary)] uppercase text-xs block mb-1">
                                      {key.replace(/([A-Z])/g, ' $1').trim()}
                                   </span>
-                                  <div className="p-3 rounded-xl bg-black/5 whitespace-pre-wrap" style={{ background: 'var(--bg-base)' }}>
+                                  <div className="p-3 rounded-xl whitespace-pre-wrap" style={{ background: 'var(--bg-base)' }}>
                                      {String(value)}
                                   </div>
                                </div>
@@ -165,8 +190,19 @@ export default function LeadsClient({ initialLeads, cmsData }: { initialLeads: a
                    </div>
                 </div>
 
+                {/* Footer */}
+                <div className="px-6 py-4 border-t flex justify-end shrink-0" style={{ borderColor: 'var(--border-soft)', background: 'var(--bg-surface)' }}>
+                   <button
+                     onClick={() => setSelectedLead(null)}
+                     className="btn-secondary px-5 py-2 rounded-xl text-sm font-bold cursor-pointer"
+                   >
+                      Close
+                   </button>
+                </div>
+
              </div>
-          </div>
+          </div>,
+          document.body
        )}
     </div>
   );

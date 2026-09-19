@@ -16,16 +16,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ message: "No file received" }, { status: 400 });
     }
 
-    // Check size limit (2MB)
-    const MAX_SIZE = 2 * 1024 * 1024;
+    // Check size limit (5MB)
+    const MAX_SIZE = 5 * 1024 * 1024;
     if (file.size > MAX_SIZE) {
-      return NextResponse.json({ message: "File exceeds 2MB limit" }, { status: 400 });
+      return NextResponse.json({ message: "File exceeds 5MB limit" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
     
     // Return the base64 string as the URL
-    const base64String = `data:${file.type};base64,${buffer.toString("base64")}`;
+    const mimeType = file.type || "image/jpeg";
+    const base64String = `data:${mimeType};base64,${buffer.toString("base64")}`;
     return NextResponse.json({ url: base64String }, { status: 200 });
 
   } catch (error) {

@@ -83,9 +83,7 @@ export default function ContactForm() {
           <h3 className="heading-font text-2xl md:text-3xl font-extrabold text-slate-900 mb-2">
             Request Demo / Quote
           </h3>
-          <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
-            Provide your details below. Our solutions architect will reach out within 24 hours to schedule a session.
-          </p>
+          
         </div>
 
         {status === "success" ? (

@@ -37,7 +37,7 @@ export default async function AdminCoursesPage() {
     }));
 
     return (
-      <div className="max-w-[1200px] mx-auto space-y-8 animate-fade-in-up pb-24">
+      <div className="max-w-[1200px] mx-auto space-y-8 pb-24">
         <CoursesClient initialCourses={serializedCourses as any} />
       </div>
     );

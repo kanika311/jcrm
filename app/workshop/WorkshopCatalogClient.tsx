@@ -37,30 +37,14 @@ export default function WorkshopCatalogClient({ workshops }: { workshops: Worksh
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-10">
         
-        {/* Page Hero Header */}
-        <div className="text-center max-w-3xl mx-auto animate-fade-in-up">
-          <span className="inline-block px-4 py-1.5 mb-3 text-xs font-extrabold uppercase tracking-widest text-[#0055FF] bg-blue-50/90 rounded-full border border-blue-100/90 shadow-xs">
-            🎓 INDUSTRY & CAMPUS TECHNICAL WORKSHOPS
-          </span>
-          <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 mb-4 tracking-tight leading-tight">
-            Hands-on Technical Bootcamps & <span className="text-[#0055FF]">College Workshops</span>
-          </h1>
-          <p className="text-base sm:text-lg text-slate-600 font-medium leading-relaxed">
-            Select a domain from our workshop catalog below to inspect full curriculum highlights, key gains, non-editable certificate templates, and booking routing.
-          </p>
-        </div>
+   
 
         {/* CLEAN, RESPONSIVE IN-PAGE WORKSHOP DOMAIN CATALOG NAVBAR */}
-        <div className="sticky top-24 z-30 w-full rounded-[24px] bg-white/95 backdrop-blur-2xl border border-blue-100 shadow-[0_10px_35px_rgba(0,85,255,0.12)] p-3 sm:p-4 space-y-3">
+        <div className="sticky top-0 z-30 w-full rounded-[24px] bg-white/95 backdrop-blur-2xl border border-blue-100 shadow-[0_10px_35px_rgba(0,85,255,0.12)] p-3 sm:p-4 space-y-3">
           
           {/* Top Bar Info & Prev/Next Toggle Row */}
           <div className="flex items-center justify-between px-2 pb-2 border-b border-blue-100/70">
-            <div className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-              <span className="text-xs font-extrabold uppercase tracking-widest text-slate-700">
-                WORKSHOP DOMAIN CATALOG ({activeDomainIndex + 1} of {workshops.length})
-              </span>
-            </div>
+            
 
             {/* Prev / Next Cycle Controls */}
             <div className="flex items-center gap-2">

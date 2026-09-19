@@ -19,9 +19,7 @@ export default async function ContactPage() {
           <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 mb-4 tracking-tight">
             Contact & <span className="text-[#0055FF]">Consultation</span>
           </h1>
-          <p className="text-lg md:text-xl text-slate-600 font-medium leading-relaxed">
-            Request a custom ERP product demo, inquire about corporate IT training, or connect with our support desk.
-          </p>
+        
         </div>
 
         {/* Top Grid: Info on Left (6 Cols), Form on Right (6 Cols) */}
@@ -37,9 +35,7 @@ export default async function ContactPage() {
                 <h2 className="heading-font text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">
                   Let's Build Something Smarter Together
                 </h2>
-                <p className="text-slate-600 font-medium text-sm md:text-base leading-relaxed mb-8">
-                  Have questions about our enterprise ERP modules or placement assistance tracks? Connect directly with our team through any of our coordinates:
-                </p>
+
 
                 {/* 3 Contact Glass Cards */}
                 <div className="space-y-4">

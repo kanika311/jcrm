@@ -6,7 +6,12 @@ import { usePathname } from "next/navigation";
 
 export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?: string }) {
   const pathname = usePathname();
-  const isPublicPage = !pathname?.startsWith("/student") && !pathname?.startsWith("/faculty") && !pathname?.startsWith("/admin") && !pathname?.startsWith("/auth");
+  const isPublicPage =
+    !pathname?.startsWith("/student") &&
+    !pathname?.startsWith("/faculty") &&
+    !pathname?.startsWith("/admin") &&
+    !pathname?.startsWith("/auth") &&
+    !pathname?.startsWith("/jcrm-sushant");
 
   if (!isPublicPage) return null;
 
@@ -27,7 +32,7 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
                 <img
                   src="/logo - JCRM.jpeg"
                   alt="JCRM Logo"
-                  className="w-10 h-10 object-contain rounded-xl bg-white p-1 shadow-md border border-blue-100"
+                  className="w-12 h-12 object-contain rounded-full bg-white p-0.5 shadow-md border border-blue-100"
                 />
                 <span className="heading-font text-2xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#0055FF] transition-colors">
                   JCRM TECHNOLOGIES
@@ -95,7 +100,8 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
             <ul className="space-y-3.5 text-sm font-semibold text-slate-600">
               <li><Link href="/about" className="hover:text-[#0055FF] transition-colors">About Us</Link></li>
               <li><Link href="/courses" className="hover:text-[#0055FF] transition-colors">Courses</Link></li>
-              <li><Link href="/about" className="hover:text-[#0055FF] transition-colors">Our Team</Link></li>
+              <li><Link href="/ourteam" className="hover:text-[#0055FF] transition-colors">Our Team</Link></li>
+              <li><Link href="/joinus" className="hover:text-[#0055FF] transition-colors">Join Us</Link></li>
               <li><Link href="/contact" className="hover:text-[#0055FF] transition-colors">Contact</Link></li>
             </ul>
           </div>

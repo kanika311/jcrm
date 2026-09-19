@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { createPortal } from "react-dom";
 
 export default function JoinForm() {
   const [formData, setFormData] = useState({
@@ -21,6 +22,15 @@ export default function JoinForm() {
     agreeTerms: false
   });
 
+  const [mounted, setMounted] = useState(false);
+  const [customCountry, setCustomCountry] = useState("");
+  const [customState, setCustomState] = useState("");
+  const [customCity, setCustomCity] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedApp, setSubmittedApp] = useState<{ id: string; name: string; dept: string } | null>(null);
@@ -35,57 +45,84 @@ export default function JoinForm() {
   // -------------------------------------------------------------
   const locationData: Record<string, Record<string, string[]>> = {
     India: {
-      Karnataka: ["Udupi", "Bangalore", "Mangalore", "Mysore", "Hubli-Dharwad", "Belgaum", "Davanagere", "Shimoga", "Tumkur", "Gulbarga", "Bellary"],
-      Maharashtra: ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Aurangabad", "Solapur", "Kolhapur", "Navi Mumbai", "Amravati"],
-      "Delhi NCR": ["New Delhi", "Noida", "Gurugram", "Faridabad", "Ghaziabad", "Greater Noida"],
-      Telangana: ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam"],
-      "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode"],
-      Gujarat: ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar"],
-      Rajasthan: ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner", "Ajmer"],
-      "West Bengal": ["Kolkata", "Siliguri", "Durgapur", "Asansol", "Howrah"],
-      "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra", "Prayagraj", "Meerut", "Noida"],
-      Kerala: ["Kochi", "Thiruvananthapuram", "Kozhikode", "Thrissur", "Kollam"],
-      Punjab: ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Mohali"],
-      "Madhya Pradesh": ["Bhopal", "Indore", "Gwalior", "Jabalpur", "Ujjain"],
-      Bihar: ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur"],
-      Assam: ["Guwahati", "Silchar", "Dibrugarh"],
-      Goa: ["Panaji", "Margao", "Vasco da Gama"]
+      Karnataka: ["Udupi", "Bengaluru", "Mangaluru", "Manipal", "Mysuru", "Hubballi-Dharwad", "Belagavi", "Shivamogga", "Davanagere", "Tumakuru", "Kalaburagi", "Ballari", "Kundapura", "Karkala"],
+      Maharashtra: ["Mumbai", "Pune", "Nagpur", "Nashik", "Thane", "Navi Mumbai", "Aurangabad", "Solapur", "Kolhapur", "Amravati", "Jalgaon"],
+      "Delhi NCR": ["New Delhi", "Noida", "Greater Noida", "Gurugram", "Faridabad", "Ghaziabad"],
+      Telangana: ["Hyderabad", "Warangal", "Nizamabad", "Karimnagar", "Khammam", "Ramagundam"],
+      "Tamil Nadu": ["Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem", "Tirunelveli", "Erode", "Vellore", "Thoothukudi"],
+      Gujarat: ["Ahmedabad", "Surat", "Vadodara", "Rajkot", "Bhavnagar", "Jamnagar", "Gandhinagar", "Anand", "Junagadh"],
+      Rajasthan: ["Jaipur", "Jodhpur", "Udaipur", "Kota", "Bikaner", "Ajmer", "Bhilwara", "Alwar", "Sikar"],
+      "Uttar Pradesh": ["Lucknow", "Kanpur", "Varanasi", "Agra", "Prayagraj", "Meerut", "Noida", "Ghaziabad", "Bareilly", "Aligarh", "Gorakhpur"],
+      "West Bengal": ["Kolkata", "Howrah", "Siliguri", "Durgapur", "Asansol", "Kharagpur", "Bardhaman"],
+      Kerala: ["Kochi", "Thiruvananthapuram", "Kozhikode", "Thrissur", "Kollam", "Kannur", "Palakkad", "Alappuzha", "Kottayam"],
+      Punjab: ["Ludhiana", "Amritsar", "Jalandhar", "Patiala", "Mohali", "Bathinda", "Hoshiarpur"],
+      Haryana: ["Gurugram", "Faridabad", "Panipat", "Ambala", "Karnal", "Rohtak", "Hisar", "Panchkula", "Sonipat"],
+      "Madhya Pradesh": ["Bhopal", "Indore", "Gwalior", "Jabalpur", "Ujjain", "Sagar", "Dewas", "Satna"],
+      Bihar: ["Patna", "Gaya", "Bhagalpur", "Muzaffarpur", "Purnia", "Darbhanga", "Bihar Sharif"],
+      "Andhra Pradesh": ["Visakhapatnam", "Vijayawada", "Guntur", "Nellore", "Tirupati", "Kurnool", "Kakinada", "Rajahmundry"],
+      Odisha: ["Bhubaneswar", "Cuttack", "Rourkela", "Berhampur", "Sambalpur", "Puri", "Balasore"],
+      Uttarakhand: ["Dehradun", "Haridwar", "Roorkee", "Haldwani", "Rishikesh", "Nainital", "Rudrapur"],
+      "Himachal Pradesh": ["Shimla", "Dharamshala", "Solan", "Mandi", "Kullu", "Manali", "Baddi"],
+      Jharkhand: ["Ranchi", "Jamshedpur", "Dhanbad", "Bokaro", "Deoghar", "Hazaribagh"],
+      Chhattisgarh: ["Raipur", "Bhilai", "Bilaspur", "Korba", "Durg", "Rajnandgaon"],
+      Assam: ["Guwahati", "Silchar", "Dibrugarh", "Jorhat", "Nagaon"],
+      Goa: ["Panaji", "Margao", "Vasco da Gama", "Mapusa", "Ponda"],
+      "Jammu & Kashmir": ["Srinagar", "Jammu", "Anantnag", "Baramulla", "Udhampur"],
+      Chandigarh: ["Chandigarh"],
+      Tripura: ["Agartala"],
+      Meghalaya: ["Shillong"],
+      Manipur: ["Imphal"],
+      Nagaland: ["Kohima", "Dimapur"],
+      Puducherry: ["Puducherry"]
     },
     "United States": {
-      California: ["San Francisco", "Los Angeles", "San Jose", "San Diego", "Sacramento"],
-      "New York": ["New York City", "Buffalo", "Rochester", "Albany"],
-      Texas: ["Austin", "Dallas", "Houston", "San Antonio"],
-      Washington: ["Seattle", "Bellevue", "Redmond"],
-      Massachusetts: ["Boston", "Cambridge", "Worcester"]
+      California: ["San Francisco", "Los Angeles", "San Jose", "San Diego", "Sacramento", "Sunnyvale"],
+      "New York": ["New York City", "Buffalo", "Rochester", "Albany", "Syracuse"],
+      Texas: ["Austin", "Dallas", "Houston", "San Antonio", "Fort Worth"],
+      Washington: ["Seattle", "Bellevue", "Redmond", "Tacoma"],
+      Massachusetts: ["Boston", "Cambridge", "Worcester", "Quincy"],
+      Illinois: ["Chicago", "Naperville", "Springfield"],
+      Florida: ["Miami", "Orlando", "Tampa", "Jacksonville"]
     },
     "United Kingdom": {
-      England: ["London", "Manchester", "Birmingham", "Leeds", "Liverpool", "Bristol"],
-      Scotland: ["Edinburgh", "Glasgow", "Aberdeen"],
-      Wales: ["Cardiff", "Swansea"]
+      England: ["London", "Manchester", "Birmingham", "Leeds", "Liverpool", "Bristol", "Cambridge", "Oxford"],
+      Scotland: ["Edinburgh", "Glasgow", "Aberdeen", "Dundee"],
+      Wales: ["Cardiff", "Swansea", "Newport"],
+      "Northern Ireland": ["Belfast", "Derry"]
     },
     Canada: {
-      Ontario: ["Toronto", "Ottawa", "Mississauga", "Hamilton"],
-      "British Columbia": ["Vancouver", "Victoria", "Surrey"],
-      Quebec: ["Montreal", "Quebec City"]
+      Ontario: ["Toronto", "Ottawa", "Mississauga", "Hamilton", "Waterloo"],
+      "British Columbia": ["Vancouver", "Victoria", "Surrey", "Burnaby"],
+      Quebec: ["Montreal", "Quebec City", "Laval"],
+      Alberta: ["Calgary", "Edmonton"]
     },
     Australia: {
       "New South Wales": ["Sydney", "Newcastle", "Wollongong"],
-      Victoria: ["Melbourne", "Geelong"],
-      Queensland: ["Brisbane", "Gold Coast"]
+      Victoria: ["Melbourne", "Geelong", "Ballarat"],
+      Queensland: ["Brisbane", "Gold Coast", "Sunshine Coast"],
+      "Western Australia": ["Perth", "Fremantle"]
     },
     "United Arab Emirates": {
-      Dubai: ["Dubai Marina", "Downtown Dubai", "Deira", "Jumeirah"],
-      "Abu Dhabi": ["Abu Dhabi City", "Al Ain"],
-      Sharjah: ["Sharjah City"]
+      Dubai: ["Dubai Marina", "Downtown Dubai", "Business Bay", "Deira", "Jumeirah"],
+      "Abu Dhabi": ["Abu Dhabi City", "Al Ain", "Al Dhafra"],
+      Sharjah: ["Sharjah City", "Khor Fakkan"],
+      Ajman: ["Ajman City"]
     },
     Germany: {
-      Bavaria: ["Munich", "Nuremberg"],
+      Bavaria: ["Munich", "Nuremberg", "Augsburg"],
       Berlin: ["Berlin City"],
-      Hesse: ["Frankfurt", "Wiesbaden"]
+      Hesse: ["Frankfurt", "Wiesbaden", "Darmstadt"],
+      "North Rhine-Westphalia": ["Cologne", "Dusseldorf", "Dortmund"]
     },
     Singapore: {
-      Central: ["Central Area", "Orchard", "Marina Bay"],
-      East: ["Changi", "Tampines", "Bedok"]
+      Central: ["Central Area", "Orchard", "Marina Bay", "Downtown Core"],
+      East: ["Changi", "Tampines", "Bedok", "Pasir Ris"],
+      West: ["Jurong", "Clementi", "Boon Lay"]
+    },
+    "Saudi Arabia": {
+      Riyadh: ["Riyadh City"],
+      Makkah: ["Jeddah", "Mecca"],
+      "Eastern Province": ["Dammam", "Khobar", "Dhahran"]
     }
   };
 
@@ -114,7 +151,7 @@ export default function JoinForm() {
     }
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.agreeTerms) {
       alert("Please agree to the Terms & Conditions to submit your application.");
@@ -123,19 +160,44 @@ export default function JoinForm() {
 
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const appId = `JCRM-APP-2026-${Math.floor(1000 + Math.random() * 9000)}`;
-      setSubmittedApp({
-        id: appId,
-        name: formData.fullName,
-        dept: formData.department
+    const displayCountry = formData.country === "Other" ? (customCountry.trim() || "Other") : formData.country;
+    const displayState = formData.state === "Other" ? (customState.trim() || "Other") : formData.state;
+    const displayCity = formData.city === "Other" ? (customCity.trim() || "Other") : formData.city;
+
+    try {
+      const res = await fetch("/api/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          country: displayCountry,
+          state: displayState,
+          city: displayCity,
+          photoPreview: photoPreview || null,
+        }),
       });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to submit application");
+
+      setSubmittedApp({
+        id: data.id || `JCRM-APP-2026-${Math.floor(1000 + Math.random() * 9000)}`,
+        name: formData.fullName,
+        dept: formData.department,
+      });
+    } catch (err: any) {
+      alert(err.message || "An error occurred while submitting your application. Please try again.");
+    } finally {
       setIsSubmitting(false);
-    }, 800);
+    }
   };
 
   const handleFastTrackWhatsApp = () => {
     if (!submittedApp) return;
+
+    const displayCountry = formData.country === "Other" ? (customCountry.trim() || "Other") : formData.country;
+    const displayState = formData.state === "Other" ? (customState.trim() || "Other") : formData.state;
+    const displayCity = formData.city === "Other" ? (customCity.trim() || "Other") : formData.city;
 
     const founderPhone = "918310531309";
     const message = `🚀 *NEW JCRM CAREER / INTERNSHIP APPLICATION* 🚀
@@ -147,7 +209,7 @@ Hello Founder, a new candidate application has been submitted:
 📱 *Mobile Number:* ${formData.phoneNumber}
 ✉️ *Email Address:* ${formData.emailAddress}
 📅 *Date of Birth:* ${formData.dateOfBirth}
-📍 *Location:* ${formData.city}, ${formData.state}, ${formData.country} (Pin: ${formData.pinCode})
+📍 *Location:* ${displayCity}, ${displayState}, ${displayCountry} (Pin: ${formData.pinCode})
 
 💼 *Application Profile:*
 • *Target Department:* ${formData.department}
@@ -358,54 +420,133 @@ Hello Founder, a new candidate application has been submitted:
           </div>
         </div>
 
-        {/* Row 3: SMART COUNTRY & STATE (DUAL-INPUT: TYPE OR SELECT FROM DROPDOWN) */}
+        {/* Row 3: COUNTRY & STATE DROPDOWNS */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-              Country * (Type or Select)
+              Country *
             </label>
-            <input
-              type="text"
-              required
-              list="country-options"
-              placeholder="Select or Type Country (e.g. India)"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
-              value={formData.country}
-              onChange={(e) => setFormData({ ...formData, country: e.target.value, state: "", city: "" })}
-            />
+            <div className="relative">
+              <select
+                required
+                className="w-full px-4 py-3.5 pr-10 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
+                value={formData.country}
+                onChange={(e) => {
+                  const newCountry = e.target.value;
+                  if (newCountry === "Other") {
+                    setFormData({ ...formData, country: "Other", state: "Other", city: "Other" });
+                  } else {
+                    const states = locationData[newCountry] ? Object.keys(locationData[newCountry]) : [];
+                    const firstState = states[0] || "";
+                    const firstCity = (locationData[newCountry] && locationData[newCountry][firstState]) ? locationData[newCountry][firstState][0] || "" : "";
+                    setFormData({ ...formData, country: newCountry, state: firstState, city: firstCity });
+                  }
+                }}
+              >
+                <option value="">-- Select Country --</option>
+                {countriesList.map((c) => (
+                  <option key={c} value={c}>{c}</option>
+                ))}
+                <option value="Other">Other Country</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            {formData.country === "Other" && (
+              <input
+                type="text"
+                required
+                placeholder="Type your country name..."
+                className="mt-2 w-full px-4 py-2.5 rounded-xl bg-white border border-blue-200 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
+                value={customCountry}
+                onChange={(e) => setCustomCountry(e.target.value)}
+              />
+            )}
           </div>
 
           <div>
             <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-              State * (Type or Select)
+              State *
             </label>
-            <input
-              type="text"
-              required
-              list="state-options"
-              placeholder="Select or Type State (e.g. Karnataka)"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
-              value={formData.state}
-              onChange={(e) => setFormData({ ...formData, state: e.target.value, city: "" })}
-            />
+            <div className="relative">
+              <select
+                required
+                className="w-full px-4 py-3.5 pr-10 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
+                value={formData.state}
+                onChange={(e) => {
+                  const newState = e.target.value;
+                  if (newState === "Other") {
+                    setFormData({ ...formData, state: "Other", city: "Other" });
+                  } else {
+                    const cities = (locationData[formData.country] && locationData[formData.country][newState]) ? locationData[formData.country][newState] : [];
+                    const firstCity = cities[0] || "";
+                    setFormData({ ...formData, state: newState, city: firstCity });
+                  }
+                }}
+              >
+                <option value="">-- Select State --</option>
+                {currentStatesList.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+                <option value="Other">Other State</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            {formData.state === "Other" && (
+              <input
+                type="text"
+                required
+                placeholder="Type your state name..."
+                className="mt-2 w-full px-4 py-2.5 rounded-xl bg-white border border-blue-200 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
+                value={customState}
+                onChange={(e) => setCustomState(e.target.value)}
+              />
+            )}
           </div>
         </div>
 
-        {/* Row 4: SMART CITY & PIN CODE (DUAL-INPUT: TYPE OR SELECT FROM DROPDOWN) */}
+        {/* Row 4: CITY & PIN CODE */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
           <div>
             <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-              City * (Type or Select)
+              City *
             </label>
-            <input
-              type="text"
-              required
-              list="city-options"
-              placeholder="Select or Type City (e.g. Udupi)"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
-              value={formData.city}
-              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-            />
+            <div className="relative">
+              <select
+                required
+                className="w-full px-4 py-3.5 pr-10 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
+                value={formData.city}
+                onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              >
+                <option value="">-- Select City --</option>
+                {currentCitiesList.map((city) => (
+                  <option key={city} value={city}>{city}</option>
+                ))}
+                <option value="Other">Other City</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slate-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            {formData.city === "Other" && (
+              <input
+                type="text"
+                required
+                placeholder="Type your city name..."
+                className="mt-2 w-full px-4 py-2.5 rounded-xl bg-white border border-blue-200 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
+                value={customCity}
+                onChange={(e) => setCustomCity(e.target.value)}
+              />
+            )}
           </div>
 
           <div>
@@ -577,10 +718,16 @@ Hello Founder, a new candidate application has been submitted:
       </form>
 
       {/* CONFIRMATION MODAL ON SUCCESSFUL APPLICATION SUBMISSION */}
-      {submittedApp && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md animate-fade-in">
-          <div className="relative w-full max-w-lg rounded-[36px] bg-white backdrop-blur-2xl border border-white/90 shadow-2xl p-8 text-center space-y-6">
-            
+      {mounted && submittedApp && createPortal(
+        <div 
+          className="fixed inset-0 z-[99999] flex items-center justify-center p-4 sm:p-6 bg-slate-900/70 backdrop-blur-sm animate-fade-in" 
+          style={{ margin: 0 }}
+          onClick={() => setSubmittedApp(null)}
+        >
+          <div 
+            className="relative w-full max-w-lg text-center rounded-3xl bg-white shadow-2xl border border-blue-100 p-6 sm:p-8 space-y-6 max-h-[85vh] overflow-y-auto m-auto"
+            onClick={e => e.stopPropagation()}
+          >
             <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto text-2xl font-black shadow-md">
               ✓
             </div>
@@ -621,7 +768,8 @@ Hello Founder, a new candidate application has been submitted:
             </div>
 
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
     </div>
