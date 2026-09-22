@@ -1,11 +1,30 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { signOut } from "next-auth/react";
+import { signOut, useSession } from "next-auth/react";
+import {
+  FiGrid,
+  FiUsers,
+  FiBookOpen,
+  FiUserCheck,
+  FiLayers,
+  FiMail,
+  FiEdit3,
+  FiTarget,
+  FiBarChart2,
+  FiSettings,
+  FiExternalLink,
+  FiLogOut,
+  FiMenu,
+  FiX,
+  FiShield,
+} from "react-icons/fi";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -16,137 +35,224 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, []);
 
   const navLinks = [
-    { name: "Overview", href: "/admin" },
-    { name: "Users", href: "/admin/users" },
-    { name: "Courses", href: "/admin/courses" },
-    { name: "Our Team", href: "/admin/team" },
-    { name: "ERP Solutions", href: "/admin/erp" },
-    { name: "Messages", href: "/admin/messages" },
-    { name: "CMS", href: "/admin/cms" },
-    { name: "Leads", href: "/admin/leads" },
-    { name: "Reports", href: "/admin/reports" },
-    { name: "Settings", href: "/admin/settings" },
+    { name: "Overview", href: "/admin", icon: FiGrid },
+    { name: "Users", href: "/admin/users", icon: FiUsers },
+    { name: "Courses", href: "/admin/courses", icon: FiBookOpen },
+    { name: "Our Team", href: "/admin/team", icon: FiUserCheck },
+    { name: "ERP Solutions", href: "/admin/erp", icon: FiLayers },
+    { name: "CMS", href: "/admin/cms", icon: FiEdit3 },
+    { name: "Messages", href: "/admin/messages", icon: FiMail },
+    { name: "Leads", href: "/admin/leads", icon: FiTarget },
+    { name: "Reports", href: "/admin/reports", icon: FiBarChart2 },
+    { name: "Settings", href: "/admin/settings", icon: FiSettings },
   ];
 
+  const adminName = session?.user?.name || "Admin";
+  const initials = adminName
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase() || "AD";
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
-       {/* Top Navbar */}
-       <header 
-          className={`sticky top-0 z-40 transition-all duration-300 ${scrolled ? 'backdrop-blur-xl' : ''}`}
-          style={{ 
-             background: scrolled ? 'color-mix(in srgb, var(--bg-card) 90%, transparent)' : 'var(--bg-card)',
-             borderBottom: '1px solid var(--border-soft)'
-          }}
-       >
-          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-             <div className="flex justify-between items-center h-16">
-                
-                {/* Logo & Branding */}
-                <div className="flex items-center gap-6">
-                   <Link href="/admin" className="flex items-center gap-2">
-                      <img
-                        src="/logo - JCRM.jpeg"
-                        alt="JCRM Technologies"
-                        className="h-10 w-10 rounded-full object-contain bg-white shrink-0"
-                      />
-                      <span className="heading-font text-xl font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-primary)' }}>JCRM Technology</span>
-                   </Link>
-                   <div className="hidden sm:block h-6 w-px" style={{ background: 'var(--border-soft)' }}></div>
-                   <span className="badge-danger px-2.5 py-1 rounded-md text-xs font-bold hidden sm:block">Admin Console</span>
+    <div className="min-h-screen flex flex-col bg-slate-900 text-white">
+      {/* Top Admin Navigation Header */}
+      <header
+        className={`sticky top-0 z-50 transition-all duration-300 border-b border-slate-800 ${
+          scrolled ? "bg-slate-950/95 backdrop-blur-xl shadow-lg" : "bg-slate-950"
+        }`}
+      >
+        <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            
+            {/* Logo & Admin Branding */}
+            <div className="flex items-center gap-4">
+              <Link href="/admin" className="flex items-center gap-2.5">
+                <img
+                  src="/logo - JCRM.jpeg"
+                  alt="JCRM Technologies"
+                  className="h-9 w-9 rounded-full object-contain bg-white shrink-0 p-0.5"
+                />
+                <span className="heading-font text-lg font-black tracking-tight hidden sm:block text-white">
+                  JCRM <span className="text-[#0055FF]">Admin</span>
+                </span>
+              </Link>
+              <span className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-black uppercase tracking-wider bg-rose-500/10 text-rose-400 border border-rose-500/20">
+                <FiShield className="w-3 h-3 text-rose-400" />
+                <span>Console</span>
+              </span>
+            </div>
+
+            {/* Desktop Navigation Links (Admin CRUD & CMS) */}
+            <nav className="hidden xl:flex items-center gap-1">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive =
+                  link.href === "/admin"
+                    ? pathname === "/admin"
+                    : pathname === link.href || pathname?.startsWith(link.href + "/");
+
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    className={`relative px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-[#0055FF] text-white shadow-md shadow-blue-500/25"
+                        : "text-slate-300 hover:text-white hover:bg-slate-800/80"
+                    }`}
+                  >
+                    <Icon className="w-3.5 h-3.5" />
+                    <span>{link.name}</span>
+                  </Link>
+                );
+              })}
+            </nav>
+
+            {/* Right Actions */}
+            <div className="flex items-center gap-3">
+              
+              {/* Button to View Public Website */}
+              <Link
+                href="/"
+                target="_blank"
+                className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition"
+                title="Open live website in new tab"
+              >
+                <span>Live Site</span>
+                <FiExternalLink className="w-3.5 h-3.5 text-blue-400" />
+              </Link>
+
+              {/* Admin Avatar */}
+              <Link href="/admin/settings" className="flex items-center gap-2 group">
+                <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-xs text-white shadow-xs">
+                  {initials}
                 </div>
+              </Link>
 
-                {/* Desktop Nav */}
-                <nav className="hidden lg:flex items-center gap-1">
-                   {navLinks.map((link) => {
-                      const isActive = pathname === link.href;
-                      return (
-                         <Link
-                            key={link.name}
-                            href={link.href}
-                            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 group`}
-                            style={{ 
-                               color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                               background: isActive ? 'var(--bg-surface)' : 'transparent'
-                            }}
-                         >
-                            <span className={`group-hover:text-[var(--text-primary)] transition-colors`}>{link.name}</span>
-                         </Link>
-                      )
-                   })}
-                </nav>
+              {/* Sign Out */}
+              <button
+                onClick={() => signOut({ callbackUrl: "/auth" })}
+                className="hidden sm:flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors hover:bg-rose-500/10 text-rose-400 border border-rose-500/20"
+                title="Sign out of admin"
+              >
+                <FiLogOut className="w-3.5 h-3.5" />
+                <span>Sign Out</span>
+              </button>
 
-                {/* Right Actions */}
-                <div className="flex items-center gap-4">
-                   
-                   <Link href="/admin/settings" className="relative group ml-2">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-rose-400 to-rose-600 p-[2px]">
-                         <div className="w-full h-full rounded-full border-2 flex items-center justify-center font-bold text-xs" style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-card)' }}>
-                            AD
-                         </div>
-                      </div>
-                      <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-rose-500 border-2" style={{ borderColor: 'var(--bg-card)' }}></div>
-                   </Link>
+              {/* Mobile Menu Toggle Button */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="xl:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800"
+                aria-label="Toggle menu"
+              >
+                {mobileMenuOpen ? <FiX className="w-6 h-6" /> : <FiMenu className="w-6 h-6 text-white" />}
+              </button>
+            </div>
 
-                   <button 
-                     onClick={() => signOut({ callbackUrl: '/auth' })}
-                     className="hidden sm:flex ml-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-red-500/10 text-red-500 border border-transparent hover:border-red-500/20"
-                   >
-                     Sign out
-                   </button>
-
-                   {/* Mobile Toggle */}
-                   <button 
-                      onClick={() => setMobileMenuOpen(true)}
-                      className="lg:hidden p-2 rounded-md hover:bg-black/5 dark:hover:bg-surf-elevated" style={{ color: 'var(--text-primary)' }}
-                   >
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                   </button>
-                </div>
-
-             </div>
           </div>
-       </header>
+        </div>
 
-       {/* Mobile Menu Drawer */}
-       {mobileMenuOpen && (
-          <div className="fixed inset-0 z-50 lg:hidden">
-             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
-             <div className="absolute right-0 top-0 bottom-0 w-64 shadow-2xl flex flex-col slide-in-right" style={{ background: 'var(--bg-card)' }}>
-                <div className="p-4 border-b flex justify-between items-center" style={{ borderColor: 'var(--border-soft)' }}>
-                   <span className="font-bold">Menu</span>
-                   <button onClick={() => setMobileMenuOpen(false)} className="p-2" style={{ color: 'var(--text-secondary)' }}>
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                   </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                   {navLinks.map((link) => {
-                      const isActive = pathname === link.href;
-                      return (
-                         <Link
-                            key={link.name}
-                            href={link.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center justify-between p-3 rounded-xl font-medium"
-                            style={{
-                               background: isActive ? 'var(--bg-surface)' : 'transparent',
-                               color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)'
-                            }}
-                         >
-                            <span className="flex items-center gap-3">
-                               {link.name}
-                            </span>
-                         </Link>
-                      )
-                   })}
-                </div>
-             </div>
+        {/* Secondary Navigation Row for Large Screens that are not xl */}
+        <div className="hidden lg:flex xl:hidden border-t border-slate-800/80 px-4 py-2 overflow-x-auto gap-1">
+          {navLinks.map((link) => {
+            const Icon = link.icon;
+            const isActive =
+              link.href === "/admin"
+                ? pathname === "/admin"
+                : pathname === link.href || pathname?.startsWith(link.href + "/");
+
+            return (
+              <Link
+                key={link.name}
+                href={link.href}
+                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 shrink-0 ${
+                  isActive
+                    ? "bg-[#0055FF] text-white"
+                    : "text-slate-300 hover:text-white hover:bg-slate-800"
+                }`}
+              >
+                <Icon className="w-3 h-3" />
+                <span>{link.name}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </header>
+
+      {/* Mobile Menu Drawer */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 xl:hidden">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-xs transition-opacity"
+            onClick={() => setMobileMenuOpen(false)}
+          ></div>
+          <div className="absolute right-0 top-0 bottom-0 w-72 bg-slate-950 border-l border-slate-800 shadow-2xl flex flex-col p-5">
+            <div className="flex justify-between items-center pb-4 border-b border-slate-800">
+              <span className="font-bold text-sm text-white">Admin Navigation</span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-1.5 text-slate-400 hover:text-white rounded-lg"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto py-4 space-y-1.5">
+              {navLinks.map((link) => {
+                const Icon = link.icon;
+                const isActive =
+                  link.href === "/admin"
+                    ? pathname === "/admin"
+                    : pathname === link.href || pathname?.startsWith(link.href + "/");
+
+                return (
+                  <Link
+                    key={link.name}
+                    href={link.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-bold transition ${
+                      isActive
+                        ? "bg-[#0055FF] text-white"
+                        : "text-slate-300 hover:bg-slate-800/80 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span>{link.name}</span>
+                  </Link>
+                );
+              })}
+
+              <div className="pt-4 mt-4 border-t border-slate-800 space-y-2">
+                <Link
+                  href="/"
+                  target="_blank"
+                  className="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold text-slate-300 bg-slate-900 border border-slate-800 hover:text-white"
+                >
+                  <span className="flex items-center gap-2">
+                    <FiExternalLink className="w-4 h-4 text-blue-400" />
+                    Live Website
+                  </span>
+                  <span>↗</span>
+                </Link>
+                <button
+                  onClick={() => signOut({ callbackUrl: "/auth" })}
+                  className="w-full flex items-center gap-2 px-3.5 py-2.5 rounded-xl text-xs font-bold text-rose-400 bg-rose-500/10 border border-rose-500/20"
+                >
+                  <FiLogOut className="w-4 h-4" />
+                  <span>Sign Out</span>
+                </button>
+              </div>
+            </div>
           </div>
-       )}
+        </div>
+      )}
 
-       {/* Main Content Area */}
-       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8">
-          {children}
-       </main>
+      {/* Main Content Area */}
+      <main className="flex-1 max-w-[1700px] w-full mx-auto p-4 sm:p-6 lg:p-8">
+        {children}
+      </main>
     </div>
   );
 }

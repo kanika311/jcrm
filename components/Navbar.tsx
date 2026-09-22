@@ -46,8 +46,10 @@ export default function Navbar({
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Hide ONLY on auth, onboarding, and hidden admin routes
+  // Hide on admin console, auth, onboarding, and hidden admin routes
   if (
+    pathname === "/admin" ||
+    pathname?.startsWith("/admin") ||
     pathname === "/auth" ||
     pathname === "/onboarding" ||
     pathname === "/jcrm-sushant" ||
