@@ -383,7 +383,7 @@ export default function TeamDirectoryClient({ members }: { members: TeamMember[]
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
+    <div className="min-h-screen pt-20 pb-24 relative bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
       {/* Ambient Lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-[#0055FF]/10 rounded-full blur-[150px] pointer-events-none"></div>
 
@@ -394,96 +394,73 @@ export default function TeamDirectoryClient({ members }: { members: TeamMember[]
         <div className="flex flex-col lg:flex-row items-start gap-8">
           
           {/* ============================================================ */}
-          {/* 1. LEFT FILTER PANEL (Desktop Sticky Sidebar) */}
+          {/* 2. CENTER CONTENT (Sticky Top Bar with Search & Sort + Cards Grid) */}
           {/* ============================================================ */}
-          <aside className="hidden lg:block w-80 shrink-0 sticky top-28">
-            <div className="rounded-[28px] bg-white/90 backdrop-blur-2xl border border-white/90 shadow-[0_12px_45px_rgba(0,85,255,0.07)] p-6">
-              {renderFilterPanel()}
-            </div>
-          </aside>
-
-          {/* ============================================================ */}
-          {/* 2. CENTER CONTENT (Master Search + Active Filters + Cards Grid) */}
-          {/* ============================================================ */}
-          <main className="flex-1 w-full min-w-0 space-y-6">
+          <main className="flex-1 w-full min-w-0 space-y-5">
             
-            {/* MASTER SEARCH BAR */}
-            <div className="p-4 sm:p-5 rounded-[28px] bg-white/90 backdrop-blur-2xl border border-white/90 shadow-[0_12px_45px_rgba(0,85,255,0.08)] space-y-3">
-              <div className="relative flex items-center">
-                <div className="absolute left-4.5 text-[#0055FF] pointer-events-none flex items-center justify-center">
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  placeholder="Master Search: Search by name, designation, city, skills, college..."
-                  value={masterSearch}
-                  onChange={(e) => setMasterSearch(e.target.value)}
-                  className="w-full pl-12 sm:pl-14 pr-24 py-3.5 sm:py-4 rounded-2xl bg-blue-50/40 hover:bg-blue-50/60 focus:bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0055FF] transition-all"
-                />
-                {masterSearch && (
-                  <button
-                    onClick={() => setMasterSearch("")}
-                    className="absolute right-4 text-slate-400 hover:text-slate-700 text-sm font-black w-6 h-6 rounded-full bg-slate-200/70 hover:bg-slate-300 flex items-center justify-center cursor-pointer transition-colors"
-                    title="Clear search"
-                  >
-                    ✕
-                  </button>
-                )}
-              </div>
-
-              {/* Quick Search Chips */}
-              <div className="flex items-center gap-2 flex-wrap pt-1 text-xs">
-                <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400">
-                  Quick Search:
-                </span>
-                {["React", "Python", "Full Stack", "AI/ML", "Bangalore", "Intern"].map((quick) => (
-                  <button
-                    key={quick}
-                    onClick={() => setMasterSearch(quick)}
-                    className="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-blue-50/80 hover:bg-blue-100 text-[#0055FF] border border-blue-100 cursor-pointer transition-colors"
-                  >
-                    +{quick}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* RESULTS BAR & CONTROLS */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
-              <div className="flex items-center gap-3">
-                {/* Mobile Filter Drawer Button */}
+            {/* STICKY TOP CONTROLS BAR (Search on Top Right + Sort + Count) */}
+            <div className="sticky top-20 z-30 p-3 sm:p-4 rounded-2xl bg-white/90 backdrop-blur-xl border border-white/90 shadow-[0_10px_35px_rgba(0,85,255,0.08)] flex flex-col md:flex-row md:items-center justify-between gap-3">
+              
+              {/* Left: Count & Mobile Filter Button */}
+              <div className="flex items-center gap-3 w-full md:w-auto justify-between md:justify-start">
                 <button
                   onClick={() => setIsMobileFilterOpen(true)}
-                  className="lg:hidden px-4 py-2 rounded-xl bg-white border border-slate-200 text-xs font-extrabold text-slate-800 shadow-xs flex items-center gap-2 cursor-pointer"
+                  className="lg:hidden px-3.5 py-2 rounded-xl bg-blue-50 border border-blue-100 text-xs font-extrabold text-[#0055FF] shadow-xs flex items-center gap-2 cursor-pointer"
                 >
-                  <svg className="w-4 h-4 text-[#0055FF]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
                   </svg>
                   Filters {activeFiltersCount > 0 && `(${activeFiltersCount})`}
                 </button>
 
-                <div>
-                  <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-800">
-                    Showing <span className="text-[#0055FF]">{sortedMembers.length}</span> of {members.length} Candidates
-                  </span>
-                </div>
+                <span className="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-slate-700 whitespace-nowrap">
+                  Showing <span className="text-[#0055FF] font-black">{sortedMembers.length}</span> of {members.length} Candidates
+                </span>
               </div>
 
-              {/* Sort By Dropdown */}
-              <div className="flex items-center gap-2 self-end sm:self-auto">
-                <span className="text-xs font-bold text-slate-500 whitespace-nowrap">Sort by:</span>
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-3 py-1.5 rounded-xl bg-white/90 border border-slate-200 text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer"
-                >
-                  <option value="featured">Featured / Recommended</option>
-                  <option value="name_asc">Name: A to Z</option>
-                  <option value="name_desc">Name: Z to A</option>
-                  <option value="role">Role / Department</option>
-                </select>
+              {/* Right: Search Box + Sort Dropdown */}
+              <div className="flex items-center gap-2.5 w-full md:w-auto flex-1 md:justify-end">
+                
+                {/* Search Box on Top Right */}
+                <div className="relative flex-1 max-w-full md:max-w-xs">
+                  <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#0055FF] pointer-events-none flex items-center">
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  </div>
+                  <input
+                    type="text"
+                    placeholder="Search name, skills, role..."
+                    value={masterSearch}
+                    onChange={(e) => setMasterSearch(e.target.value)}
+                    className="w-full pl-9 pr-7 py-2 rounded-xl bg-blue-50/50 hover:bg-blue-50/80 focus:bg-white border border-blue-100 text-slate-900 text-xs font-semibold placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#0055FF]/30 transition-all"
+                  />
+                  {masterSearch && (
+                    <button
+                      onClick={() => setMasterSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs font-black w-4 h-4 rounded-full bg-slate-200 flex items-center justify-center cursor-pointer"
+                      title="Clear search"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+
+                {/* Sort By Dropdown */}
+                <div className="flex items-center gap-1.5 shrink-0">
+                  <span className="hidden sm:inline text-xs font-bold text-slate-500 whitespace-nowrap">Sort by:</span>
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="px-3 py-2 rounded-xl bg-white border border-blue-100 text-xs font-extrabold text-slate-800 shadow-xs focus:outline-none focus:ring-2 focus:ring-[#0055FF]/30 cursor-pointer"
+                  >
+                    <option value="featured">Role / Department</option>
+                    <option value="name_asc">Name: A to Z</option>
+                    <option value="name_desc">Name: Z to A</option>
+                    <option value="experience">Experience</option>
+                  </select>
+                </div>
+
               </div>
             </div>
 
