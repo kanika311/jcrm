@@ -7,8 +7,7 @@ import { usePathname } from "next/navigation";
 export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?: string }) {
   const pathname = usePathname();
   const isPublicPage =
-    !pathname?.startsWith("/student") &&
-    !pathname?.startsWith("/faculty") &&
+    
     !pathname?.startsWith("/admin") &&
     !pathname?.startsWith("/auth") &&
     !pathname?.startsWith("/jcrm-sushant");
@@ -155,7 +154,7 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
         {/* Bottom Copyright & Legal Links */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-slate-500 font-semibold">
           <div>
-            © 2026 JCRM TECHNOLOGIES • All Rights Reserved
+            Â© 2026 JCRM TECHNOLOGIES â€¢ All Rights Reserved
           </div>
 
           <div className="flex items-center gap-3">

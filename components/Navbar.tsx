@@ -2,13 +2,22 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import { useEffect, useState, useRef } from "react";
+import { useSession, signOut } from "next-auth/react";
 
-export default function Navbar({ siteName, links }: { siteName?: string, links?: any[], logoUrl?: string }) {
+export default function Navbar({
+  siteName,
+  links,
+}: {
+  siteName?: string;
+  links?: any[];
+  logoUrl?: string;
+}) {
   const { data: session } = useSession();
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -19,12 +28,27 @@ export default function Navbar({ siteName, links }: { siteName?: string, links?:
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Hide on dashboard, auth, onboarding, and admin login routes
+  // Close user dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Close dropdown on route change
+  useEffect(() => {
+    setUserDropdownOpen(false);
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
+  // Hide ONLY on auth, onboarding, and hidden admin routes
   if (
     pathname === "/auth" ||
     pathname === "/onboarding" ||
-    pathname?.startsWith("/student") ||
-    pathname?.startsWith("/faculty") ||
     pathname?.startsWith("/admin") ||
     pathname === "/jcrm-sushant" ||
     pathname?.startsWith("/jcrm-sushant")
@@ -59,32 +83,50 @@ export default function Navbar({ siteName, links }: { siteName?: string, links?:
 
   const displayLogoUrl = "/logo - JCRM.jpeg";
 
+  const user = session?.user;
+  const userFullName = user?.name || (user as any)?.fullName || "User";
+  const userFirstName = userFullName.split(" ")[0];
+  const userEmail = user?.email || "";
+  const userRole = user?.role || "STUDENT";
+
+  const dashboardHref =
+    userRole === "INSTRUCTOR" ? "/faculty" : userRole === "ADMIN" ? "/admin" : "/student";
+  const dashboardLabel =
+    userRole === "INSTRUCTOR" ? "Expert Dashboard" : userRole === "ADMIN" ? "Admin Console" : "Student Dashboard";
+  const profileHref =
+    userRole === "INSTRUCTOR" ? "/faculty/settings" : "/student/settings";
+
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 bg-white/85 backdrop-blur-2xl border-b border-white/90 ${
+      className={`fixed top-0 w-full z-50 transition-all duration-300 bg-white/90 dark:bg-gray-950/90 backdrop-blur-2xl border-b border-slate-200/80 dark:border-gray-800/80 ${
         scrolled
-          ? "shadow-[0_8px_35px_rgba(0,85,255,0.12)] bg-white/95"
+          ? "shadow-[0_8px_35px_rgba(0,85,255,0.12)] bg-white/95 dark:bg-gray-950/95"
           : "shadow-[0_4px_30px_rgba(0,85,255,0.08)]"
       }`}
     >
       <div className="w-full max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-10">
-        <div className="flex justify-between items-center h-20 sm:h-22">
-          
-          {/* Logo & Brand Name - Directly placed image scaled to occupy navbar height */}
-          <Link href="/" className="flex items-center gap-3.5 shrink-0 group relative z-20">
-            <img
-              src={displayLogoUrl}
-              alt={siteName || "JCRM Logo"}
-              className="h-14 sm:h-16 w-14 sm:w-16 rounded-full object-contain bg-white shrink-0 group-hover:scale-105 transition-transform"
-            />
-            
-            <span className="heading-font text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 group-hover:text-[#0055FF] transition-colors">
-              {siteName || "JCRM Technologies"}
-            </span>
+        <div className="flex justify-between items-center h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3.5 group shrink-0 cursor-pointer">
+            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white/90 shadow-md bg-white p-0.5 group-hover:scale-105 transition-all">
+              <img
+                src={displayLogoUrl}
+                alt={siteName || "JCRM Logo"}
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <div className="flex flex-col">
+              <span className="heading-font text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-[#0055FF] transition-colors">
+                {siteName || "JCRM Technology"}
+              </span>
+              <span className="text-[10px] font-extrabold text-[#0055FF] tracking-wider uppercase -mt-1">
+                Innovate &bull; Build &bull; Scale
+              </span>
+            </div>
           </Link>
 
-          {/* Desktop Links with Glowing Blue Indicator Bar */}
-          <div className="hidden lg:flex items-center space-x-6 xl:space-x-8">
+          {/* Desktop Nav Links */}
+          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {activeLinks.map((link: any) => {
               const isActive = isLinkActive(link.href);
 
@@ -92,10 +134,10 @@ export default function Navbar({ siteName, links }: { siteName?: string, links?:
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`relative py-2 text-sm xl:text-base transition-all duration-200 ${
+                  className={`relative px-3.5 py-2 text-sm xl:text-base font-bold rounded-xl transition-all cursor-pointer ${
                     isActive
-                      ? "text-[#0055FF] font-extrabold"
-                      : "text-slate-700 font-bold hover:text-[#0055FF]"
+                      ? "text-[#0055FF] bg-blue-50/80 dark:bg-blue-900/30"
+                      : "text-slate-700 dark:text-slate-200 hover:text-[#0055FF] hover:bg-slate-50 dark:hover:bg-gray-800"
                   }`}
                 >
                   {link.name}
@@ -109,18 +151,158 @@ export default function Navbar({ siteName, links }: { siteName?: string, links?:
             })}
           </div>
 
-          {/* Right Action Button */}
+          {/* Right Action: User Menu / Get Started */}
           <div className="hidden md:flex items-center gap-4 shrink-0">
-            <Link
-              href="/auth"
-              className="px-6 py-3 text-sm md:text-base font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md hover:shadow-blue-500/25 hover:scale-105 transition-all flex items-center justify-center cursor-pointer"
-            >
-              Get Started
-            </Link>
+            {user ? (
+              /* User Avatar & Dropdown (Yogsathi Style) */
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+                  className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors border border-slate-200 dark:border-gray-800 cursor-pointer"
+                >
+                  {user.image ? (
+                    <img
+                      src={user.image}
+                      alt={userFullName}
+                      className="w-9 h-9 rounded-full object-cover border border-blue-500/30"
+                    />
+                  ) : (
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-extrabold text-sm flex items-center justify-center shadow-md">
+                      {userFirstName[0]?.toUpperCase() || "U"}
+                    </div>
+                  )}
+
+                  <span className="text-sm font-bold text-slate-800 dark:text-white">
+                    {userFirstName}
+                  </span>
+
+                  <svg
+                    className={`w-4 h-4 text-slate-400 transition-transform ${
+                      userDropdownOpen ? "rotate-180" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {/* Floating User Account Menu (Matching Yogsathi.com) */}
+                {userDropdownOpen && (
+                  <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-500/20 bg-white dark:bg-gray-900 z-50 animate-in fade-in zoom-in-95 duration-150">
+                    {/* Header Banner */}
+                    <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-[#0055FF] p-4 text-white">
+                      <div className="flex items-center gap-3">
+                        {user.image ? (
+                          <img
+                            src={user.image}
+                            alt={userFullName}
+                            className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm text-white font-bold text-base flex items-center justify-center border border-white/30">
+                            {userFirstName[0]?.toUpperCase() || "U"}
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-bold text-sm truncate">{userFullName}</p>
+                          <p className="text-xs text-blue-200 truncate">{userEmail}</p>
+                          <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-white/20 mt-1">
+                            {userRole}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="p-2 space-y-1">
+                      <Link
+                        href={dashboardHref}
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-[#0055FF] transition-colors"
+                      >
+                        <span className="w-8 h-8 rounded-lg bg-blue-500/10 text-[#0055FF] flex items-center justify-center text-base shrink-0">
+                          📊
+                        </span>
+                        <span>{dashboardLabel}</span>
+                      </Link>
+
+                      {userRole === "ADMIN" && (
+                        <>
+                          <Link
+                            href="/faculty"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            <span className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm shrink-0">
+                              🏫
+                            </span>
+                            <span>Expert / Teacher Dashboard</span>
+                          </Link>
+                          <Link
+                            href="/student"
+                            onClick={() => setUserDropdownOpen(false)}
+                            className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            <span className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm shrink-0">
+                              🎓
+                            </span>
+                            <span>Student Dashboard</span>
+                          </Link>
+                        </>
+                      )}
+
+                      <Link
+                        href={profileHref}
+                        onClick={() => setUserDropdownOpen(false)}
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-[#0055FF] transition-colors"
+                      >
+                        <span className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-base shrink-0">
+                          👤
+                        </span>
+                        <span>Profile & Settings</span>
+                      </Link>
+                    </div>
+
+                    {/* Sign Out Button */}
+                    <div className="p-2 border-t border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-950">
+                      <button
+                        type="button"
+                        onClick={() => signOut({ callbackUrl: "/" })}
+                        className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left cursor-pointer"
+                      >
+                        <span className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-sm shrink-0">
+                          🚪
+                        </span>
+                        <span>Logout</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/auth"
+                className="px-6 py-3 text-sm md:text-base font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md hover:shadow-blue-500/25 hover:scale-105 transition-all flex items-center justify-center cursor-pointer"
+              >
+                Get Started
+              </Link>
+            )}
           </div>
 
           {/* Mobile Hamburger Toggle */}
-          <div className="lg:hidden flex items-center">
+          <div className="lg:hidden flex items-center gap-2">
+            {user && (
+              <Link
+                href={dashboardHref}
+                className="w-8 h-8 rounded-full bg-[#0055FF] text-white font-bold text-xs flex items-center justify-center"
+              >
+                {userFirstName[0]?.toUpperCase()}
+              </Link>
+            )}
+
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="p-2.5 rounded-xl bg-blue-50 text-slate-800 hover:bg-blue-100 transition-colors cursor-pointer"
@@ -142,8 +324,30 @@ export default function Navbar({ siteName, links }: { siteName?: string, links?:
 
       {/* Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-2xl border-b border-blue-100 shadow-2xl">
+        <div className="lg:hidden absolute top-full left-0 w-full bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-b border-blue-100 shadow-2xl max-h-[80vh] overflow-y-auto">
           <div className="px-5 pt-3 pb-6 space-y-2">
+            {user && (
+              <div className="p-3 mb-2 rounded-2xl bg-blue-50/80 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
+                <p className="font-bold text-sm text-slate-900 dark:text-white">{userFullName}</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
+                <div className="flex gap-2 mt-2">
+                  <Link
+                    href={dashboardHref}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex-1 py-1.5 rounded-lg text-center text-xs font-bold bg-[#0055FF] text-white"
+                  >
+                    {dashboardLabel}
+                  </Link>
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-600"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+
             {activeLinks.map((link: any) => {
               const isActive = isLinkActive(link.href);
 
@@ -155,7 +359,7 @@ export default function Navbar({ siteName, links }: { siteName?: string, links?:
                   className={`flex items-center justify-between px-4 py-3.5 text-base font-extrabold rounded-xl transition-all ${
                     isActive
                       ? "text-[#0055FF] bg-blue-50/90 border-l-4 border-[#0055FF]"
-                      : "text-slate-700 hover:text-[#0055FF] hover:bg-slate-50"
+                      : "text-slate-700 dark:text-slate-300 hover:text-[#0055FF] hover:bg-slate-50"
                   }`}
                 >
                   <span>{link.name}</span>
@@ -165,18 +369,22 @@ export default function Navbar({ siteName, links }: { siteName?: string, links?:
                 </Link>
               );
             })}
-            <div className="pt-3 px-1">
-              <Link
-                href="/auth"
-                onClick={() => setMobileMenuOpen(false)}
-                className="w-full text-center px-6 py-3.5 text-base font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md block"
-              >
-                Get Started
-              </Link>
-            </div>
+
+            {!user && (
+              <div className="pt-3 px-1">
+                <Link
+                  href="/auth"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center px-6 py-3.5 text-base font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md block"
+                >
+                  Get Started
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
     </nav>
   );
 }
+

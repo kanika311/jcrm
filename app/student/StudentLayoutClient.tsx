@@ -1,168 +1,181 @@
 "use client";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { signOut } from "next-auth/react";
+import { useState } from "react";
+import { useSession } from "next-auth/react";
 
-export default function StudentLayoutClient({ children, cmsData }: { children: React.ReactNode, cmsData?: any }) {
+export default function StudentLayoutClient({
+  children,
+}: {
+  children: React.ReactNode;
+  cmsData?: any;
+}) {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { data: session } = useSession();
+  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const user = session?.user;
+  const userName = user?.name || (user as any)?.fullName || "Student";
+  const userInitial = userName[0]?.toUpperCase() || "S";
 
   const navLinks = [
-    { name: "Overview", href: "/student" },
-    { name: "My Courses", href: "/student/courses" },
-    { name: "Live", href: "/student/live", hasPulse: true },
-    { name: "Assignments", href: "/student/assignments", badge: "2" },
-    { name: "Calendar", href: "/student/calendar" },
-    { name: "Messages", href: "/student/messages", badge: "3" },
+    { name: "Overview", href: "/student", icon: "📊" },
+    { name: "My Courses", href: "/student/courses", icon: "📚" },
+    { name: "Classroom & Player", href: "/student/classroom", icon: "🎬" },
+    { name: "Live Sessions", href: "/student/live", icon: "🔴", hasPulse: true },
+    { name: "Assignments", href: "/student/assignments", icon: "📝", badge: "2" },
+    { name: "Calendar", href: "/student/calendar", icon: "📅" },
+    { name: "Messages", href: "/student/messages", icon: "💬", badge: "3" },
+    { name: "Profile & Settings", href: "/student/settings", icon: "⚙️" },
   ];
 
+  const isActive = (href: string) => {
+    if (href === "/student") return pathname === "/student";
+    return pathname.startsWith(href);
+  };
+
+  const sidebarContent = (
+    <div className="space-y-6">
+      {/* Profile Card (Yogsathi Style) */}
+      <div
+        className="p-5 rounded-2xl border shadow-sm"
+        style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
+      >
+        <div className="flex items-center gap-3.5 mb-4">
+          {user?.image ? (
+            <img
+              src={user.image}
+              alt={userName}
+              className="w-12 h-12 rounded-full object-cover border-2 border-blue-500/40"
+            />
+          ) : (
+            <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-black text-lg flex items-center justify-center shadow-md">
+              {userInitial}
+            </div>
+          )}
+          <div className="min-w-0">
+            <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">{userName}</h3>
+            <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-blue-500/15 text-blue-600 dark:text-blue-400 mt-0.5">
+              STUDENT
+            </span>
+          </div>
+        </div>
+
+        <div className="pt-3 border-t border-slate-100 dark:border-gray-800 space-y-2 text-xs">
+          <div className="flex justify-between">
+            <span className="text-slate-400">Profile Type</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">Software Engineering Track</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-slate-400">Status</span>
+            <span className="font-bold text-emerald-600 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+              Active Learner
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Student Panel Menu (Yogsathi Style) */}
+      <div
+        className="p-4 rounded-2xl border shadow-sm space-y-1.5"
+        style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
+      >
+        <div className="px-3 py-2 text-xs font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
+          <span>Student Panel</span>
+          <span className="text-base">🎓</span>
+        </div>
+
+        {navLinks.map((link) => {
+          const active = isActive(link.href);
+          return (
+            <Link
+              key={link.name}
+              href={link.href}
+              onClick={() => setMobileDrawerOpen(false)}
+              className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                active
+                  ? "bg-[#0055FF] text-white shadow-md shadow-blue-500/20"
+                  : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800 hover:text-[#0055FF]"
+              }`}
+            >
+              <div className="flex items-center gap-2.5 truncate">
+                <span className="text-sm">{link.icon}</span>
+                <span className="truncate">{link.name}</span>
+                {link.hasPulse && (
+                  <span className="relative flex h-2 w-2 ml-1">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
+                  </span>
+                )}
+              </div>
+              {link.badge && (
+                <span
+                  className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
+                    active ? "bg-white text-blue-600" : "bg-rose-500 text-white"
+                  }`}
+                >
+                  {link.badge}
+                </span>
+              )}
+            </Link>
+          );
+        })}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-base)' }}>
-       {/* Top Navbar */}
-       <header 
-          className={`sticky top-0 z-40 transition-all duration-300 ${scrolled ? 'backdrop-blur-xl' : ''}`}
-          style={{ 
-             background: scrolled ? 'color-mix(in srgb, var(--bg-card) 90%, transparent)' : 'var(--bg-card)',
-             borderBottom: '1px solid var(--border-soft)'
-          }}
-       >
-          <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-             <div className="flex justify-between items-center h-16">
-                
-                {/* Logo & Branding */}
-                <div className="flex items-center gap-6">
-                   <Link href="/student" className="flex items-center gap-2">
-                      <img
-                        src="/logo - JCRM.jpeg"
-                        alt="JCRM Technologies"
-                        className="h-10 w-10 rounded-full object-contain bg-white shrink-0"
-                      />
-                      <span className="heading-font text-xl font-bold tracking-tight hidden sm:block" style={{ color: 'var(--text-primary)' }}>JCRM Technology</span>
-                   </Link>
-                   <div className="hidden sm:block h-6 w-px" style={{ background: 'var(--border-soft)' }}></div>
-                   <span className="badge-primary px-2.5 py-1 rounded-md text-xs font-bold hidden sm:block">Student Portal</span>
-                </div>
+    <div className="min-h-screen pt-24 pb-16 bg-slate-50/60 dark:bg-black/40">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Mobile Open Sidebar Button */}
+        <div className="lg:hidden mb-4">
+          <button
+            type="button"
+            onClick={() => setMobileDrawerOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm"
+          >
+            <span>☰ Open Student Menu</span>
+          </button>
+        </div>
 
-                {/* Desktop Nav */}
-                <nav className="hidden lg:flex items-center gap-1">
-                   {navLinks.map((link) => {
-                      const isActive = pathname === link.href;
-                      return (
-                         <Link
-                            key={link.name}
-                            href={link.href}
-                            className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center gap-2 group`}
-                            style={{ 
-                               color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                               background: isActive ? 'var(--bg-surface)' : 'transparent'
-                            }}
-                         >
-                            <span className={`group-hover:text-[var(--text-primary)] transition-colors`}>{link.name}</span>
-                            {link.hasPulse && (
-                               <span className="relative flex h-2 w-2">
-                                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                 <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                               </span>
-                            )}
-                            {link.badge && (
-                               <span className="flex items-center justify-center w-5 h-5 text-[10px] font-bold text-txt-primary rounded-full bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.4)]">
-                                  {link.badge}
-                               </span>
-                            )}
-                         </Link>
-                      )
-                   })}
-                </nav>
-
-                {/* Right Actions */}
-                <div className="flex items-center gap-4">
-                   
-                   {cmsData?.showNotifications !== false && (
-                      <div className="relative cursor-pointer w-10 h-10 rounded-full flex items-center justify-center transition-colors hover:bg-black/5 dark:hover:bg-surf-elevated text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                         <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                         <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 border-2" style={{ borderColor: 'var(--bg-card)' }}></span>
-                      </div>
-                   )}
-
-                   <Link href="/student/settings" className="relative group ml-2">
-                      <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-emerald-400 to-emerald-600 p-[2px]">
-                         <div className="w-full h-full rounded-full border-2 flex items-center justify-center font-bold text-xs" style={{ background: 'var(--bg-card)', borderColor: 'var(--bg-card)' }}>
-                            SG
-                         </div>
-                      </div>
-                      <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-emerald-500 border-2" style={{ borderColor: 'var(--bg-card)' }}></div>
-                   </Link>
-
-                   <button 
-                     onClick={() => signOut({ callbackUrl: '/auth' })}
-                     className="hidden sm:flex ml-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors hover:bg-red-500/10 text-red-500 border border-transparent hover:border-red-500/20"
-                   >
-                     Sign out
-                   </button>
-
-                   {/* Mobile Toggle */}
-                   <button 
-                      onClick={() => setMobileMenuOpen(true)}
-                      className="lg:hidden p-2 rounded-md hover:bg-black/5 dark:hover:bg-surf-elevated" style={{ color: 'var(--text-primary)' }}
-                   >
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-                   </button>
-                </div>
-
-             </div>
-          </div>
-       </header>
-
-       {/* Mobile Menu Drawer */}
-       {mobileMenuOpen && (
+        {/* Mobile Drawer */}
+        {mobileDrawerOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
-             <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setMobileMenuOpen(false)}></div>
-             <div className="absolute right-0 top-0 bottom-0 w-64 shadow-2xl flex flex-col slide-in-right" style={{ background: 'var(--bg-card)' }}>
-                <div className="p-4 border-b flex justify-between items-center" style={{ borderColor: 'var(--border-soft)' }}>
-                   <span className="font-bold">Menu</span>
-                   <button onClick={() => setMobileMenuOpen(false)} className="p-2" style={{ color: 'var(--text-secondary)' }}>
-                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                   </button>
-                </div>
-                <div className="flex-1 overflow-y-auto p-4 space-y-2">
-                   {navLinks.map((link) => {
-                      const isActive = pathname === link.href;
-                      return (
-                         <Link
-                            key={link.name}
-                            href={link.href}
-                            onClick={() => setMobileMenuOpen(false)}
-                            className="flex items-center justify-between p-3 rounded-xl font-medium"
-                            style={{
-                               background: isActive ? 'var(--bg-surface)' : 'transparent',
-                               color: isActive ? 'var(--accent-primary)' : 'var(--text-secondary)'
-                            }}
-                         >
-                            <span className="flex items-center gap-3">
-                               {link.name}
-                               {link.hasPulse && <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>}
-                            </span>
-                            {link.badge && <span className="bg-rose-500 text-txt-primary text-[10px] font-bold px-2 py-0.5 rounded-full">{link.badge}</span>}
-                         </Link>
-                      )
-                   })}
-                </div>
-             </div>
+            <div
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+              onClick={() => setMobileDrawerOpen(false)}
+            />
+            <div className="absolute left-0 top-0 bottom-0 w-72 bg-white dark:bg-gray-900 p-4 shadow-2xl overflow-y-auto pt-24">
+              <div className="flex justify-between items-center mb-4 pb-2 border-b">
+                <span className="font-bold text-sm">Student Navigation</span>
+                <button
+                  onClick={() => setMobileDrawerOpen(false)}
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                >
+                  ✕
+                </button>
+              </div>
+              {sidebarContent}
+            </div>
           </div>
-       )}
+        )}
 
-       {/* Main Content Area */}
-       <main className="flex-1 max-w-[1600px] w-full mx-auto p-4 sm:p-6 lg:p-8 animate-fade-in-up">
-          {children}
-       </main>
+        {/* 2-Column Grid (Like Yogsathi.com) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Rail (4 cols on lg, 3 on xl) */}
+          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 sticky top-28 self-start space-y-6">
+            {sidebarContent}
+          </aside>
+
+          {/* Main Dashboard Content (8 cols on lg, 9 on xl) */}
+          <main className="lg:col-span-8 xl:col-span-9 min-w-0">
+            {children}
+          </main>
+        </div>
+      </div>
     </div>
   );
 }
+
