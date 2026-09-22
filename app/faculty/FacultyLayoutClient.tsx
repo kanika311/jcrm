@@ -4,6 +4,19 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useSession } from "next-auth/react";
+import {
+  FiGrid,
+  FiBookOpen,
+  FiVideo,
+  FiUsers,
+  FiFileText,
+  FiBarChart2,
+  FiBell,
+  FiSettings,
+  FiMenu,
+  FiX,
+  FiCheckCircle,
+} from "react-icons/fi";
 
 export default function FacultyLayoutClient({
   children,
@@ -20,14 +33,14 @@ export default function FacultyLayoutClient({
   const userInitial = userName[0]?.toUpperCase() || "I";
 
   const navLinks = [
-    { name: "Dashboard Overview", href: "/faculty", icon: "📊" },
-    { name: "My Courses", href: "/faculty/courses", icon: "📚" },
-    { name: "Course Builder & Live", href: "/faculty/courses/builder", icon: "⚙️" },
-    { name: "Students", href: "/faculty/students", icon: "👥" },
-    { name: "Submissions", href: "/faculty/submissions", icon: "📝", badge: "12" },
-    { name: "Analytics & Revenue", href: "/faculty/analytics", icon: "📈" },
-    { name: "Announcements", href: "/faculty/announcements", icon: "📢" },
-    { name: "Profile & Settings", href: "/faculty/settings", icon: "⚙️" },
+    { name: "Dashboard Overview", href: "/faculty", icon: FiGrid },
+    { name: "My Courses", href: "/faculty/courses", icon: FiBookOpen },
+    { name: "Course Builder & Live", href: "/faculty/courses/builder", icon: FiVideo },
+    { name: "Students", href: "/faculty/students", icon: FiUsers },
+    { name: "Submissions", href: "/faculty/submissions", icon: FiFileText, badge: "12" },
+    { name: "Analytics & Revenue", href: "/faculty/analytics", icon: FiBarChart2 },
+    { name: "Announcements", href: "/faculty/announcements", icon: FiBell },
+    { name: "Profile & Settings", href: "/faculty/settings", icon: FiSettings },
   ];
 
   const isActive = (href: string) => {
@@ -56,7 +69,7 @@ export default function FacultyLayoutClient({
           )}
           <div className="min-w-0">
             <h3 className="font-bold text-sm text-slate-900 dark:text-white truncate">{userName}</h3>
-            <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-500/15 text-amber-600 dark:text-amber-400 mt-0.5">
+            <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-600 dark:text-amber-400 mt-0.5 border border-amber-500/30">
               EXPERT
             </span>
           </div>
@@ -65,30 +78,31 @@ export default function FacultyLayoutClient({
         <div className="pt-3 border-t border-slate-100 dark:border-gray-800 space-y-2 text-xs">
           <div className="flex justify-between">
             <span className="text-slate-400">Profile Type</span>
-            <span className="font-semibold text-slate-700 dark:text-slate-200">Instructor / Tech Faculty</span>
+            <span className="font-semibold text-slate-700 dark:text-slate-200">Instructor / Faculty</span>
           </div>
           <div className="flex justify-between">
             <span className="text-slate-400">Status</span>
-            <span className="font-bold text-emerald-600 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span className="font-bold text-emerald-600 flex items-center gap-1.5">
+              <FiCheckCircle className="w-3.5 h-3.5 text-emerald-500" />
               Approved
             </span>
           </div>
         </div>
       </div>
 
-      {/* Expert Panel Menu (Yogsathi Style) */}
+      {/* Expert Panel Menu */}
       <div
         className="p-4 rounded-2xl border shadow-sm space-y-1.5"
         style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
       >
         <div className="px-3 py-2 text-xs font-black uppercase tracking-wider text-slate-400 flex items-center justify-between">
           <span>Expert Panel</span>
-          <span className="text-base">✨</span>
         </div>
 
         {navLinks.map((link) => {
           const active = isActive(link.href);
+          const Icon = link.icon;
+
           return (
             <Link
               key={link.name}
@@ -101,7 +115,7 @@ export default function FacultyLayoutClient({
               }`}
             >
               <div className="flex items-center gap-2.5 truncate">
-                <span className="text-sm">{link.icon}</span>
+                <Icon className={`w-4 h-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
                 <span className="truncate">{link.name}</span>
               </div>
               {link.badge && (
@@ -130,7 +144,8 @@ export default function FacultyLayoutClient({
             onClick={() => setMobileDrawerOpen(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm"
           >
-            <span>☰ Open Expert Menu</span>
+            <FiMenu className="w-4 h-4" />
+            <span>Open Expert Menu</span>
           </button>
         </div>
 
@@ -148,7 +163,7 @@ export default function FacultyLayoutClient({
                   onClick={() => setMobileDrawerOpen(false)}
                   className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
                 >
-                  ✕
+                  <FiX className="w-5 h-5" />
                 </button>
               </div>
               {sidebarContent}
@@ -156,14 +171,14 @@ export default function FacultyLayoutClient({
           </div>
         )}
 
-        {/* 2-Column Grid (Like Yogsathi.com) */}
+        {/* 2-Column Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Rail (4 cols on lg, 3 on xl) */}
+          {/* Left Rail */}
           <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 sticky top-28 self-start space-y-6">
             {sidebarContent}
           </aside>
 
-          {/* Main Dashboard Content (8 cols on lg, 9 on xl) */}
+          {/* Main Dashboard Content */}
           <main className="lg:col-span-8 xl:col-span-9 min-w-0">
             {children}
           </main>
@@ -172,4 +187,3 @@ export default function FacultyLayoutClient({
     </div>
   );
 }
-

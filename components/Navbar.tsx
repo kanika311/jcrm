@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
+import { FiGrid, FiUser, FiLogOut, FiChevronDown, FiShield, FiBookOpen, FiSettings } from "react-icons/fi";
 
 export default function Navbar({
   siteName,
@@ -49,7 +50,6 @@ export default function Navbar({
   if (
     pathname === "/auth" ||
     pathname === "/onboarding" ||
-    pathname?.startsWith("/admin") ||
     pathname === "/jcrm-sushant" ||
     pathname?.startsWith("/jcrm-sushant")
   ) {
@@ -87,14 +87,25 @@ export default function Navbar({
   const userFullName = user?.name || (user as any)?.fullName || "User";
   const userFirstName = userFullName.split(" ")[0];
   const userEmail = user?.email || "";
-  const userRole = user?.role || "STUDENT";
+  const userRole = (user?.role || "STUDENT").toUpperCase();
 
-  const dashboardHref =
-    userRole === "INSTRUCTOR" ? "/faculty" : userRole === "ADMIN" ? "/admin" : "/student";
-  const dashboardLabel =
-    userRole === "INSTRUCTOR" ? "Expert Dashboard" : userRole === "ADMIN" ? "Admin Console" : "Student Dashboard";
+  // Show ONLY ONE dashboard link according to the user's specific role
+  let dashboardHref = "/student";
+  let dashboardLabel = "Student Dashboard";
+  let DashboardIcon = FiBookOpen;
+
+  if (userRole === "INSTRUCTOR") {
+    dashboardHref = "/faculty";
+    dashboardLabel = "Expert Dashboard";
+    DashboardIcon = FiGrid;
+  } else if (userRole === "ADMIN") {
+    dashboardHref = "/admin";
+    dashboardLabel = "Admin Console";
+    DashboardIcon = FiShield;
+  }
+
   const profileHref =
-    userRole === "INSTRUCTOR" ? "/faculty/settings" : "/student/settings";
+    userRole === "INSTRUCTOR" ? "/faculty/settings" : userRole === "ADMIN" ? "/admin/settings" : "/student/settings";
 
   return (
     <nav
@@ -117,7 +128,7 @@ export default function Navbar({
             </div>
             <div className="flex flex-col">
               <span className="heading-font text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-[#0055FF] transition-colors">
-                {siteName || "JCRM Technology"}
+                {siteName || "JCRM Technologies"}
               </span>
               <span className="text-[10px] font-extrabold text-[#0055FF] tracking-wider uppercase -mt-1">
                 Innovate &bull; Build &bull; Scale
@@ -142,9 +153,9 @@ export default function Navbar({
                 >
                   {link.name}
 
-                  {/* Active Blue Indicator Toggle Bar */}
+                  {/* Active Indicator Bar */}
                   {isActive && (
-                    <span className="absolute -bottom-2.5 left-0 right-0 h-1 rounded-full bg-[#0055FF] shadow-[0_0_10px_#0055FF] animate-pulse"></span>
+                    <span className="absolute -bottom-2.5 left-0 right-0 h-1 rounded-full bg-[#0055FF] shadow-[0_0_10px_#0055FF]"></span>
                   )}
                 </Link>
               );
@@ -154,7 +165,7 @@ export default function Navbar({
           {/* Right Action: User Menu / Get Started */}
           <div className="hidden md:flex items-center gap-4 shrink-0">
             {user ? (
-              /* User Avatar & Dropdown (Yogsathi Style) */
+              /* User Avatar & Dropdown */
               <div className="relative" ref={dropdownRef}>
                 <button
                   type="button"
@@ -177,21 +188,16 @@ export default function Navbar({
                     {userFirstName}
                   </span>
 
-                  <svg
+                  <FiChevronDown
                     className={`w-4 h-4 text-slate-400 transition-transform ${
                       userDropdownOpen ? "rotate-180" : ""
                     }`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
+                  />
                 </button>
 
-                {/* Floating User Account Menu (Matching Yogsathi.com) */}
+                {/* Floating User Account Menu */}
                 {userDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden shadow-2xl border-2 border-blue-500/20 bg-white dark:bg-gray-900 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="absolute right-0 top-full mt-2 w-72 rounded-2xl overflow-hidden shadow-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 z-50 animate-in fade-in zoom-in-95 duration-150">
                     {/* Header Banner */}
                     <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-[#0055FF] p-4 text-white">
                       <div className="flex items-center gap-3">
@@ -209,58 +215,33 @@ export default function Navbar({
                         <div className="min-w-0">
                           <p className="font-bold text-sm truncate">{userFullName}</p>
                           <p className="text-xs text-blue-200 truncate">{userEmail}</p>
-                          <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-white/20 mt-1">
+                          <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 mt-1">
                             {userRole}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    {/* Menu Items */}
+                    {/* Single Relevant Dashboard Item + Settings */}
                     <div className="p-2 space-y-1">
                       <Link
                         href={dashboardHref}
                         onClick={() => setUserDropdownOpen(false)}
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-[#0055FF] transition-colors"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-blue-500/10 text-[#0055FF] flex items-center justify-center text-base shrink-0">
-                          📊
+                        <span className="w-8 h-8 rounded-lg bg-blue-500/10 text-[#0055FF] flex items-center justify-center shrink-0">
+                          <DashboardIcon className="w-4 h-4" />
                         </span>
                         <span>{dashboardLabel}</span>
                       </Link>
 
-                      {userRole === "ADMIN" && (
-                        <>
-                          <Link
-                            href="/faculty"
-                            onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
-                          >
-                            <span className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center text-sm shrink-0">
-                              🏫
-                            </span>
-                            <span>Expert / Teacher Dashboard</span>
-                          </Link>
-                          <Link
-                            href="/student"
-                            onClick={() => setUserDropdownOpen(false)}
-                            className="flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
-                          >
-                            <span className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-sm shrink-0">
-                              🎓
-                            </span>
-                            <span>Student Dashboard</span>
-                          </Link>
-                        </>
-                      )}
-
                       <Link
                         href={profileHref}
                         onClick={() => setUserDropdownOpen(false)}
-                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-[#0055FF] transition-colors"
+                        className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors"
                       >
-                        <span className="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center text-base shrink-0">
-                          👤
+                        <span className="w-8 h-8 rounded-lg bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-slate-300 flex items-center justify-center shrink-0">
+                          <FiSettings className="w-4 h-4" />
                         </span>
                         <span>Profile & Settings</span>
                       </Link>
@@ -273,8 +254,8 @@ export default function Navbar({
                         onClick={() => signOut({ callbackUrl: "/" })}
                         className="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-bold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors text-left cursor-pointer"
                       >
-                        <span className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center text-sm shrink-0">
-                          🚪
+                        <span className="w-7 h-7 rounded-lg bg-rose-500/10 flex items-center justify-center shrink-0">
+                          <FiLogOut className="w-4 h-4" />
                         </span>
                         <span>Logout</span>
                       </button>
@@ -364,7 +345,7 @@ export default function Navbar({
                 >
                   <span>{link.name}</span>
                   {isActive && (
-                    <span className="w-2.5 h-2.5 rounded-full bg-[#0055FF] shadow-[0_0_8px_#0055FF]"></span>
+                    <span className="w-2.5 h-2.5 rounded-full bg-[#0055FF]"></span>
                   )}
                 </Link>
               );
@@ -387,4 +368,3 @@ export default function Navbar({
     </nav>
   );
 }
-
