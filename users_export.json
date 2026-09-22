@@ -1,0 +1,42 @@
+[
+  {
+    "id": "6aad0f7077cd6c1ce17aff66",
+    "email": "jcrm technology97@gmail.com",
+    "fullName": null,
+    "phoneNumber": null,
+    "role": "ADMIN",
+    "createdAt": "2026-09-18T10:16:15.997Z"
+  },
+  {
+    "id": "6aad13531bb86f31a2584b41",
+    "email": "admin2@jcrm.dev",
+    "fullName": "Secondary Admin",
+    "phoneNumber": null,
+    "role": "ADMIN",
+    "createdAt": "2026-09-18T10:32:51.838Z"
+  },
+  {
+    "id": "6aad13a7ebfa0289e26a380b",
+    "email": "aggarwalkanika676@gmail.com",
+    "fullName": "kanika",
+    "phoneNumber": null,
+    "role": "ADMIN",
+    "createdAt": "2026-09-18T10:34:15.761Z"
+  },
+  {
+    "id": "6aad2eb9d5ea7ff19d2010a0",
+    "email": "aggarwalkanika@gmail.com",
+    "fullName": "Kanika Aggarwal",
+    "phoneNumber": "+917895726762",
+    "role": "STUDENT",
+    "createdAt": "2026-09-18T12:29:45.505Z"
+  },
+  {
+    "id": "6aad2f55d5ea7ff19d2010a4",
+    "email": "khushi@gmail.com",
+    "fullName": "khushi",
+    "phoneNumber": "+917895726761",
+    "role": "INSTRUCTOR",
+    "createdAt": "2026-09-18T12:32:21.759Z"
+  }
+]
