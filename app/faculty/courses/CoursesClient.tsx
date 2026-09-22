@@ -50,7 +50,7 @@ export default function CoursesClient({
             {cmsData?.heading || "Course Management"}
           </h1>
           <p style={{ color: "var(--text-secondary)" }}>
-            Manage your instructor courses, publish status, and enrolled students.
+            Manage your instructor courses, curriculum modules, live sessions, and students.
           </p>
         </div>
 
@@ -174,9 +174,16 @@ export default function CoursesClient({
               <Link
                 href={`/courses/${course.id}`}
                 target="_blank"
-                className="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-blue-50 text-[#0055FF] hover:bg-blue-100 transition-colors"
+                className="py-2 px-3 text-center text-xs font-bold rounded-lg bg-blue-50 text-[#0055FF] hover:bg-blue-100 transition-colors"
+                title="Preview public course page"
               >
-                View on Public Site ↗
+                View ↗
+              </Link>
+              <Link
+                href={`/faculty/courses/builder?id=${course.id}`}
+                className="flex-1 py-2 px-3 text-center text-xs font-bold rounded-lg bg-[#0055FF] text-white hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+              >
+                <span>⚙️ Manage Modules & Live</span>
               </Link>
             </div>
           </div>
