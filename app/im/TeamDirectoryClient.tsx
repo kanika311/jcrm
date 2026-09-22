@@ -383,23 +383,12 @@ export default function TeamDirectoryClient({ members }: { members: TeamMember[]
   );
 
   return (
-    <div className="min-h-screen pt-32 pb-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
+    <div className="min-h-screen pt-24 pb-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
       {/* Ambient Lighting */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-[#0055FF]/10 rounded-full blur-[150px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Page Header */}
-        <div className="text-center max-w-3xl mx-auto mb-10 animate-fade-in-up">
-          <span className="inline-block px-4 py-1 mb-3 text-xs font-extrabold uppercase tracking-widest text-[#0055FF] bg-blue-50/90 rounded-full border border-blue-100 shadow-xs">
-            JCRM Verified Member Directory
-          </span>
-          <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 mb-3 tracking-tight leading-tight">
-            Meet Our <span className="text-[#0055FF]">Engineering Team & Interns</span>
-          </h1>
-          <p className="text-sm sm:text-base text-slate-600 font-medium">
-            Search, filter, and connect with our verified software developers, engineers, and technical interns.
-          </p>
-        </div>
+        
 
         {/* 2-Column Responsive Layout: Left Filter Panel + Center Content */}
         <div className="flex flex-col lg:flex-row items-start gap-8">
