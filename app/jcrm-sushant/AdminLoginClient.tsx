@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
@@ -13,8 +13,6 @@ export default function AdminLoginClient() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const router = useRouter();
-
-  // Overflow lock removed to prevent cutoff on small viewports
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,19 +58,20 @@ export default function AdminLoginClient() {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] overflow-y-auto flex items-center justify-center p-4 sm:p-6">
-      <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
+    <div className="flex-1 w-full min-h-[calc(100vh-2rem)] flex items-center justify-center p-4 sm:p-6 py-10 relative">
+      {/* Dark luxury background backdrop for admin portal */}
+      <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md pointer-events-none -z-10" />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="admin-login-title"
-        className="relative z-10 w-full max-w-[420px] rounded-[28px] bg-slate-900 border border-slate-700/80 shadow-[0_24px_80px_rgba(0,0,0,0.55)] p-6 sm:p-8 my-auto"
+        className="relative z-10 w-full max-w-[420px] rounded-[28px] bg-slate-900 border border-slate-700/80 shadow-[0_24px_80px_rgba(0,0,0,0.65)] p-6 sm:p-8"
       >
         <Link
           href="/"
           aria-label="Close admin login"
-          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors"
+          className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
         >
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
