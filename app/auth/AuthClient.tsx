@@ -13,6 +13,7 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
   
   // Role for Signup: "STUDENT" or "INSTRUCTOR"
   const [signupRole, setSignupRole] = useState<"STUDENT" | "INSTRUCTOR">("STUDENT");
+  const [loginRole, setLoginRole] = useState<"STUDENT" | "INSTRUCTOR">("STUDENT");
 
   // Form Fields
   const [fullName, setFullName] = useState("");
@@ -44,12 +45,34 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
       const sessionData = await sessionRes.json();
       const role = sessionData?.user?.role;
 
+      // STRICT CHECK: Admin is NEVER allowed to log in from the public /auth portal
+      if (role === "ADMIN") {
+        await import("next-auth/react").then(m => m.signOut({ redirect: false }));
+        setErrorMsg("Access Denied: Administrators must sign in through the Admin Console (/jcrm-sushant).");
+        setIsLoading(false);
+        return;
+      }
+
+      // Role match check for login
+      if (activeTab === "login") {
+        if (loginRole === "INSTRUCTOR" && role !== "INSTRUCTOR") {
+          await import("next-auth/react").then(m => m.signOut({ redirect: false }));
+          setErrorMsg("This account is registered as a Student. Please select 'Student' role to sign in.");
+          setIsLoading(false);
+          return;
+        }
+        if (loginRole === "STUDENT" && role !== "STUDENT") {
+          await import("next-auth/react").then(m => m.signOut({ redirect: false }));
+          setErrorMsg("This account is registered as an Instructor. Please select 'Teacher / Faculty' role to sign in.");
+          setIsLoading(false);
+          return;
+        }
+      }
+
       if (callbackUrl && callbackUrl !== "/student") {
         router.push(callbackUrl);
       } else if (role === "INSTRUCTOR") {
         router.push("/faculty");
-      } else if (role === "ADMIN") {
-        router.push("/admin");
       } else {
         router.push("/student");
       }
@@ -327,6 +350,66 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
             {/* ======================================================== */}
             {activeTab === "login" ? (
               <form onSubmit={handleLoginSubmit} className="space-y-4">
+                {/* ROLE PICKER FOR LOGIN */}
+                <div>
+                  <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-2">
+                    Sign In As:
+                  </label>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginRole("STUDENT");
+                        setErrorMsg("");
+                      }}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        loginRole === "STUDENT"
+                          ? "border-[#0055FF] bg-blue-50/70 shadow-sm"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-base">🎓</span>
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
+                          loginRole === "STUDENT" ? "border-[#0055FF] bg-[#0055FF]" : "border-slate-300"
+                        }`}>
+                          {loginRole === "STUDENT" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                      </div>
+                      <div className="text-xs font-extrabold text-slate-900">Student</div>
+                      <div className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">
+                        Course & lab portal
+                      </div>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setLoginRole("INSTRUCTOR");
+                        setErrorMsg("");
+                      }}
+                      className={`p-3 rounded-2xl border text-left transition-all cursor-pointer ${
+                        loginRole === "INSTRUCTOR"
+                          ? "border-[#0055FF] bg-blue-50/70 shadow-sm"
+                          : "border-slate-200 hover:border-slate-300 bg-white"
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-base">👨‍🏫</span>
+                        <div className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
+                          loginRole === "INSTRUCTOR" ? "border-[#0055FF] bg-[#0055FF]" : "border-slate-300"
+                        }`}>
+                          {loginRole === "INSTRUCTOR" && <span className="w-1.5 h-1.5 rounded-full bg-white" />}
+                        </div>
+                      </div>
+                      <div className="text-xs font-extrabold text-slate-900">Teacher / Faculty</div>
+                      <div className="text-[10px] text-slate-500 font-medium leading-tight mt-0.5">
+                        Instructor workspace
+                      </div>
+                    </button>
+                  </div>
+                </div>
+
                 {/* Email Input */}
                 <div>
                   <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-600 mb-1.5">

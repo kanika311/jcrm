@@ -14,13 +14,7 @@ export default function AdminLoginClient() {
 
   const router = useRouter();
 
-  useEffect(() => {
-    const orig = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = orig;
-    };
-  }, []);
+  // Overflow lock removed to prevent cutoff on small viewports
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,14 +60,14 @@ export default function AdminLoginClient() {
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-[200] overflow-y-auto flex items-center justify-center p-4 sm:p-6">
       <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-md" />
 
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby="admin-login-title"
-        className="relative z-10 w-full max-w-[420px] rounded-[28px] bg-slate-900 border border-slate-700/80 shadow-[0_24px_80px_rgba(0,0,0,0.55)] p-7 sm:p-8"
+        className="relative z-10 w-full max-w-[420px] rounded-[28px] bg-slate-900 border border-slate-700/80 shadow-[0_24px_80px_rgba(0,0,0,0.55)] p-6 sm:p-8 my-auto"
       >
         <Link
           href="/"
