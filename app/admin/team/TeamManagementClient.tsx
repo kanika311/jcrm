@@ -27,10 +27,17 @@ export interface TeamMemberItem {
   updatedAt: string;
 }
 
-export default function TeamManagementClient({ initialMembers }: { initialMembers: TeamMemberItem[] }) {
+export default function TeamManagementClient({ initialMembers, initialPlacedCandidates = [] }: { initialMembers: TeamMemberItem[]; initialPlacedCandidates?: any[] }) {
   const [members, setMembers] = useState<TeamMemberItem[]>(initialMembers);
-  const [activeTab, setActiveTab] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED">("PENDING");
+  const [activeTab, setActiveTab] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED" | "PLACED">("PENDING");
   const [searchTerm, setSearchTerm] = useState("");
+
+  // Placed Candidates State (Synced with Home Page)
+  const [placedList, setPlacedList] = useState<any[]>(initialPlacedCandidates);
+  const [placementModalMember, setPlacementModalMember] = useState<TeamMemberItem | null>(null);
+  const [placementCompany, setPlacementCompany] = useState("");
+  const [placementRole, setPlacementRole] = useState("");
+  const [placementPackage, setPlacementPackage] = useState("");
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -119,6 +126,99 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
       reader.readAsDataURL(file);
     } finally {
       setIsUploadingImage(false);
+    }
+  };
+
+  // Placed candidates helpers
+  const getPlacementInfo = (member: TeamMemberItem) => {
+    return placedList.find(
+      (p) =>
+        (p.memberId && p.memberId === member.id) ||
+        p.name.toLowerCase() === member.name.toLowerCase()
+    );
+  };
+
+  const openPlacementModal = (member: TeamMemberItem) => {
+    const existing = getPlacementInfo(member);
+    setPlacementModalMember(member);
+    setPlacementCompany(existing?.company || "");
+    setPlacementRole(existing?.role || member.role || "Software Engineer");
+    setPlacementPackage(existing?.package || "");
+  };
+
+  const handleSavePlacement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!placementModalMember) return;
+    if (!placementCompany.trim()) {
+      alert("Please enter the placed company name.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+
+    try {
+      const res = await fetch("/api/admin/team/placement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          memberId: placementModalMember.id,
+          name: placementModalMember.name,
+          role: placementRole || placementModalMember.role,
+          company: placementCompany.trim(),
+          package: placementPackage.trim(),
+          image: placementModalMember.image,
+          isPlaced: true,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to save placement");
+
+      setPlacedList(data.candidates);
+      setPlacementModalMember(null);
+      setFeedbackMsg({
+        type: "success",
+        text: `"${placementModalMember.name}" marked as Placed at ${placementCompany.trim()}! Successfully updated on the Home Page.`,
+      });
+    } catch (err: any) {
+      setFeedbackMsg({ type: "error", text: err.message || "Failed to update placement" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleUnmarkPlacement = async (member: TeamMemberItem) => {
+    if (!window.confirm(`Unmark "${member.name}" from Placed Candidates? They will be removed from the Home Page carousel.`)) {
+      return;
+    }
+
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+
+    try {
+      const res = await fetch("/api/admin/team/placement", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          memberId: member.id,
+          name: member.name,
+          isPlaced: false,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to unmark placement");
+
+      setPlacedList(data.candidates);
+      setFeedbackMsg({
+        type: "success",
+        text: `"${member.name}" removed from Placed Candidates on the Home Page.`,
+      });
+    } catch (err: any) {
+      setFeedbackMsg({ type: "error", text: err.message || "Failed to unmark placement" });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -260,10 +360,17 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
   const pendingCount = members.filter(m => m.status === "PENDING").length;
   const approvedCount = members.filter(m => m.status === "APPROVED").length;
   const rejectedCount = members.filter(m => m.status === "REJECTED").length;
+  const placedCount = placedList.length;
 
   // Filtered members list
   const filteredMembers = members.filter(m => {
-    const matchesTab = activeTab === "ALL" || m.status === activeTab;
+    const isPlaced = Boolean(getPlacementInfo(m));
+    const matchesTab =
+      activeTab === "ALL"
+        ? true
+        : activeTab === "PLACED"
+        ? isPlaced
+        : m.status === activeTab;
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       m.name.toLowerCase().includes(searchLower) ||
@@ -299,7 +406,28 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
       </div>
 
       {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+        {/* Placed Candidates Card */}
+        <div
+          onClick={() => setActiveTab("PLACED")}
+          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            activeTab === "PLACED"
+              ? "border-emerald-500/60 bg-emerald-500/10 shadow-lg"
+              : "hover:border-emerald-500/30"
+          }`}
+          style={{ background: activeTab !== "PLACED" ? "var(--bg-card)" : undefined, borderColor: activeTab !== "PLACED" ? "var(--border-soft)" : undefined }}
+        >
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+              🎓 Placed
+            </span>
+            <span className="px-2 py-0.5 rounded text-[9px] font-black bg-emerald-500/20 text-emerald-300">
+              HOME
+            </span>
+          </div>
+          <div className="text-3xl font-extrabold text-white">{placedCount}</div>
+          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Live in Home carousel</p>
+        </div>
         <div
           onClick={() => setActiveTab("PENDING")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
@@ -399,6 +527,17 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
           </button>
 
           <button
+            onClick={() => setActiveTab("PLACED")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+              activeTab === "PLACED"
+                ? "bg-emerald-500 text-black shadow-md font-black"
+                : "text-[var(--text-secondary)] hover:text-white"
+            }`}
+          >
+            <span>🎓 Placed ({placedCount})</span>
+          </button>
+
+          <button
             onClick={() => setActiveTab("ALL")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "ALL"
@@ -461,6 +600,7 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
                 <th className="p-4 font-bold">Role & Department</th>
                 <th className="p-4 font-bold">Location & College</th>
                 <th className="p-4 font-bold">Status</th>
+                <th className="p-4 font-bold">Placement (Home Page)</th>
                 <th className="p-4 font-bold text-right">Approval Actions</th>
               </tr>
             </thead>
@@ -539,6 +679,31 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
                     )}
                   </td>
 
+                  {/* Placement Status */}
+                  <td className="p-4">
+                    {(() => {
+                      const placement = getPlacementInfo(member);
+                      if (placement) {
+                        return (
+                          <div className="space-y-1">
+                            <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 w-fit">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              <span>Placed at {placement.company}</span>
+                            </span>
+                            {placement.package && (
+                              <span className="text-[11px] font-bold text-slate-400 block pl-1">
+                                Pkg: {placement.package}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      }
+                      return (
+                        <span className="text-xs text-slate-500 italic">Not placed</span>
+                      );
+                    })()}
+                  </td>
+
                   {/* Actions */}
                   <td className="p-4 text-right">
                     <div className="flex gap-2 justify-end items-center">
@@ -585,6 +750,43 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
                           >
                             Revoke
                           </button>
+
+                          {/* Placed Action Button */}
+                          {(() => {
+                            const placement = getPlacementInfo(member);
+                            if (placement) {
+                              return (
+                                <div className="flex items-center gap-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => openPlacementModal(member)}
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 transition cursor-pointer"
+                                    title="Edit placement details"
+                                  >
+                                    Edit Placed
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleUnmarkPlacement(member)}
+                                    className="px-2 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+                                    title="Remove from Placed section on Home Page"
+                                  >
+                                    Unmark
+                                  </button>
+                                </div>
+                              );
+                            }
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => openPlacementModal(member)}
+                                className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-blue-300 bg-[#0055FF]/20 hover:bg-[#0055FF]/30 border border-[#0055FF]/40 transition flex items-center gap-1 cursor-pointer shadow-xs"
+                                title="Mark candidate as Placed to show on Home Page"
+                              >
+                                <span>🎓 Mark Placed</span>
+                              </button>
+                            );
+                          })()}
                         </>
                       )}
 
@@ -1210,6 +1412,123 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
           </div>,
           document.body
         )}
+      {/* PLACEMENT MODAL */}
+      {mounted &&
+        placementModalMember &&
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+            <div
+              className="w-full max-w-lg rounded-[28px] overflow-hidden shadow-2xl border border-white/20 flex flex-col"
+              style={{ background: "var(--bg-card)" }}
+            >
+              {/* Header */}
+              <div
+                className="px-6 py-5 border-b flex justify-between items-center"
+                style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
+              >
+                <div>
+                  <h3 className="heading-font text-lg font-extrabold text-white flex items-center gap-2">
+                    <span>🎓 Mark as Placed Candidate</span>
+                  </h3>
+                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                    This candidate will appear in &quot;Successfully Placed Candidates&quot; on the Home Page.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setPlacementModalMember(null)}
+                  className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-sm font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Form */}
+              <form onSubmit={handleSavePlacement} className="p-6 space-y-4">
+                {/* Candidate Info Summary */}
+                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10">
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-black/40 shrink-0 border border-white/15">
+                    {placementModalMember.image ? (
+                      <img src={placementModalMember.image} alt={placementModalMember.name} className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center font-bold text-xs text-[#0055FF]">
+                        {placementModalMember.name.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-sm text-white">{placementModalMember.name}</h4>
+                    <p className="text-xs text-slate-400">{placementModalMember.email}</p>
+                    <p className="text-[11px] text-blue-400 font-semibold">{placementModalMember.role}</p>
+                  </div>
+                </div>
+
+                {/* Company Name */}
+                <div>
+                  <label className="block text-xs font-bold mb-1.5 uppercase tracking-wider text-slate-300">
+                    Placed Company Name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="e.g. Cognizant, Google, TCS, HDFC Bank, Infosys"
+                    className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                    value={placementCompany}
+                    onChange={e => setPlacementCompany(e.target.value)}
+                  />
+                </div>
+
+                {/* Placed Role */}
+                <div>
+                  <label className="block text-xs font-bold mb-1.5 uppercase tracking-wider text-slate-300">
+                    Job / Engineering Role
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. Software Engineer, Full Stack Developer, Sales & Marketing"
+                    className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                    value={placementRole}
+                    onChange={e => setPlacementRole(e.target.value)}
+                  />
+                </div>
+
+                {/* Package / CTC (optional) */}
+                <div>
+                  <label className="block text-xs font-bold mb-1.5 uppercase tracking-wider text-slate-300">
+                    Package / CTC (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="e.g. 12 LPA, 8.5 LPA"
+                    className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                    value={placementPackage}
+                    onChange={e => setPlacementPackage(e.target.value)}
+                  />
+                </div>
+
+                {/* Actions */}
+                <div className="pt-4 flex items-center justify-end gap-3 border-t border-white/10">
+                  <button
+                    type="button"
+                    onClick={() => setPlacementModalMember(null)}
+                    className="btn-secondary px-5 py-2.5 rounded-xl text-xs font-bold cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg cursor-pointer flex items-center gap-1.5"
+                  >
+                    <span>{isSubmitting ? "Saving..." : "Save & Feature on Home"}</span>
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )}
+
     </div>
   );
 }

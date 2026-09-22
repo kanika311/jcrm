@@ -4,6 +4,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { TEAM_MEMBERS } from "@/lib/teamData";
+import { getSiteContent } from "@/lib/cms";
+import { DEFAULT_PLACED_CANDIDATES } from "@/app/api/admin/team/placement/route";
 
 export const dynamic = "force-dynamic";
 
@@ -43,10 +45,13 @@ export default async function AdminTeamPage() {
       }
     }
 
-    // Fetch all team members
-    const dbMembers = await prisma.teamMember.findMany({
-      orderBy: { createdAt: "desc" },
-    });
+    // Fetch all team members and stored placed candidates
+    const [dbMembers, placedData] = await Promise.all([
+      prisma.teamMember.findMany({
+        orderBy: { createdAt: "desc" },
+      }),
+      getSiteContent("placed-candidates", { candidates: DEFAULT_PLACED_CANDIDATES }),
+    ]);
 
     const serializedMembers = dbMembers.map((m) => ({
       ...m,
@@ -54,9 +59,16 @@ export default async function AdminTeamPage() {
       updatedAt: m.updatedAt.toISOString(),
     }));
 
+    const initialPlacedCandidates = Array.isArray(placedData?.candidates) && placedData.candidates.length > 0
+      ? placedData.candidates
+      : DEFAULT_PLACED_CANDIDATES;
+
     return (
       <div className="max-w-[1300px] mx-auto space-y-8 pb-24">
-        <TeamManagementClient initialMembers={serializedMembers as any} />
+        <TeamManagementClient
+          initialMembers={serializedMembers as any}
+          initialPlacedCandidates={initialPlacedCandidates}
+        />
       </div>
     );
   } catch (error: any) {

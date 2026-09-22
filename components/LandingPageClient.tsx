@@ -4,7 +4,13 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-export default function LandingPageClient({ initialData = {} }: { initialData?: any }) {
+export default function LandingPageClient({
+  initialData = {},
+  initialPlacedCandidates,
+}: {
+  initialData?: any;
+  initialPlacedCandidates?: any[];
+}) {
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 500], [0, 150]);
   const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
@@ -13,7 +19,7 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
   const carouselRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(0);
 
-  const placedCandidates = [
+  const defaultPlacedCandidates = [
     {
       name: "Vanshika Srivastava",
       role: "Python Developer",
@@ -63,6 +69,11 @@ export default function LandingPageClient({ initialData = {} }: { initialData?: 
       company: "Wipro"
     }
   ];
+
+  const placedCandidates =
+    Array.isArray(initialPlacedCandidates) && initialPlacedCandidates.length > 0
+      ? initialPlacedCandidates
+      : defaultPlacedCandidates;
 
   const [isHovered, setIsHovered] = useState(false);
   const [quoteIndex, setQuoteIndex] = useState(0);
