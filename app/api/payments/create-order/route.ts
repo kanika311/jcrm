@@ -16,10 +16,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing courseId" }, { status: 400 });
     }
 
-    const course = await prisma.course.findUnique({
-      where: { id: courseId },
-      select: { id: true, title: true, price: true }
-    });
+    // Try finding by ObjectId or slug/title
+    let course = null;
+    if (/^[0-9a-fA-F]{24}$/.test(courseId)) {
+      course = await prisma.course.findUnique({
+        where: { id: courseId },
+        select: { id: true, title: true, price: true }
+      });
+    }
+
+    if (!course) {
+      const slugTitle = courseId.replace(/-/g, " ");
+      course = await prisma.course.findFirst({
+        where: {
+          title: { contains: slugTitle, mode: "insensitive" }
+        },
+        select: { id: true, title: true, price: true }
+      });
+    }
 
     if (!course) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 });
@@ -41,8 +55,13 @@ export async function POST(request: Request) {
       });
     }
 
+    const rawPrice = course.price;
+    const numericPrice = typeof rawPrice === "number"
+      ? rawPrice
+      : parseFloat(String(rawPrice).replace(/[^0-9.]/g, "")) || 0;
+
     // If free course (₹0)
-    if (!course.price || course.price <= 0) {
+    if (numericPrice <= 0) {
       await prisma.enrollment.upsert({
         where: {
           studentId_courseId: {
@@ -69,7 +88,7 @@ export async function POST(request: Request) {
 
     // Create Razorpay Order
     const receipt = `c_${course.id.slice(-6)}_${Date.now().toString().slice(-6)}`;
-    const order = await createRazorpayOrder(course.price, "INR", receipt);
+    const order = await createRazorpayOrder(numericPrice, "INR", receipt);
 
     const key = process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID?.trim() || process.env.RAZORPAY_KEY_ID?.trim();
 
@@ -79,8 +98,9 @@ export async function POST(request: Request) {
       amount: order.amount,
       currency: order.currency,
       key,
+      targetCourseId: course.id,
       courseTitle: course.title,
-      coursePrice: course.price,
+      coursePrice: numericPrice,
       user: {
         name: session.user.name || (session.user as any)?.fullName || "Student",
         email: session.user.email,
@@ -94,4 +114,3 @@ export async function POST(request: Request) {
     );
   }
 }
-

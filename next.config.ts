@@ -10,12 +10,12 @@ const securityHeaders = [
       img-src 'self' data: blob: https:;
       media-src 'self' https: blob:;
       font-src 'self' https:;
-      connect-src 'self' https:;
-      frame-ancestors 'none';
+      connect-src 'self' https: wss:;
+      frame-src 'self' https://api.razorpay.com https://*.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://*.youtube.com https://player.vimeo.com https://*.vimeo.com https://meet.jit.si https://*.jit.si https: blob:;
+      child-src 'self' https://api.razorpay.com https://*.razorpay.com https://checkout.razorpay.com https: blob:;
       object-src 'none';
       base-uri 'self';
-      form-action 'self';
-      upgrade-insecure-requests;
+      form-action 'self' https://api.razorpay.com https://*.razorpay.com;
     `.replace(/\n/g, "").replace(/\s+/g, " ").trim()
   },
   {
@@ -28,11 +28,7 @@ const securityHeaders = [
   },
   {
     key: "X-Frame-Options",
-    value: "DENY"
-  },
-  {
-    key: "Cross-Origin-Resource-Policy",
-    value: "same-origin"
+    value: "SAMEORIGIN"
   },
   {
     key: "Strict-Transport-Security",

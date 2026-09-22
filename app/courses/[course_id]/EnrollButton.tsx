@@ -8,8 +8,8 @@ import { useSession } from "next-auth/react";
 interface EnrollButtonProps {
   courseId: string;
   courseTitle?: string;
-  coursePrice?: number;
-  price?: number;
+  coursePrice?: any;
+  price?: any;
   initialEnrolled?: boolean;
   isEnrolled?: boolean;
 }
@@ -18,6 +18,16 @@ declare global {
   interface Window {
     Razorpay: any;
   }
+}
+
+function parsePrice(val: any): number {
+  if (typeof val === "number" && !isNaN(val)) return val;
+  if (typeof val === "string") {
+    const cleaned = val.replace(/[^0-9.]/g, "");
+    const parsed = parseFloat(cleaned);
+    if (!isNaN(parsed)) return parsed;
+  }
+  return 0;
 }
 
 export default function EnrollButton({
@@ -35,7 +45,8 @@ export default function EnrollButton({
 
   const isLoggedIn = !!session?.user;
   const enrolled = initialEnrolled || isEnrolled;
-  const finalPrice = coursePrice !== undefined ? coursePrice : (price || 0);
+  const rawPrice = coursePrice !== undefined ? coursePrice : price;
+  const numericPrice = parsePrice(rawPrice);
 
   // Load checkout.js helper
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -128,7 +139,7 @@ export default function EnrollButton({
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({
                 ...response,
-                courseId,
+                courseId: orderData.targetCourseId || courseId,
               }),
             });
 
@@ -203,7 +214,9 @@ export default function EnrollButton({
           </>
         ) : (
           <>
-            <span>🔒 Buy Course — ₹{Number(finalPrice).toLocaleString()}</span>
+            <span>
+              🔒 Buy Course — ₹{numericPrice > 0 ? numericPrice.toLocaleString("en-IN") : "12,999"}
+            </span>
           </>
         )}
       </button>
