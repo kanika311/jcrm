@@ -1,6 +1,9 @@
 import Link from "next/link";
 import CurriculumAccordion from "./CurriculumAccordion";
 import { prisma } from "@/lib/prisma";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/authOptions";
+import EnrollButton from "./EnrollButton";
 
 export const dynamicParams = true;
 
@@ -707,6 +710,7 @@ const COURSES_DATA: Record<string, any> = {
 
 export default async function CourseDetailPage({ params }: { params: Promise<{ course_id: string }> }) {
   const { course_id } = await params;
+  const session = await getServerSession(authOptions);
   
   // 1. Check if course exists in Database
   let dbCourse = null;
@@ -838,6 +842,21 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
     };
   }
 
+  const targetCourseId = dbCourse?.id || course.id || course_id;
+  let isEnrolled = false;
+  if (session?.user?.id && targetCourseId) {
+    try {
+      const existingEnrollment = await prisma.enrollment.findFirst({
+        where: {
+          studentId: session.user.id,
+          courseId: targetCourseId,
+          paymentStatus: "COMPLETED",
+        },
+      });
+      isEnrolled = !!existingEnrollment;
+    } catch {}
+  }
+
   return (
     <div className="min-h-screen pt-32 pb-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
       
@@ -915,15 +934,11 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
 
               {/* CTA Buttons */}
               <div className="flex flex-wrap gap-4">
-                <Link
-                  href="/contact"
-                  className="px-8 py-4 rounded-2xl text-base font-extrabold text-white bg-[#0055FF] hover:bg-blue-600 shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all flex items-center gap-2 cursor-pointer"
-                >
-                  Enroll Now — {course.price}
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                  </svg>
-                </Link>
+                <EnrollButton
+                  courseId={targetCourseId}
+                  coursePrice={course.price}
+                  initialEnrolled={isEnrolled}
+                />
 
                 <Link
                   href="/contact"

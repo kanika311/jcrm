@@ -83,34 +83,46 @@ export default async function StudentDashboard() {
              {/* Continue Learning */}
              <div className="p-6 md:p-8 rounded-[24px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}>
                 <div className="flex justify-between items-center mb-6">
-                   <h2 className="heading-font text-xl font-bold">Continue Learning</h2>
-                   <Link href="/student/courses" className="text-sm font-semibold hover:underline" style={{ color: 'var(--accent-primary)' }}>View All</Link>
+                   <h2 className="heading-font text-xl font-bold">My Active Courses</h2>
+                   <Link href="/courses" className="text-sm font-semibold hover:underline" style={{ color: 'var(--accent-primary)' }}>Browse Catalog</Link>
                 </div>
                 
-                <div className="flex flex-col md:flex-row gap-6 items-center">
-                   <div className="w-full md:w-48 h-32 rounded-xl shrink-0 bg-gradient-to-br from-violet-600 to-fuchsia-600 p-4 flex flex-col justify-between text-txt-primary relative overflow-hidden">
-                      <div className="absolute inset-0 bg-black/20 mix-blend-overlay"></div>
-                      <span className="relative z-10 text-xs font-bold uppercase tracking-wider">Module 4</span>
-                      <svg className="relative z-10 w-8 h-8 self-end opacity-50" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
-                   </div>
-                   
-                   <div className="flex-1 w-full">
-                      <h3 className="font-bold text-lg mb-1">Full-Stack React & TypeScript</h3>
-                      <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Lesson 4.2: Implementing Next.js Middleware for Auth</p>
-                      
-                      <div className="flex items-center gap-4 mb-4">
-                         <div className="flex-1 h-2 rounded-full bg-black/10 dark:bg-surf-hover overflow-hidden">
-                            <div className="h-full rounded-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-cyan)]" style={{ width: '68%' }}></div>
-                         </div>
-                         <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>68%</span>
-                      </div>
-                      
-                      <Link href="/student/classroom" className="btn-secondary w-full md:w-auto px-6 py-2.5 rounded-lg text-sm flex items-center justify-center gap-2">
-                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
-                         Resume Lesson
+                {data.enrollments.length === 0 ? (
+                   <div className="py-8 px-4 text-center rounded-2xl bg-black/5 dark:bg-surf-elevated">
+                      <p className="text-sm font-semibold mb-4" style={{ color: 'var(--text-secondary)' }}>
+                        You are not enrolled in any courses yet. Browse our instructor-led courses to buy and start learning!
+                      </p>
+                      <Link href="/courses" className="btn-primary px-6 py-2.5 rounded-xl text-xs font-bold inline-flex items-center gap-2">
+                        <span>Browse Courses & Enroll</span>
+                        <span>→</span>
                       </Link>
                    </div>
-                </div>
+                ) : (
+                   <div className="flex flex-col md:flex-row gap-6 items-center">
+                      <div className="w-full md:w-48 h-32 rounded-xl shrink-0 bg-gradient-to-br from-blue-600 to-indigo-700 p-4 flex flex-col justify-between text-white relative overflow-hidden">
+                         <div className="absolute inset-0 bg-black/20 mix-blend-overlay"></div>
+                         <span className="relative z-10 text-xs font-bold uppercase tracking-wider">{data.enrollments[0].course?.level || "Track"}</span>
+                         <svg className="relative z-10 w-8 h-8 self-end opacity-50" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                      </div>
+                      
+                      <div className="flex-1 w-full">
+                         <h3 className="font-bold text-lg mb-1">{data.enrollments[0].course?.title}</h3>
+                         <p className="text-sm mb-4" style={{ color: 'var(--text-secondary)' }}>Instructor: {data.enrollments[0].course?.instructor || "JCRM Faculty"}</p>
+                         
+                         <div className="flex items-center gap-4 mb-4">
+                            <div className="flex-1 h-2 rounded-full bg-black/10 dark:bg-surf-hover overflow-hidden">
+                               <div className="h-full rounded-full bg-gradient-to-r from-[var(--accent-primary)] to-[var(--accent-cyan)]" style={{ width: `${data.enrollments[0].progressPercent || 0}%` }}></div>
+                            </div>
+                            <span className="text-sm font-bold" style={{ color: 'var(--text-secondary)' }}>{data.enrollments[0].progressPercent || 0}%</span>
+                         </div>
+                         
+                         <Link href={`/student/classroom?courseId=${data.enrollments[0].course?.id}`} className="btn-secondary w-full md:w-auto px-6 py-2.5 rounded-lg text-sm flex items-center justify-center gap-2">
+                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                            Resume Lesson
+                         </Link>
+                      </div>
+                   </div>
+                )}
              </div>
              
              {/* Activity Chart */}
