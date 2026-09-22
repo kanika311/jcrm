@@ -50,7 +50,7 @@ export default function TeamManagementClient({ initialMembers }: { initialMember
   const [newExperience, setNewExperience] = useState("Fresher / Intern");
   const [newSkills, setNewSkills] = useState("Python, React, Machine Learning");
   const [newBio, setNewBio] = useState("");
-  const [newImage, setNewImage] = useState("https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80");
+  const [newImage, setNewImage] = useState("");
   const [newStatus, setNewStatus] = useState<"PENDING" | "APPROVED" | "REJECTED">("APPROVED");
   const [newIsVerified, setNewIsVerified] = useState(true);
 

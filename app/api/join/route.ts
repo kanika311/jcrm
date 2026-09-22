@@ -22,9 +22,9 @@ export async function POST(req: Request) {
       photoPreview,
     } = data;
 
-    if (!fullName || !emailAddress) {
+    if (!fullName || !emailAddress || !photoPreview) {
       return NextResponse.json(
-        { message: "Full name and email are required" },
+        { message: "Full name, email address, and profile photo are all mandatory" },
         { status: 400 }
       );
     }

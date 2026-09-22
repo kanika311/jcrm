@@ -646,25 +646,48 @@ Hello Founder, a new candidate application has been submitted:
           </select>
         </div>
 
-        {/* Row 8: Profile Photo Upload with Live Thumbnail Preview */}
+        {/* Row 8: Profile Photo Upload with Live Thumbnail Preview (MANDATORY) */}
         <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
-            Profile Photo
-          </label>
-          <div className="flex items-center gap-4 bg-white p-3 rounded-2xl border border-blue-100">
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
+              Profile Photo <span className="text-red-500 font-black">* (Mandatory)</span>
+            </label>
+            {photoPreview ? (
+              <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
+                ✓ Photo Uploaded
+              </span>
+            ) : (
+              <span className="text-[11px] font-bold text-red-500 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
+                * Photo Required
+              </span>
+            )}
+          </div>
+          <div className={`flex items-center gap-4 bg-white p-3 rounded-2xl border transition-all ${
+            !photoPreview ? 'border-dashed border-red-300 bg-red-50/20' : 'border-emerald-300 bg-emerald-50/10'
+          }`}>
             <input
               type="file"
               accept="image/*"
-              className="text-xs text-slate-600 font-semibold file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-blue-50 file:text-[#0055FF] hover:file:bg-blue-100 cursor-pointer"
+              required
+              className="text-xs text-slate-600 font-semibold file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-blue-50 file:text-[#0055FF] hover:file:bg-blue-100 cursor-pointer flex-1"
               onChange={handlePhotoUpload}
             />
 
-            {photoPreview && (
-              <div className="w-12 h-12 rounded-xl overflow-hidden border border-blue-200 shrink-0 shadow-xs">
+            {photoPreview ? (
+              <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-[#0055FF] shrink-0 shadow-md relative">
                 <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-14 h-14 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center shrink-0 text-slate-400">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
               </div>
             )}
           </div>
+          <p className="text-[11px] text-slate-500 font-medium mt-1">
+            Please upload a clear, professional portrait photo. Max size 5MB (JPG, PNG, WebP).
+          </p>
         </div>
 
         {/* Row 9: About Yourself */}

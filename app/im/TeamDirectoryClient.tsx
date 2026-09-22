@@ -585,12 +585,23 @@ export default function TeamDirectoryClient({ members }: { members: TeamMember[]
                       
                       {/* Portrait Image */}
                       <div className="w-full h-64 rounded-[22px] overflow-hidden bg-slate-900 relative mb-4 border border-blue-50">
-                        <img
-                          src={member.image}
-                          alt={member.name}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent"></div>
+                        {member.image ? (
+                          <img
+                            src={member.image}
+                            alt={member.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white select-none">
+                            <div className="w-20 h-20 rounded-full bg-blue-600/30 border-2 border-blue-400/40 flex items-center justify-center text-2xl font-black tracking-wider text-blue-200 shadow-inner">
+                              {member.name ? member.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() : "TM"}
+                            </div>
+                            <span className="text-xs font-bold text-blue-200/90 mt-2.5 tracking-wide">
+                              JCRM Member
+                            </span>
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent pointer-events-none"></div>
 
                         {/* Top Badges */}
                         <div className="absolute top-3 right-3 z-10">

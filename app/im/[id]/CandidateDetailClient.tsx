@@ -43,12 +43,23 @@ export default function CandidateDetailClient({ member }: { member: TeamMember }
               
               {/* Photo Box */}
               <div className="w-full max-w-sm mx-auto h-80 sm:h-96 rounded-[32px] overflow-hidden bg-slate-900 relative shadow-xl border border-blue-100 group">
-                <img
-                  src={member.image}
-                  alt={member.name}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
+                {member.image ? (
+                  <img
+                    src={member.image}
+                    alt={member.name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-900 via-blue-950 to-indigo-950 text-white select-none">
+                    <div className="w-24 h-24 rounded-full bg-blue-600/30 border-2 border-blue-400/40 flex items-center justify-center text-3xl font-black tracking-wider text-blue-200 shadow-inner">
+                      {member.name ? member.name.split(" ").map(n => n[0]).join("").slice(0, 2).toUpperCase() : "TM"}
+                    </div>
+                    <span className="text-sm font-bold text-blue-200/90 mt-3 tracking-wide">
+                      JCRM Member
+                    </span>
+                  </div>
+                )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent pointer-events-none"></div>
 
                 <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between z-10">
                   <span className="px-3.5 py-1 rounded-full text-xs font-extrabold bg-[#0055FF] text-white shadow-md">

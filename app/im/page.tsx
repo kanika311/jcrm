@@ -20,7 +20,7 @@ export default async function TeamDirectoryPage() {
         id: m.id,
         name: m.name,
         role: m.role || "Software Engineering Intern",
-        image: m.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+        image: m.image || "",
         city: m.city || "Bangalore",
         state: m.state || "Karnataka",
         maskedPhone,

@@ -38,7 +38,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
       id: dbMember.id,
       name: dbMember.name,
       role: dbMember.role || "Software Engineering Intern",
-      image: dbMember.image || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      image: dbMember.image || "",
       city: dbMember.city || "Bangalore",
       state: dbMember.state || "Karnataka",
       maskedPhone,
