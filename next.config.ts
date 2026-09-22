@@ -41,7 +41,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  serverExternalPackages: ["firebase-admin"],
   images: {
     remotePatterns: [
       {

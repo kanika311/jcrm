@@ -6,8 +6,6 @@ import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import type { Adapter } from "next-auth/adapters";
 import { cookies } from "next/headers";
-import "@/lib/firebaseAdmin"; // Ensures it is initialized
-import { getAuth } from "firebase-admin/auth";
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
@@ -139,6 +137,8 @@ export const authOptions: NextAuthOptions = {
             console.log("[LOCAL DEV] Mock ID Token detected, bypassing Firebase verification.");
             phoneNumber = "+919999999999";
           } else {
+            await import("@/lib/firebaseAdmin");
+            const { getAuth } = await import("firebase-admin/auth");
             const decodedToken = await getAuth().verifyIdToken(credentials.idToken);
             phoneNumber = decodedToken.phone_number;
           }
