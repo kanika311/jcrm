@@ -14,10 +14,12 @@ export default async function AdminTeamPage() {
       redirect("/auth");
     }
 
-    // Seed default team members if table is completely empty
-    const count = await prisma.teamMember.count();
-    if (count === 0) {
-      for (const m of TEAM_MEMBERS) {
+    // Ensure all standard team members exist in database so admin can edit them
+    for (const m of TEAM_MEMBERS) {
+      const existing = await prisma.teamMember.findFirst({
+        where: { name: { equals: m.name, mode: "insensitive" } },
+      });
+      if (!existing) {
         await prisma.teamMember.create({
           data: {
             name: m.name,

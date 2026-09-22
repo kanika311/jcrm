@@ -37,17 +37,7 @@ export default async function TeamDirectoryPage() {
     console.error("Error fetching approved team members:", err);
   }
 
-  // Combine DB approved members with static members (avoiding duplicate names/ids)
-  const combinedMembers = [...dbApproved];
-  for (const staticMember of TEAM_MEMBERS) {
-    if (
-      !combinedMembers.some(
-        (m) => m.id === staticMember.id || m.name.toLowerCase() === staticMember.name.toLowerCase()
-      )
-    ) {
-      combinedMembers.push(staticMember);
-    }
-  }
-
-  return <TeamDirectoryClient members={combinedMembers} />;
+  // Single source of truth: DB approved members
+  const displayMembers = dbApproved.length > 0 ? dbApproved : TEAM_MEMBERS;
+  return <TeamDirectoryClient members={displayMembers} />;
 }

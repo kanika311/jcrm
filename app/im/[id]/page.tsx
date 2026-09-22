@@ -62,7 +62,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
       id,
       name: id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
       role: "Software Engineering Intern",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
+      image: "",
       city: "Udupi",
       state: "Karnataka",
       maskedPhone: "xxxxxx9070",
