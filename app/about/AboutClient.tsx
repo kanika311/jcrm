@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { FiBriefcase, FiAward, FiLock, FiSmartphone, FiZap, FiCode, FiUsers, FiTarget, FiArrowRight } from "react-icons/fi";
 
 export default function AboutClient({ cmsData }: { cmsData?: any }) {
   const [activeTab, setActiveTab] = useState<"business" | "students">("business");
@@ -76,15 +77,17 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
           <div className="flex flex-wrap items-center justify-center gap-4 pt-4">
             <Link
               href="/erp-solutions"
-              className="px-8 py-4 rounded-2xl text-sm font-extrabold text-white bg-[#0055FF] hover:bg-blue-600 transition-all shadow-xl hover:shadow-blue-500/30 hover:scale-105"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-sm font-extrabold text-white bg-[#0055FF] hover:bg-blue-600 transition-all shadow-xl hover:shadow-blue-500/30 hover:scale-105"
             >
-              Explore Enterprise ERP Solutions 🚀
+              <span>Explore Enterprise ERP Solutions</span>
+              <FiArrowRight className="w-4 h-4" />
             </Link>
             <Link
               href="/joinus"
-              className="px-8 py-4 rounded-2xl text-sm font-extrabold text-[#0055FF] bg-white border border-blue-200 hover:bg-blue-50 transition-all shadow-md hover:scale-105"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl text-sm font-extrabold text-[#0055FF] bg-white border border-blue-200 hover:bg-blue-50 transition-all shadow-md hover:scale-105"
             >
-              Join Engineering Program 🎓
+              <span>Join Engineering Program</span>
+              <FiAward className="w-4 h-4" />
             </Link>
           </div>
 
@@ -126,23 +129,25 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
             <div className="inline-flex p-1.5 rounded-2xl bg-blue-50 border border-blue-100 mt-6 gap-2">
               <button
                 onClick={() => setActiveTab("business")}
-                className={`px-6 py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                   activeTab === "business"
                     ? "bg-[#0055FF] text-white shadow-md"
                     : "text-slate-700 hover:text-[#0055FF]"
                 }`}
               >
-                🏢 For Business & ERP Clients
+                <FiBriefcase className="w-4 h-4" />
+                <span>For Business & ERP Clients</span>
               </button>
               <button
                 onClick={() => setActiveTab("students")}
-                className={`px-6 py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
+                className={`inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs sm:text-sm font-extrabold transition-all cursor-pointer ${
                   activeTab === "students"
                     ? "bg-[#0055FF] text-white shadow-md"
                     : "text-slate-700 hover:text-[#0055FF]"
                 }`}
               >
-                🎓 For Students & Interns
+                <FiAward className="w-4 h-4" />
+                <span>For Students & Interns</span>
               </button>
             </div>
           </div>
@@ -151,7 +156,9 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
           {activeTab === "business" ? (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
               <div className="p-6 rounded-[28px] bg-blue-50/50 border border-blue-100 space-y-3">
-                <span className="text-2xl">🔒</span>
+                <div className="w-10 h-10 rounded-xl bg-blue-100 text-[#0055FF] flex items-center justify-center">
+                  <FiLock className="w-5 h-5" />
+                </div>
                 <h3 className="heading-font text-xl font-extrabold text-slate-900">
                   Zero Vendor Lock-In & Self-Hosting
                 </h3>
@@ -161,7 +168,9 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
               </div>
 
               <div className="p-6 rounded-[28px] bg-blue-50/50 border border-blue-100 space-y-3">
-                <span className="text-2xl">📱</span>
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                  <FiSmartphone className="w-5 h-5" />
+                </div>
                 <h3 className="heading-font text-xl font-extrabold text-slate-900">
                   WhatsApp & Automated GST Gateways
                 </h3>
@@ -171,7 +180,9 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
               </div>
 
               <div className="p-6 rounded-[28px] bg-blue-50/50 border border-blue-100 space-y-3">
-                <span className="text-2xl">⚡</span>
+                <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+                  <FiZap className="w-5 h-5" />
+                </div>
                 <h3 className="heading-font text-xl font-extrabold text-slate-900">
                   Sub-Second Database Speed
                 </h3>
@@ -183,7 +194,9 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-in">
               <div className="p-6 rounded-[28px] bg-blue-50/50 border border-blue-100 space-y-3">
-                <span className="text-2xl">💻</span>
+                <div className="w-10 h-10 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center">
+                  <FiCode className="w-5 h-5" />
+                </div>
                 <h3 className="heading-font text-xl font-extrabold text-slate-900">
                   Real Production Codebase Access
                 </h3>
@@ -193,7 +206,9 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
               </div>
 
               <div className="p-6 rounded-[28px] bg-blue-50/50 border border-blue-100 space-y-3">
-                <span className="text-2xl">👨‍💻</span>
+                <div className="w-10 h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center">
+                  <FiUsers className="w-5 h-5" />
+                </div>
                 <h3 className="heading-font text-xl font-extrabold text-slate-900">
                   1-on-1 Senior Tech Lead Mentorship
                 </h3>
@@ -203,7 +218,9 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
               </div>
 
               <div className="p-6 rounded-[28px] bg-blue-50/50 border border-blue-100 space-y-3">
-                <span className="text-2xl">🎯</span>
+                <div className="w-10 h-10 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center">
+                  <FiTarget className="w-5 h-5" />
+                </div>
                 <h3 className="heading-font text-xl font-extrabold text-slate-900">
                   Direct Placement Talent Directory
                 </h3>

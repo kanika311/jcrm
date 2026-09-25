@@ -34,6 +34,18 @@ export default function JoinForm() {
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedApp, setSubmittedApp] = useState<{ id: string; name: string; dept: string } | null>(null);
+  const [founderPhone, setFounderPhone] = useState("918310531309");
+
+  useEffect(() => {
+    fetch("/api/settings/whatsapp")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.data?.whatsappNumber) {
+          setFounderPhone(d.data.whatsappNumber.replace(/[^0-9]/g, ""));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   // Modern Calendar Modal State for DOB
   const [showCalendar, setShowCalendar] = useState(false);
@@ -199,19 +211,19 @@ export default function JoinForm() {
     const displayState = formData.state === "Other" ? (customState.trim() || "Other") : formData.state;
     const displayCity = formData.city === "Other" ? (customCity.trim() || "Other") : formData.city;
 
-    const founderPhone = "918310531309";
-    const message = `🚀 *NEW JCRM CAREER / INTERNSHIP APPLICATION* 🚀
+    const phoneToUse = founderPhone || "918310531309";
+    const message = `*NEW JCRM CAREER / INTERNSHIP APPLICATION*
 --------------------------------------------
 Hello Founder, a new candidate application has been submitted:
 
-📌 *Application Reference ID:* ${submittedApp.id}
-👤 *Applicant Name:* ${formData.fullName}
-📱 *Mobile Number:* ${formData.phoneNumber}
-✉️ *Email Address:* ${formData.emailAddress}
-📅 *Date of Birth:* ${formData.dateOfBirth}
-📍 *Location:* ${displayCity}, ${displayState}, ${displayCountry} (Pin: ${formData.pinCode})
+*Application Reference ID:* ${submittedApp.id}
+*Applicant Name:* ${formData.fullName}
+*Mobile Number:* ${formData.phoneNumber}
+*Email Address:* ${formData.emailAddress}
+*Date of Birth:* ${formData.dateOfBirth}
+*Location:* ${displayCity}, ${displayState}, ${displayCountry} (Pin: ${formData.pinCode})
 
-💼 *Application Profile:*
+*Application Profile:*
 • *Target Department:* ${formData.department}
 • *Experience Level:* ${formData.experienceLevel}
 • *College / Institution:* ${formData.college}
@@ -219,10 +231,10 @@ Hello Founder, a new candidate application has been submitted:
 • *Key Skills:* ${formData.skills || "Not specified"}
 
 --------------------------------------------
-⚡ Candidate is requesting fast-track review for interview scheduling.`;
+Candidate is requesting fast-track review for interview scheduling.`;
 
     const encodedMessage = encodeURIComponent(message);
-    window.open(`https://wa.me/${founderPhone}?text=${encodedMessage}`, "_blank");
+    window.open(`https://wa.me/${phoneToUse}?text=${encodedMessage}`, "_blank");
   };
 
   // Modern Calendar helper functions
@@ -779,7 +791,7 @@ Hello Founder, a new candidate application has been submitted:
                 onClick={handleFastTrackWhatsApp}
                 className="w-full py-3.5 rounded-2xl text-xs sm:text-sm font-extrabold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer"
               >
-                Fast-Track Application with Founder on WhatsApp (+91 8310531309)
+                Fast-Track Application with Founder on WhatsApp (+{founderPhone})
               </button>
 
               <button

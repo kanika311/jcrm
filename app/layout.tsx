@@ -43,6 +43,7 @@ export const metadata: Metadata = {
 import AuthProvider from "@/components/AuthProvider";
 import { getSiteContent } from "@/lib/cms";
 import Footer from "@/components/Footer";
+import GlobalWhatsAppWidget from "@/components/GlobalWhatsAppWidget";
 
 // CMS + auth are request-time; avoid DB connections during static page generation.
 export const dynamic = "force-dynamic";
@@ -64,6 +65,7 @@ export default async function RootLayout({
           <Navbar siteName={globalSettings.siteName} links={navbarConfig.links} logoUrl={globalSettings.logoUrl} />
           <main className="flex-1 flex flex-col relative z-10">{children}</main>
           <Footer cmsData={footerConfig} siteName={globalSettings.siteName} />
+          <GlobalWhatsAppWidget />
         </AuthProvider>
       </body>
     </html>

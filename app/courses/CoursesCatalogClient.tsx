@@ -2,6 +2,9 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
+import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
+import SponsoredAdModal from "@/components/SponsoredAdModal";
 import {
   FiSearch,
   FiChevronLeft,
@@ -10,6 +13,11 @@ import {
   FiArrowRight,
   FiX,
   FiSliders,
+  FiEdit2,
+  FiExternalLink,
+  FiMessageCircle,
+  FiUserCheck,
+  FiTag,
 } from "react-icons/fi";
 
 const ITEMS_PER_PAGE = 6;
@@ -31,10 +39,20 @@ interface Course {
 
 export default function CoursesCatalogClient({
   courses = [],
+  initialSponsoredAd,
 }: {
   cmsData?: any;
   courses: Course[];
+  initialSponsoredAd?: SponsoredAd;
 }) {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
+
+  const [sponsoredAd, setSponsoredAd] = useState<SponsoredAd>(
+    initialSponsoredAd || DEFAULT_SPONSORED_AD
+  );
+  const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
+
   // Search & Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedLevel, setSelectedLevel] = useState("All Levels");
@@ -333,35 +351,39 @@ export default function CoursesCatalogClient({
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-[#f8fafc] dark:bg-gray-950">
+    <div className="min-h-screen pt-24 pb-20 bg-white font-sans">
       
-      {/* 2-Column Responsive Layout: Left Filter + Right Courses */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      {/* 3-Panel Responsive Layout: Left Filter + Center Courses + Right Highlights */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col lg:flex-row items-start gap-6">
 
-          {/* DESKTOP LEFT FILTER SIDEBAR (Blue & White Border & Theme, Sticky on scroll) */}
-          <aside className="hidden lg:block w-[280px] shrink-0 sticky top-24 h-[calc(100vh-7.5rem)] rounded-2xl border border-blue-200/80 bg-white shadow-md ring-1 ring-blue-500/10 dark:border-blue-950 dark:bg-gray-900 overflow-hidden">
+          {/* ================================================================ */}
+          {/* 1. LEFT PANEL: FILTERS SIDEBAR (Pure White & Light Blue)          */}
+          {/* ================================================================ */}
+          <aside className="hidden lg:block w-64 lg:w-72 shrink-0 sticky top-24 max-h-[calc(100vh-7.5rem)] rounded-2xl border border-[#D4E8F8] bg-white shadow-xs overflow-hidden">
             {FilterSidebarContent}
           </aside>
 
           {/* MOBILE FILTER MODAL DRAWER */}
           {mobileFilterOpen && (
-            <div className="fixed inset-0 z-50 lg:hidden">
+            <div className="fixed inset-0 z-50 lg:hidden flex">
               <div
-                className="absolute inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
+                className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs transition-opacity"
                 onClick={() => setMobileFilterOpen(false)}
               />
-              <aside className="absolute left-0 top-0 flex h-full w-[min(320px,88vw)] max-w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-gray-900">
+              <aside className="relative left-0 top-0 flex h-full w-[min(320px,88vw)] max-w-full flex-col overflow-hidden bg-white shadow-2xl z-50">
                 {FilterSidebarContent}
               </aside>
             </div>
           )}
 
-          {/* RIGHT COLUMN: STICKY BLUE-WHITE SEARCH BAR + COURSES GRID */}
+          {/* ================================================================ */}
+          {/* 2. CENTER PANEL: SEARCH BAR + COURSES GRID                       */}
+          {/* ================================================================ */}
           <main className="flex-1 min-w-0 w-full">
 
             {/* STICKY SEARCH BAR (Pure Blue & White Theme) */}
-            <div className="sticky top-20 z-30 mb-6 bg-[#f8fafc]/90 dark:bg-gray-950/90 backdrop-blur-md pt-1 pb-3">
+            <div className="sticky top-20 z-30 mb-5 bg-white/95 backdrop-blur-md pt-1 pb-3">
               <div className="flex items-center gap-2 sm:gap-3">
 
                 {/* Mobile Filter Toggle Button */}
@@ -371,7 +393,7 @@ export default function CoursesCatalogClient({
                   className={`relative flex h-[50px] shrink-0 items-center justify-center gap-2 rounded-2xl border-2 px-3.5 text-xs font-bold shadow-xs transition active:scale-95 lg:hidden ${
                     activeFilterCount > 0
                       ? "border-[#0055FF] bg-[#0055FF] text-white ring-2 ring-blue-500/20"
-                      : "border-blue-200 bg-white text-slate-800 ring-2 ring-blue-500/10 hover:border-[#0055FF] dark:border-blue-900 dark:bg-gray-900 dark:text-white"
+                      : "border-[#D4E8F8] bg-white text-slate-800 ring-2 ring-blue-500/10 hover:border-[#0055FF]"
                   }`}
                   aria-label="Open filters"
                 >
@@ -384,15 +406,15 @@ export default function CoursesCatalogClient({
                   )}
                 </button>
 
-                {/* Main Prominent Sticky Search Box (Blue Border & White Background) */}
-                <div className="relative flex flex-1 items-center rounded-2xl border-2 border-[#0055FF] bg-white shadow-sm ring-2 ring-blue-500/15 dark:border-[#0055FF] dark:bg-gray-900">
+                {/* Main Prominent Sticky Search Box (Pure Blue Border & White Background) */}
+                <div className="relative flex flex-1 items-center rounded-2xl border-2 border-[#0055FF] bg-white shadow-xs">
                   <FiSearch className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#0055FF]" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search courses, skills, technologies..."
-                    className="w-full rounded-2xl bg-transparent py-3.5 pl-11 pr-10 text-sm font-medium text-slate-800 dark:text-white outline-none placeholder:text-slate-400"
+                    className="w-full rounded-2xl bg-transparent py-3.5 pl-11 pr-10 text-sm font-bold text-slate-900 outline-none placeholder:text-slate-400 placeholder:font-normal"
                   />
                   {searchQuery && (
                     <button
@@ -409,14 +431,14 @@ export default function CoursesCatalogClient({
 
               {/* Showing count & active filters badge indicator */}
               <div className="flex items-center justify-between mt-2.5 px-1 text-xs">
-                <span className="font-bold text-slate-500 dark:text-slate-400">
-                  SHOWING <strong className="text-slate-800 dark:text-white">{filteredCourses.length}</strong> OF {courses.length} COURSES
+                <span className="font-bold text-slate-500">
+                  SHOWING <strong className="text-slate-900">{filteredCourses.length}</strong> OF {courses.length} COURSES
                 </span>
                 {activeFilterCount > 0 && (
                   <button
                     type="button"
                     onClick={handleResetFilters}
-                    className="text-[#0055FF] hover:text-blue-700 font-bold transition flex items-center gap-1"
+                    className="text-[#0055FF] hover:underline font-bold transition flex items-center gap-1 cursor-pointer"
                   >
                     <span>Reset All Filters</span>
                     <FiX className="w-3 h-3" />
@@ -425,10 +447,10 @@ export default function CoursesCatalogClient({
               </div>
             </div>
 
-            {/* COURSES CARDS GRID */}
+            {/* COURSES CARDS GRID (2 columns in Center Panel) */}
             {filteredCourses.length === 0 ? (
-              <div className="text-center py-20 bg-white dark:bg-gray-900 rounded-2xl border border-dashed border-blue-200 dark:border-gray-800 p-8 shadow-sm">
-                <p className="text-base font-extrabold text-slate-800 dark:text-white mb-2">
+              <div className="text-center py-16 bg-blue-50/30 rounded-2xl border border-dashed border-[#D4E8F8] p-8 shadow-xs">
+                <p className="text-base font-extrabold text-slate-900 mb-1.5">
                   No courses found matching your criteria
                 </p>
                 <p className="text-xs text-slate-500 mb-4">
@@ -437,19 +459,19 @@ export default function CoursesCatalogClient({
                 <button
                   type="button"
                   onClick={handleResetFilters}
-                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#0055FF] hover:bg-blue-600 transition shadow-sm"
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#0055FF] hover:bg-blue-600 transition shadow-xs cursor-pointer"
                 >
                   Clear All Filters
                 </button>
               </div>
             ) : (
               <>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   {paginatedCourses.map((course) => (
                     <Link
                       href={`/courses/${course.id}`}
                       key={course.id}
-                      className="group block rounded-2xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden"
+                      className="group block rounded-2xl bg-white border border-[#D4E8F8] shadow-xs hover:shadow-md hover:border-[#0055FF]/40 hover:-translate-y-0.5 transition-all duration-300 flex flex-col justify-between overflow-hidden"
                     >
                       {/* Thumbnail Image */}
                       <div className="h-44 w-full relative overflow-hidden bg-slate-900">
@@ -461,7 +483,7 @@ export default function CoursesCatalogClient({
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/30 to-black/20 p-4 flex flex-col justify-between">
                           <div className="flex items-center justify-between relative z-10">
                             {course.badge && (
-                              <span className="px-2.5 py-0.5 text-[10px] font-extrabold rounded-full bg-white text-[#0055FF] shadow-sm">
+                              <span className="px-2.5 py-0.5 text-[10px] font-extrabold rounded-full bg-white text-[#0055FF] shadow-xs">
                                 {course.badge}
                               </span>
                             )}
@@ -471,7 +493,7 @@ export default function CoursesCatalogClient({
                           </div>
 
                           <div className="relative z-10">
-                            <h3 className="heading-font text-lg font-extrabold text-white leading-tight drop-shadow-sm group-hover:text-blue-200 transition-colors line-clamp-1">
+                            <h3 className="heading-font text-base sm:text-lg font-extrabold text-white leading-tight drop-shadow-xs group-hover:text-blue-200 transition-colors line-clamp-1">
                               {course.title}
                             </h3>
                           </div>
@@ -479,21 +501,21 @@ export default function CoursesCatalogClient({
                       </div>
 
                       {/* Card Content */}
-                      <div className="p-5 flex-1 flex flex-col justify-between space-y-3">
+                      <div className="p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-3">
                         <div>
                           {/* Instructor & Rating */}
                           <div className="flex items-center justify-between mb-2 text-xs">
-                            <span className="font-bold text-slate-700 dark:text-slate-300 truncate max-w-[140px]">
+                            <span className="font-bold text-slate-800 truncate max-w-[140px]">
                               {course.instructor || "JCRM Faculty"}
                             </span>
-                            <div className="flex items-center gap-1 font-black text-amber-500 bg-amber-50 dark:bg-amber-950/40 px-2 py-0.5 rounded-full border border-amber-200 dark:border-amber-900 shrink-0">
+                            <div className="flex items-center gap-1 font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 shrink-0">
                               <FiStar className="w-3 h-3 fill-amber-400 text-amber-400" />
                               <span>{course.rating || "4.9"}</span>
                             </div>
                           </div>
 
                           {/* Description */}
-                          <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed line-clamp-2 mb-3">
+                          <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 mb-3">
                             {course.description}
                           </p>
 
@@ -503,7 +525,7 @@ export default function CoursesCatalogClient({
                               {course.tags.slice(0, 3).map((tag, j) => (
                                 <span
                                   key={j}
-                                  className="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-900/30 text-slate-600 dark:text-slate-300"
+                                  className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-blue-50 text-[#0055FF] border border-[#D4E8F8]"
                                 >
                                   {tag}
                                 </span>
@@ -513,19 +535,19 @@ export default function CoursesCatalogClient({
                         </div>
 
                         {/* Price and CTA */}
-                        <div className="pt-3 border-t border-slate-100 dark:border-gray-800 flex items-center justify-between">
+                        <div className="pt-3 border-t border-[#D4E8F8] flex items-center justify-between">
                           <div>
                             <span className="text-[10px] font-bold text-slate-400 block uppercase tracking-wider">
                               TUITION FEE
                             </span>
-                            <span className="heading-font text-base font-black text-slate-900 dark:text-white">
+                            <span className="heading-font text-base font-black text-slate-900">
                               {course.price || "₹12,999"}
                             </span>
                           </div>
 
-                          <span className="px-3.5 py-1.5 rounded-xl text-xs font-extrabold text-white bg-[#0055FF] group-hover:bg-blue-600 transition-all shadow-sm flex items-center gap-1.5">
+                          <span className="px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-[#0055FF] group-hover:bg-blue-600 transition-all shadow-xs flex items-center gap-1.5">
                             <span>View Details</span>
-                            <FiArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                            <FiArrowRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform" />
                           </span>
                         </div>
                       </div>
@@ -535,12 +557,12 @@ export default function CoursesCatalogClient({
 
                 {/* PAGINATION CONTROLS (Blue & White) */}
                 {totalPages > 1 && (
-                  <div className="flex items-center justify-center gap-2 mt-10 pt-6 border-t border-slate-200/80 dark:border-gray-800/80">
+                  <div className="flex items-center justify-center gap-2 mt-8 pt-5 border-t border-[#D4E8F8]">
                     <button
                       type="button"
                       disabled={currentPage === 1}
                       onClick={() => goToPage(currentPage - 1)}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50 hover:text-[#0055FF] dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold border border-[#D4E8F8] bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50 hover:text-[#0055FF] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <FiChevronLeft className="w-4 h-4" />
                       <span>Previous</span>
@@ -552,10 +574,10 @@ export default function CoursesCatalogClient({
                           key={page}
                           type="button"
                           onClick={() => goToPage(page)}
-                          className={`w-8 h-8 rounded-xl text-xs font-bold transition-all ${
+                          className={`w-8 h-8 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                             currentPage === page
-                              ? "bg-[#0055FF] text-white shadow-md shadow-blue-500/25 scale-105"
-                              : "bg-white dark:bg-gray-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-gray-800 hover:bg-blue-50 hover:text-[#0055FF] dark:hover:bg-gray-800"
+                              ? "bg-[#0055FF] text-white shadow-xs"
+                              : "bg-white text-slate-700 border border-[#D4E8F8] hover:bg-blue-50 hover:text-[#0055FF]"
                           }`}
                         >
                           {page}
@@ -567,7 +589,7 @@ export default function CoursesCatalogClient({
                       type="button"
                       disabled={currentPage === totalPages}
                       onClick={() => goToPage(currentPage + 1)}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 text-slate-700 dark:text-slate-300 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50 hover:text-[#0055FF] dark:hover:bg-gray-800 transition-colors flex items-center gap-1.5 shadow-xs"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-bold border border-[#D4E8F8] bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-50 hover:text-[#0055FF] transition-colors flex items-center gap-1.5 shadow-xs cursor-pointer"
                     >
                       <span>Next</span>
                       <FiChevronRight className="w-4 h-4" />
@@ -577,7 +599,101 @@ export default function CoursesCatalogClient({
               </>
             )}
 
+            {/* Mobile / Tablet Sponsored Banner */}
+            {sponsoredAd.isActive && (
+              <div className="xl:hidden mt-8 bg-white border border-[#D4E8F8] rounded-2xl p-5 shadow-xs space-y-3.5">
+                <div className="flex items-center justify-start pb-3 border-b border-[#D4E8F8]">
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055FF] border border-[#D4E8F8] text-[10px] font-black tracking-wider uppercase flex items-center gap-1.5">
+                    <FiTag className="w-3 h-3 text-[#0055FF]" />
+                    <span>SPONSORED</span>
+                  </span>
+                </div>
+
+                {sponsoredAd.image && (
+                  <div className="w-full h-36 rounded-xl overflow-hidden border border-[#D4E8F8] bg-slate-50">
+                    <img
+                      src={sponsoredAd.image}
+                      alt={sponsoredAd.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                )}
+
+                <div className="space-y-1">
+                  <h4 className="text-sm font-black text-slate-900">{sponsoredAd.title}</h4>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                    {sponsoredAd.description}
+                  </p>
+                </div>
+
+                {sponsoredAd.ctaLink && (
+                  <a
+                    href={sponsoredAd.ctaLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 rounded-xl bg-[#0055FF] hover:bg-blue-600 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-2"
+                  >
+                    <span>{sponsoredAd.ctaText || "Learn More"}</span>
+                    <FiExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            )}
+
           </main>
+
+          {/* ================================================================ */}
+          {/* 3. RIGHT PANEL: SPONSORED BANNER & ENTERPRISE TRAINING SPOTLIGHT  */}
+          {/* ================================================================ */}
+          <aside className="w-72 lg:w-80 shrink-0 hidden xl:block sticky top-24 self-start space-y-5">
+            {/* SPONSORED ADVERTISEMENT CARD */}
+            {sponsoredAd.isActive ? (
+              <div className="bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5 space-y-3.5 relative overflow-hidden group hover:border-[#0055FF]/40 transition-all">
+                {/* Header: Only Sponsored Badge */}
+                <div className="flex items-center justify-start pb-3 border-b border-[#D4E8F8]">
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055FF] border border-[#D4E8F8] text-[10px] font-black tracking-wider uppercase flex items-center gap-1.5">
+                    <FiTag className="w-3 h-3 text-[#0055FF]" />
+                    <span>SPONSORED</span>
+                  </span>
+                </div>
+
+                {/* Optional Banner Image */}
+                {sponsoredAd.image && (
+                  <div className="w-full h-36 rounded-xl overflow-hidden border border-[#D4E8F8] bg-slate-50 relative">
+                    <img
+                      src={sponsoredAd.image}
+                      alt={sponsoredAd.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+
+                {/* Headline & Description */}
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-black text-slate-900 group-hover:text-[#0055FF] transition-colors leading-snug">
+                    {sponsoredAd.title}
+                  </h4>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed">
+                    {sponsoredAd.description}
+                  </p>
+                </div>
+
+                {/* CTA Action Button */}
+                {sponsoredAd.ctaLink && (
+                  <a
+                    href={sponsoredAd.ctaLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 rounded-xl bg-[#0055FF] hover:bg-blue-600 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>{sponsoredAd.ctaText || "Learn More"}</span>
+                    <FiExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            ) : null}
+          </aside>
+
         </div>
       </div>
 

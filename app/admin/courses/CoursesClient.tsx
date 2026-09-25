@@ -3,6 +3,15 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
+import {
+  FiSearch,
+  FiPlus,
+  FiExternalLink,
+  FiEdit2,
+  FiTrash2,
+  FiEye,
+  FiEyeOff,
+} from "react-icons/fi";
 
 export interface CourseModule {
   title: string;
@@ -570,30 +579,24 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
   });
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="heading-font text-3xl font-extrabold mb-2">Course Management</h1>
-          <p className="text-xs text-[var(--text-secondary)]">
-            Create, edit curriculum modules, set instructor details, and manage course catalog.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => {
-              setNewCurriculum(DEFAULT_MODULES_FOR_TITLE("Frontend Development"));
-              setNewWhatYouLearn(DEFAULT_WHAT_YOU_LEARN("Frontend Development"));
-              setIsAddModalOpen(true);
-            }}
-            className="btn-primary px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 cursor-pointer"
-          >
-            <span className="text-lg leading-none">+</span> Add New Course
-          </button>
+    <div className="space-y-4 pb-20 font-sans">
+      {/* Single-Line Action & Filter Bar (Course Management text removed to save space) */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-xs">
+        {/* Left: Search input & Status filter */}
+        <div className="flex flex-1 items-center gap-2.5">
+          <div className="relative flex-1">
+            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search courses by title, instructor, skill..."
+              className="w-full bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-slate-900 placeholder-slate-400 text-xs font-medium rounded-xl pl-10 pr-4 py-2.5 border border-slate-200 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 shadow-2xs transition"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
 
           <select
-            className="input-premium px-4 py-2.5 rounded-xl text-sm font-medium"
+            className="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl px-3.5 py-2.5 border border-slate-200 focus:outline-none focus:border-[#0055FF] shadow-2xs cursor-pointer shrink-0"
             value={filter}
             onChange={e => setFilter(e.target.value as any)}
           >
@@ -601,71 +604,70 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
             <option value="PUBLISHED">Published Only</option>
             <option value="DRAFT">Drafts Only</option>
           </select>
-
-          <input
-            type="text"
-            placeholder="Search courses..."
-            className="input-premium px-4 py-2.5 rounded-xl text-sm flex-1 md:w-60"
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-          />
         </div>
+
+        {/* Right: + Add New Course Button */}
+        <button
+          onClick={() => {
+            setNewCurriculum(DEFAULT_MODULES_FOR_TITLE("Frontend Development"));
+            setNewWhatYouLearn(DEFAULT_WHAT_YOU_LEARN("Frontend Development"));
+            setIsAddModalOpen(true);
+          }}
+          className="bg-[#0055FF] hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm shadow-blue-500/20 transition-all hover:scale-[1.02] cursor-pointer shrink-0"
+        >
+          <FiPlus className="w-4 h-4" />
+          <span>Add New Course</span>
+        </button>
       </div>
 
       {feedbackMsg && (
         <div
-          className={`p-4 rounded-xl text-sm font-semibold flex items-center justify-between gap-3 ${
+          className={`p-4 rounded-xl text-sm font-semibold flex items-center justify-between gap-3 shadow-xs ${
             feedbackMsg.type === "success"
-              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-              : "bg-red-500/10 border border-red-500/30 text-red-400"
+              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+              : "bg-red-50 border border-red-200 text-red-800"
           }`}
         >
           <span>{feedbackMsg.text}</span>
-          <button onClick={() => setFeedbackMsg(null)} className="opacity-60 hover:opacity-100 text-xs font-bold">
+          <button onClick={() => setFeedbackMsg(null)} className="opacity-60 hover:opacity-100 text-xs font-bold cursor-pointer">
             ✕
           </button>
         </div>
       )}
 
-      {/* Courses Table */}
-      <div
-        className="rounded-[24px] overflow-hidden shadow-2xl"
-        style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
-      >
+      {/* Courses Table (Starts directly below filter bar) */}
+      <div className="rounded-2xl overflow-hidden shadow-xs bg-white border border-slate-200">
         <div className="overflow-x-auto">
-          <table className="data-table w-full text-left">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr
-                className="border-b text-xs uppercase"
-                style={{ borderColor: "var(--border-soft)", color: "var(--text-secondary)" }}
-              >
+              <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
                 <th className="p-4 font-bold">Course</th>
-                <th className="p-4 font-bold">Instructor & Level</th>
+                <th className="p-4 font-bold">Instructor &amp; Level</th>
                 <th className="p-4 font-bold">Price</th>
                 <th className="p-4 font-bold">Status</th>
                 <th className="p-4 font-bold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: "var(--border-soft)" }}>
+            <tbody className="divide-y divide-slate-100">
               {filteredCourses.map(course => (
-                <tr key={course.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={course.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="p-4 max-w-sm">
                     <div className="flex items-center gap-3">
                       {course.image && (
                         <img
                           src={course.image}
                           alt={course.title}
-                          className="w-12 h-12 rounded-xl object-cover shrink-0 border border-white/10"
+                          className="w-12 h-12 rounded-xl object-cover shrink-0 border border-slate-200 shadow-2xs"
                         />
                       )}
                       <div>
-                        <div className="font-bold text-sm text-slate-900 dark:text-white">{course.title}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                        <div className="font-bold text-sm text-slate-900">{course.title}</div>
+                        <div className="text-xs text-slate-500 line-clamp-1 mt-0.5 font-medium">
                           {course.description}
                         </div>
                         <div className="flex items-center gap-1.5 mt-1">
                           {course.badge && (
-                            <span className="px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30">
+                            <span className="px-2 py-0.5 text-[10px] font-bold rounded-md bg-purple-50 text-purple-700 border border-purple-200">
                               {course.badge}
                             </span>
                           )}
@@ -680,73 +682,78 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                   </td>
 
                   <td className="p-4">
-                    <div className="text-sm font-semibold">
+                    <div className="text-sm font-bold text-slate-900">
                       {course.instructor || course.faculty?.fullName || "Faculty"}
                     </div>
-                    <div className="text-xs text-[var(--text-secondary)]">{course.level || "Beginner"}</div>
+                    <div className="text-xs text-slate-500 font-medium">{course.level || "Beginner"}</div>
                   </td>
 
-                  <td className="p-4 font-bold text-sm text-emerald-400">
+                  <td className="p-4 font-black text-sm text-emerald-600 font-mono">
                     ₹{Number(course.price).toLocaleString()}
                   </td>
 
                   <td className="p-4">
                     {course.status === "PUBLISHED" ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                        Published
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 inline-flex items-center gap-1 shadow-2xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                        <span>Published</span>
                       </span>
                     ) : (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                        Draft
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 inline-flex items-center gap-1 shadow-2xs">
+                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                        <span>Draft</span>
                       </span>
                     )}
                   </td>
 
                   <td className="p-4 text-right">
-                    <div className="flex gap-2 justify-end items-center">
+                    <div className="flex gap-1.5 justify-end items-center">
                       {/* View live course detail page */}
                       <a
                         href={`/courses/${course.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-[#0055FF]/15 hover:bg-[#0055FF]/25 text-[#38bdf8] border border-[#0055FF]/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1"
+                        className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0055FF] border border-blue-200 transition-all cursor-pointer shadow-2xs"
                         title="View Live Course Page"
                       >
-                        <span>View</span>
-                        <span className="text-[10px]">↗</span>
+                        <FiExternalLink className="w-4 h-4" />
                       </a>
 
                       {course.status !== "PUBLISHED" ? (
                         <button
                           disabled={isSubmitting}
                           onClick={() => handleUpdateStatus(course.id, "PUBLISHED")}
-                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-all cursor-pointer shadow-2xs"
+                          title="Publish Course"
                         >
-                          Publish
+                          <FiEye className="w-4 h-4" />
                         </button>
                       ) : (
                         <button
                           disabled={isSubmitting}
                           onClick={() => handleUpdateStatus(course.id, "DRAFT")}
-                          className="bg-amber-500/20 hover:bg-amber-500/30 text-amber-400 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                          className="p-2 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-all cursor-pointer shadow-2xs"
+                          title="Unpublish (Set to Draft)"
                         >
-                          Unpublish
+                          <FiEyeOff className="w-4 h-4" />
                         </button>
                       )}
 
                       <button
                         onClick={() => startEditing(course)}
-                        className="btn-secondary px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                        className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all cursor-pointer shadow-2xs"
+                        title="Edit Course"
                       >
-                        Edit
+                        <FiEdit2 className="w-4 h-4" />
                       </button>
 
                       <button
                         disabled={isSubmitting}
                         onClick={() => handleDeleteCourse(course.id)}
-                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all cursor-pointer shadow-2xs"
+                        title="Delete Course"
                       >
-                        Delete
+                        <FiTrash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -755,7 +762,7 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
 
               {filteredCourses.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center text-gray-500">
+                  <td colSpan={5} className="p-12 text-center text-slate-400 font-medium">
                     No courses found matching your criteria.
                   </td>
                 </tr>

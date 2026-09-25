@@ -111,28 +111,28 @@ export default function Navbar({
 
   return (
     <nav
-      className={`fixed top-0 w-full z-50 transition-all duration-300 bg-white/90 dark:bg-gray-950/90 backdrop-blur-2xl border-b border-slate-200/80 dark:border-gray-800/80 ${
+      className={`fixed top-0 left-0 right-0 w-full z-50 transition-colors transition-shadow duration-200 bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-b border-slate-200/80 dark:border-gray-800/80 ${
         scrolled
-          ? "shadow-[0_8px_35px_rgba(0,85,255,0.12)] bg-white/95 dark:bg-gray-950/95"
-          : "shadow-[0_4px_30px_rgba(0,85,255,0.08)]"
+          ? "shadow-[0_4px_25px_rgba(0,85,255,0.12)]"
+          : "shadow-xs"
       }`}
     >
-      <div className="w-full max-w-[1500px] mx-auto px-4 sm:px-8 lg:px-10">
-        <div className="flex justify-between items-center h-20">
+      <div className="w-full max-w-[1500px] mx-auto px-3 sm:px-8 lg:px-10">
+        <div className="flex justify-between items-center h-16 sm:h-20">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3.5 group shrink-0 cursor-pointer">
-            <div className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-white/90 shadow-md bg-white p-0.5 group-hover:scale-105 transition-all">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3.5 group shrink-0 cursor-pointer max-w-[70%] sm:max-w-none">
+            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-white/90 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
               <img
                 src={displayLogoUrl}
                 alt={siteName || "JCRM Logo"}
                 className="w-full h-full object-contain"
               />
             </div>
-            <div className="flex flex-col">
-              <span className="heading-font text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-[#0055FF] transition-colors">
+            <div className="flex flex-col min-w-0">
+              <span className="heading-font text-base sm:text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-[#0055FF] transition-colors truncate">
                 {siteName || "JCRM Technologies"}
               </span>
-              <span className="text-[10px] font-extrabold text-[#0055FF] tracking-wider uppercase -mt-1">
+              <span className="hidden sm:block text-[10px] font-extrabold text-[#0055FF] tracking-wider uppercase -mt-1 truncate">
                 Innovate &bull; Build &bull; Scale
               </span>
             </div>
@@ -276,11 +276,11 @@ export default function Navbar({
           </div>
 
           {/* Mobile Hamburger Toggle */}
-          <div className="lg:hidden flex items-center gap-2">
+          <div className="lg:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
             {user && (
               <Link
                 href={dashboardHref}
-                className="w-8 h-8 rounded-full bg-[#0055FF] text-white font-bold text-xs flex items-center justify-center"
+                className="w-8 h-8 rounded-full bg-[#0055FF] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs"
               >
                 {userFirstName[0]?.toUpperCase()}
               </Link>
@@ -288,15 +288,15 @@ export default function Navbar({
 
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-xl bg-blue-50 text-slate-800 hover:bg-blue-100 transition-colors cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-xl bg-blue-50 text-slate-800 hover:bg-blue-100 transition-colors cursor-pointer shrink-0"
               aria-label="Toggle Menu"
             >
               {mobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
               )}

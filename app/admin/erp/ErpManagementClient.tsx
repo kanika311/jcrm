@@ -2,6 +2,16 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
+import {
+  FiSearch,
+  FiPlus,
+  FiExternalLink,
+  FiEdit2,
+  FiTrash2,
+  FiEye,
+  FiEyeOff,
+} from "react-icons/fi";
 
 export interface ErpProductItem {
   id: string;
@@ -43,7 +53,6 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingSolution, setEditingSolution] = useState<ErpProductItem | null>(null);
 
   // Form states for New ERP Solution
   const [newTitle, setNewTitle] = useState("");
@@ -63,7 +72,6 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
   const [mounted, setMounted] = useState(false);
 
   const addFileInputRef = useRef<HTMLInputElement>(null);
-  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -71,17 +79,17 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
   // Lock background scroll when modal open
   useEffect(() => {
-    if (isAddModalOpen || editingSolution) {
+    if (isAddModalOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [isAddModalOpen, editingSolution]);
+  }, [isAddModalOpen]);
 
   // Handle Image File Upload
-  const handleImageFileUpload = async (file: File, target: "add" | "edit") => {
+  const handleImageFileUpload = async (file: File) => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       alert("Please select a valid image file (PNG, JPG, WEBP, etc.)");
@@ -100,24 +108,21 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
       if (res.ok) {
         const data = await res.json();
         if (data.url) {
-          if (target === "add") setNewImage(data.url);
-          else if (editingSolution) setEditingSolution({ ...editingSolution, image: data.url });
+          setNewImage(data.url);
           return;
         }
       }
       const reader = new FileReader();
       reader.onload = e => {
         const url = e.target?.result as string;
-        if (target === "add") setNewImage(url);
-        else if (editingSolution) setEditingSolution({ ...editingSolution, image: url });
+        setNewImage(url);
       };
       reader.readAsDataURL(file);
     } catch {
       const reader = new FileReader();
       reader.onload = e => {
         const url = e.target?.result as string;
-        if (target === "add") setNewImage(url);
-        else if (editingSolution) setEditingSolution({ ...editingSolution, image: url });
+        setNewImage(url);
       };
       reader.readAsDataURL(file);
     } finally {
@@ -202,34 +207,7 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
     }
   };
 
-  // Handle Edit Solution Submit
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingSolution) return;
-    setIsSubmitting(true);
-    setFeedbackMsg(null);
 
-    try {
-      const res = await fetch("/api/admin/erp", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingSolution),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update ERP solution");
-
-      setSolutions(prev =>
-        prev.map(s => (s.id === editingSolution.id ? { ...s, ...editingSolution } : s))
-      );
-      setEditingSolution(null);
-      setFeedbackMsg({ type: "success", text: `"${editingSolution.title}" updated successfully!` });
-    } catch (err: any) {
-      setFeedbackMsg({ type: "error", text: err.message || "Failed to update solution" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   // Handle Delete Solution
   const handleDeleteSolution = async (id: string, title: string) => {
@@ -295,168 +273,77 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
   const totalModulesSum = solutions.reduce((acc, s) => acc + (s.modulesCount || s.modules?.length || 0), 0);
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="heading-font text-3xl font-extrabold mb-2">ERP Solutions CMS</h1>
-          <p className="text-xs text-[var(--text-secondary)]">
-            Create, modify industry solution suites, edit modules & ROI metrics, and manage live catalog variants.
-          </p>
-        </div>
-
-        <div className="flex flex-wrap items-center gap-3">
-          <a
-            href="/erp-solutions"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#0055FF]/15 hover:bg-[#0055FF]/25 text-[#38bdf8] border border-[#0055FF]/30 transition-colors inline-flex items-center gap-1.5"
-          >
-            <span>Live Catalog</span>
-            <span className="text-xs">↗</span>
-          </a>
-
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="btn-primary px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 cursor-pointer"
-          >
-            <span className="text-lg leading-none">+</span> Add ERP Solution
-          </button>
-        </div>
-      </div>
-
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div
-          className="p-5 rounded-2xl border"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
-        >
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-400 block mb-2">
-            📦 Total Solutions
-          </span>
-          <div className="text-3xl font-extrabold text-white">{solutions.length}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Across all industries</p>
-        </div>
-
-        <div
-          className="p-5 rounded-2xl border"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
-        >
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-2">
-            ✅ Published Live
-          </span>
-          <div className="text-3xl font-extrabold text-white">{publishedCount}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Live on /erp-solutions</p>
-        </div>
-
-        <div
-          className="p-5 rounded-2xl border"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
-        >
-          <span className="text-xs font-bold uppercase tracking-wider text-amber-400 block mb-2">
-            📝 Drafts
-          </span>
-          <div className="text-3xl font-extrabold text-white">{draftCount}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Under review / preparation</p>
-        </div>
-
-        <div
-          className="p-5 rounded-2xl border"
-          style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
-        >
-          <span className="text-xs font-bold uppercase tracking-wider text-purple-400 block mb-2">
-            🧩 Functional Modules
-          </span>
-          <div className="text-3xl font-extrabold text-white">{totalModulesSum}+</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Total configured modules</p>
-        </div>
-      </div>
-
-      {/* MASTER SEARCH & FILTERS BAR */}
-      <div
-        className="p-5 rounded-2xl border space-y-4"
-        style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}
-      >
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-4">
-          {/* Master Search Input */}
-          <div className="relative w-full lg:w-96">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm">🔍</span>
+    <div className="space-y-4 pb-20 font-sans">
+      {/* Single-Line Action & Filter Bar (Search + All Industries + All Statuses + Add) */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-white p-2.5 rounded-2xl border border-slate-200 shadow-xs">
+        {/* Left: Search input, All Industries dropdown, Status filter */}
+        <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          {/* Search Box */}
+          <div className="relative flex-1">
+            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Master Search (title, module, metric, industry)..."
-              className="input-premium w-full pl-10 pr-4 py-2.5 rounded-xl text-sm"
+              placeholder="Search ERP solutions by title, module, industry..."
+              className="w-full bg-slate-50 hover:bg-slate-100/80 focus:bg-white text-slate-900 placeholder-slate-400 text-xs font-semibold rounded-xl pl-10 pr-4 py-2.5 border border-slate-200 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 shadow-2xs transition"
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
             />
           </div>
 
-          {/* Filters: Industry + Status + Per Page */}
-          <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-            {/* Category Filter */}
-            <select
-              className="select-premium px-3.5 py-2.5 rounded-xl text-xs font-semibold flex-1 sm:flex-none"
-              value={selectedCategory}
-              onChange={e => setSelectedCategory(e.target.value)}
-            >
-              {INDUSTRY_CATEGORIES.map(cat => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
+          {/* Industry Filter Dropdown */}
+          <select
+            className="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl px-3.5 py-2.5 border border-slate-200 focus:outline-none focus:border-[#0055FF] shadow-2xs cursor-pointer shrink-0 max-w-[200px]"
+            value={selectedCategory}
+            onChange={e => setSelectedCategory(e.target.value)}
+          >
+            {INDUSTRY_CATEGORIES.map(cat => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
 
-            {/* Status Filter */}
-            <select
-              className="select-premium px-3.5 py-2.5 rounded-xl text-xs font-semibold"
-              value={statusFilter}
-              onChange={e => setStatusFilter(e.target.value as any)}
-            >
-              <option value="ALL">All Statuses ({solutions.length})</option>
-              <option value="PUBLISHED">Published Only</option>
-              <option value="DRAFT">Drafts Only</option>
-            </select>
-
-            {/* Items Per Page */}
-            <select
-              className="select-premium px-3 py-2.5 rounded-xl text-xs font-semibold"
-              value={itemsPerPage}
-              onChange={e => setItemsPerPage(Number(e.target.value))}
-            >
-              <option value={5}>5 / page</option>
-              <option value={10}>10 / page</option>
-              <option value={15}>15 / page</option>
-              <option value={25}>25 / page</option>
-            </select>
-          </div>
+          {/* Status Filter Dropdown */}
+          <select
+            className="bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold rounded-xl px-3.5 py-2.5 border border-slate-200 focus:outline-none focus:border-[#0055FF] shadow-2xs cursor-pointer shrink-0"
+            value={statusFilter}
+            onChange={e => setStatusFilter(e.target.value as any)}
+          >
+            <option value="ALL">All Statuses ({solutions.length})</option>
+            <option value="PUBLISHED">Published Only</option>
+            <option value="DRAFT">Drafts Only</option>
+          </select>
         </div>
 
-        {/* Industry Pill Quick Selectors */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider shrink-0">
-            Quick Filter:
-          </span>
-          {INDUSTRY_CATEGORIES.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`px-3 py-1 rounded-lg shrink-0 font-semibold transition-all cursor-pointer ${
-                selectedCategory === cat
-                  ? "bg-[#0055FF] text-white shadow-xs"
-                  : "bg-white/5 hover:bg-white/10 text-slate-300"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+        {/* Right: Actions (Live Catalog + Add ERP Solution) */}
+        <div className="flex items-center gap-2 shrink-0">
+          <a
+            href="/erp-solutions"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="p-2.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0055FF] border border-[#D4E8F8] transition-all flex items-center gap-1.5 text-xs font-bold shadow-2xs"
+            title="View Live Catalog"
+          >
+            <FiExternalLink className="w-4 h-4" />
+            <span className="hidden xl:inline">Live Catalog</span>
+          </a>
+
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-[#0055FF] hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm shadow-blue-500/20 transition-all hover:scale-[1.02] cursor-pointer shrink-0"
+          >
+            <FiPlus className="w-4 h-4" />
+            <span>Add ERP Solution</span>
+          </button>
         </div>
       </div>
 
       {feedbackMsg && (
         <div
-          className={`p-4 rounded-xl text-sm font-semibold flex items-center justify-between gap-3 ${
+          className={`p-4 rounded-xl text-sm font-semibold flex items-center justify-between gap-3 shadow-xs ${
             feedbackMsg.type === "success"
-              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-              : "bg-red-500/10 border border-red-500/30 text-red-400"
+              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+              : "bg-red-50 border border-red-200 text-red-800"
           }`}
         >
           <span>{feedbackMsg.text}</span>
@@ -466,28 +353,22 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
         </div>
       )}
 
-      {/* SOLUTIONS TABLE */}
-      <div
-        className="rounded-[24px] overflow-hidden shadow-2xl"
-        style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
-      >
+      {/* DIRECT SOLUTIONS TABLE */}
+      <div className="rounded-2xl overflow-hidden shadow-xs bg-white border border-slate-200">
         <div className="overflow-x-auto">
-          <table className="data-table w-full text-left">
-            <thead>
-              <tr
-                className="border-b text-xs uppercase"
-                style={{ borderColor: "var(--border-soft)", color: "var(--text-secondary)" }}
-              >
-                <th className="p-4 font-bold">Solution Variant</th>
-                <th className="p-4 font-bold">Industry Category</th>
-                <th className="p-4 font-bold">Modules & ROI Impact</th>
-                <th className="p-4 font-bold">Status</th>
-                <th className="p-4 font-bold text-right">Actions</th>
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-200">
+              <tr className="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
+                <th className="py-3.5 px-4 font-extrabold">Solution Variant</th>
+                <th className="py-3.5 px-4 font-extrabold">Industry Category</th>
+                <th className="py-3.5 px-4 font-extrabold">Modules &amp; ROI Impact</th>
+                <th className="py-3.5 px-4 font-extrabold">Status</th>
+                <th className="py-3.5 px-4 font-extrabold text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: "var(--border-soft)" }}>
+            <tbody className="divide-y divide-slate-100 bg-white">
               {currentItems.map(item => (
-                <tr key={item.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={item.id} className="hover:bg-slate-50/70 transition-colors">
                   {/* Thumbnail & Title */}
                   <td className="p-4 max-w-sm">
                     <div className="flex items-center gap-3">
@@ -495,16 +376,16 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                         <img
                           src={item.image}
                           alt={item.title}
-                          className="w-14 h-12 rounded-xl object-cover shrink-0 border border-white/10 bg-black/20"
+                          className="w-14 h-12 rounded-xl object-cover shrink-0 border border-slate-200 bg-slate-100"
                         />
                       )}
                       <div>
-                        <div className="font-bold text-sm text-slate-900 dark:text-white">{item.title}</div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 mt-0.5">
+                        <div className="font-extrabold text-sm text-slate-900">{item.title}</div>
+                        <div className="text-xs text-slate-500 line-clamp-1 mt-0.5 font-medium">
                           {item.description}
                         </div>
                         {item.badge && (
-                          <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-[#7C3AED]/20 text-[#A78BFA] border border-[#7C3AED]/30">
+                          <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-extrabold rounded-md bg-purple-50 text-purple-700 border border-purple-200">
                             {item.badge}
                           </span>
                         )}
@@ -514,29 +395,29 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
                   {/* Industry Category */}
                   <td className="p-4">
-                    <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/5 border border-white/10 text-slate-200">
+                    <span className="px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 border border-[#D4E8F8] text-[#0055FF]">
                       {item.category}
                     </span>
                   </td>
 
                   {/* Modules & ROI Impact */}
                   <td className="p-4 max-w-xs">
-                    <div className="text-xs font-bold text-[#38bdf8] flex items-center gap-1.5 mb-1">
+                    <div className="text-xs font-bold text-[#0055FF] flex items-center gap-1.5 mb-1">
                       <span>🧩 {item.modulesCount || item.modules?.length || 12} Modules</span>
                     </div>
                     {item.roiMetric && (
-                      <div className="text-[11px] text-emerald-400 font-semibold truncate" title={item.roiMetric}>
+                      <div className="text-xs text-emerald-700 font-semibold truncate" title={item.roiMetric}>
                         ⚡ {item.roiMetric}
                       </div>
                     )}
                     <div className="flex flex-wrap gap-1 mt-1.5">
                       {(item.modules || []).slice(0, 3).map((m, idx) => (
-                        <span key={idx} className="px-1.5 py-0.5 text-[10px] rounded bg-white/5 text-slate-300">
+                        <span key={idx} className="px-1.5 py-0.5 text-[10px] font-semibold rounded bg-slate-100 text-slate-700 border border-slate-200/60">
                           {m}
                         </span>
                       ))}
                       {(item.modules?.length || 0) > 3 && (
-                        <span className="text-[10px] text-slate-400 font-semibold self-center">
+                        <span className="text-[10px] text-slate-500 font-bold self-center">
                           +{item.modules.length - 3} more
                         </span>
                       )}
@@ -546,57 +427,65 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                   {/* Status Badge */}
                   <td className="p-4">
                     {item.status === "PUBLISHED" ? (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         Published
                       </span>
                     ) : (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">
+                      <span className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
                         Draft
                       </span>
                     )}
                   </td>
 
-                  {/* Action Buttons */}
+                  {/* Action Icon Buttons */}
                   <td className="p-4 text-right">
-                    <div className="flex gap-2 justify-end items-center">
+                    <div className="flex gap-1.5 justify-end items-center">
+                      {/* View in Public Catalog */}
                       <a
                         href={`/erp-solutions#${item.id}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="bg-[#0055FF]/15 hover:bg-[#0055FF]/25 text-[#38bdf8] border border-[#0055FF]/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1"
+                        className="p-2 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0055FF] border border-blue-200 transition-all shadow-2xs"
                         title="View live in ERP catalog"
                       >
-                        <span>View</span>
-                        <span className="text-[10px]">↗</span>
+                        <FiExternalLink className="w-4 h-4" />
                       </a>
 
+                      {/* Quick Publish / Unpublish Toggle */}
                       <button
                         disabled={isSubmitting}
                         onClick={() => handleToggleStatus(item.id, item.status)}
-                        className={`px-2.5 py-1.5 rounded-lg text-xs font-bold border transition-colors cursor-pointer ${
+                        className={`p-2 rounded-lg border transition-all cursor-pointer shadow-2xs ${
                           item.status === "PUBLISHED"
-                            ? "bg-amber-500/15 hover:bg-amber-500/25 text-amber-400 border-amber-500/30"
-                            : "bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 border-emerald-500/30"
+                            ? "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200"
+                            : "bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200"
                         }`}
                         title={item.status === "PUBLISHED" ? "Unpublish to draft" : "Publish live"}
                       >
-                        {item.status === "PUBLISHED" ? "Unpublish" : "Publish"}
+                        {item.status === "PUBLISHED" ? (
+                          <FiEyeOff className="w-4 h-4" />
+                        ) : (
+                          <FiEye className="w-4 h-4" />
+                        )}
                       </button>
 
-                      <button
-                        onClick={() => setEditingSolution(item)}
-                        className="btn-secondary px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                      {/* Edit */}
+                      <Link
+                        href={`/admin/erp/${item.id}`}
+                        className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all cursor-pointer shadow-2xs inline-flex items-center justify-center"
+                        title="Edit ERP Solution"
                       >
-                        Edit
-                      </button>
+                        <FiEdit2 className="w-4 h-4" />
+                      </Link>
 
+                      {/* Delete */}
                       <button
                         disabled={isSubmitting}
                         onClick={() => handleDeleteSolution(item.id, item.title)}
-                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        className="p-2 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 transition-all cursor-pointer shadow-2xs"
                         title="Delete ERP Solution"
                       >
-                        🗑
+                        <FiTrash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -605,8 +494,8 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
               {currentItems.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center text-gray-500">
-                    No ERP solutions found matching your search criteria.
+                  <td colSpan={5} className="p-12 text-center text-slate-500 font-medium">
+                    No ERP solutions found matching your criteria.
                   </td>
                 </tr>
               )}
@@ -614,23 +503,20 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
           </table>
         </div>
 
-        {/* PAGINATION CONTROLLER FOOTER */}
+        {/* PAGINATION CONTROLLER FOOTER (High Contrast) */}
         {totalItems > 0 && (
-          <div
-            className="px-6 py-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-400"
-            style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-          >
+          <div className="px-5 py-3.5 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-semibold text-slate-600">
             <div>
-              Showing <span className="text-white font-bold">{startIndex + 1}</span> to{" "}
-              <span className="text-white font-bold">{endIndex}</span> of{" "}
-              <span className="text-white font-bold">{totalItems}</span> ERP solutions
+              Showing <strong className="text-slate-900 font-extrabold">{startIndex + 1}</strong> to{" "}
+              <strong className="text-slate-900 font-extrabold">{endIndex}</strong> of{" "}
+              <strong className="text-slate-900 font-extrabold">{totalItems}</strong> ERP solutions
             </div>
 
             <div className="flex items-center gap-2">
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                className="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:text-[#0055FF] text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs"
               >
                 ← Previous
               </button>
@@ -642,8 +528,8 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                     onClick={() => setCurrentPage(page)}
                     className={`w-7 h-7 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                       currentPage === page
-                        ? "bg-[#0055FF] text-white shadow-sm"
-                        : "hover:bg-white/10 text-slate-400"
+                        ? "bg-[#0055FF] text-white shadow-xs"
+                        : "bg-white border border-slate-200 text-slate-700 hover:bg-slate-100"
                     }`}
                   >
                     {page}
@@ -654,7 +540,7 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                className="px-3 py-1.5 rounded-lg border border-white/10 hover:bg-white/10 text-slate-300 disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+                className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-blue-50 hover:text-[#0055FF] text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors cursor-pointer shadow-2xs"
               >
                 Next →
               </button>
@@ -673,25 +559,23 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
             onClick={() => setIsAddModalOpen(false)}
           >
             <div
-              className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden m-auto"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
+              className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden m-auto bg-white border border-slate-200"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
               <div
-                className="flex justify-between items-center px-6 py-4 border-b shrink-0"
-                style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
+                className="flex justify-between items-center px-6 py-4 border-b border-slate-200 bg-white shrink-0"
               >
                 <div>
-                  <h3 className="text-xl font-bold">Add ERP Solution</h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  <h3 className="text-xl font-black text-slate-900">Add ERP Solution</h3>
+                  <p className="text-xs font-semibold text-slate-600 mt-0.5">
                     Create and publish a new industry solution suite.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-100 text-slate-400 hover:text-slate-800 transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -699,16 +583,16 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
               {/* Form Body */}
               <form onSubmit={handleAddSolution} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="p-6 overflow-y-auto space-y-4 flex-1 min-h-0">
+                <div className="p-6 overflow-y-auto space-y-4 flex-1 min-h-0 bg-white">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                         Solution Title *
                       </label>
                       <input
                         type="text"
                         required
-                        className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                        className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 placeholder:text-slate-400"
                         placeholder="e.g. Smart Manufacturing & Supply Chain ERP"
                         value={newTitle}
                         onChange={e => setNewTitle(e.target.value)}
@@ -716,16 +600,16 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                         Industry Category *
                       </label>
                       <select
-                        className="select-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                        className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 cursor-pointer"
                         value={newCategory}
                         onChange={e => setNewCategory(e.target.value)}
                       >
                         {INDUSTRY_CATEGORIES.filter(c => c !== "All Industries").map(cat => (
-                          <option key={cat} value={cat}>
+                          <option key={cat} value={cat} className="text-slate-900 font-semibold">
                             {cat}
                           </option>
                         ))}
@@ -735,12 +619,12 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                         Badge (e.g. Best Seller)
                       </label>
                       <input
                         type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
+                        className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 placeholder:text-slate-400"
                         placeholder="e.g. Industry 4.0 Ready"
                         value={newBadge}
                         onChange={e => setNewBadge(e.target.value)}
@@ -748,13 +632,13 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                         Modules Count
                       </label>
                       <input
                         type="number"
                         min={1}
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
+                        className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10"
                         placeholder="14"
                         value={newModulesCount}
                         onChange={e => setNewModulesCount(e.target.value)}
@@ -762,11 +646,11 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                         Initial Status
                       </label>
                       <select
-                        className="select-premium w-full px-4 py-2 rounded-xl text-sm"
+                        className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 cursor-pointer"
                         value={newStatus}
                         onChange={e => setNewStatus(e.target.value as any)}
                       >
@@ -778,12 +662,12 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                         ROI / Efficiency Metric Highlight
                       </label>
                       <input
                         type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
+                        className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 placeholder:text-slate-400"
                         placeholder="e.g. Boosts shop floor throughput by 32%"
                         value={newRoiMetric}
                         onChange={e => setNewRoiMetric(e.target.value)}
@@ -791,12 +675,12 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                         Pricing / Tier
                       </label>
                       <input
                         type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
+                        className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 placeholder:text-slate-400"
                         placeholder="e.g. Custom Enterprise Quote"
                         value={newPrice}
                         onChange={e => setNewPrice(e.target.value)}
@@ -805,13 +689,13 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                    <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                       Description *
                     </label>
                     <textarea
                       required
                       rows={3}
-                      className="input-premium w-full px-4 py-2.5 rounded-xl text-xs"
+                      className="w-full bg-white text-slate-900 font-medium text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 placeholder:text-slate-400"
                       placeholder="Comprehensive breakdown of enterprise operational capabilities..."
                       value={newDescription}
                       onChange={e => setNewDescription(e.target.value)}
@@ -819,33 +703,33 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                   </div>
 
                   <div>
-                    <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                    <label className="block text-xs font-black mb-1 uppercase tracking-wider text-slate-900">
                       Core Functional Modules (comma-separated) *
                     </label>
                     <input
                       type="text"
                       required
-                      className="input-premium w-full px-4 py-2 rounded-xl text-sm"
+                      className="w-full bg-white text-slate-900 font-semibold text-sm px-4 py-2.5 rounded-xl border border-slate-300 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 placeholder:text-slate-400"
                       placeholder="Bill of Materials, Shop Floor Control, Vendor Procurement, Warehouse Stock"
                       value={newModulesInput}
                       onChange={e => setNewModulesInput(e.target.value)}
                     />
-                    <p className="text-[11px] text-[var(--text-tertiary)] mt-1">
+                    <p className="text-[11px] text-slate-500 font-semibold mt-1">
                       Separate each module with a comma. These display as interactive badges in the catalog.
                     </p>
                   </div>
 
                   {/* Thumbnail Image */}
                   <div>
-                    <label className="block text-xs font-bold mb-1.5 uppercase text-slate-300">
+                    <label className="block text-xs font-black mb-1.5 uppercase tracking-wider text-slate-900">
                       Hero Thumbnail Image
                     </label>
-                    <div className="flex items-center gap-4 p-3 rounded-xl border" style={{ background: "var(--bg-base)", borderColor: "var(--border-soft)" }}>
-                      <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0 border border-white/10 bg-black/20">
+                    <div className="flex items-center gap-4 p-3 rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0 border border-slate-300 bg-white">
                         {newImage ? (
                           <img src={newImage} alt="Preview" className="w-full h-full object-cover" />
                         ) : (
-                          <span className="text-xs text-gray-500 flex items-center justify-center h-full">No image</span>
+                          <span className="text-xs text-slate-400 flex items-center justify-center h-full">No image</span>
                         )}
                       </div>
                       <div className="flex-1 space-y-1.5">
@@ -857,7 +741,7 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                             className="hidden"
                             onChange={e => {
                               const file = e.target.files?.[0];
-                              if (file) handleImageFileUpload(file, "add");
+                              if (file) handleImageFileUpload(file);
                             }}
                           />
                           <button
@@ -871,7 +755,7 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
                         </div>
                         <input
                           type="url"
-                          className="input-premium w-full px-3 py-1.5 rounded-lg text-xs"
+                          className="w-full bg-white text-slate-800 font-medium text-xs px-3 py-1.5 rounded-lg border border-slate-300 focus:outline-none focus:border-[#0055FF] placeholder:text-slate-400"
                           placeholder="Or paste image URL"
                           value={newImage}
                           onChange={e => setNewImage(e.target.value)}
@@ -883,260 +767,21 @@ export default function ErpManagementClient({ initialSolutions }: { initialSolut
 
                 {/* Sticky Footer */}
                 <div
-                  className="px-6 py-4 border-t flex justify-end gap-3 shrink-0"
-                  style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
+                  className="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3 shrink-0"
                 >
                   <button
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
-                    className="btn-secondary px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl text-sm font-bold text-slate-700 bg-white border border-slate-300 hover:bg-slate-100 transition cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl text-sm font-black bg-[#0055FF] hover:bg-blue-600 text-white shadow-md shadow-blue-500/25 transition cursor-pointer"
                   >
                     {isSubmitting ? "Creating..." : "Add Solution"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>,
-          document.body
-        )}
-
-      {/* MODAL: EDIT ERP SOLUTION */}
-      {mounted &&
-        editingSolution &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in"
-            style={{ margin: 0 }}
-            onClick={() => setEditingSolution(null)}
-          >
-            <div
-              className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden m-auto"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div
-                className="flex justify-between items-center px-6 py-4 border-b shrink-0"
-                style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-              >
-                <div>
-                  <h3 className="text-xl font-bold">Edit ERP Solution</h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                    Update solution details, modules, metric, and publishing status.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingSolution(null)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Form Body */}
-              <form onSubmit={handleEditSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="p-6 overflow-y-auto space-y-4 flex-1 min-h-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Solution Title *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                        value={editingSolution.title}
-                        onChange={e => setEditingSolution({ ...editingSolution, title: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Industry Category *
-                      </label>
-                      <select
-                        className="select-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                        value={editingSolution.category}
-                        onChange={e => setEditingSolution({ ...editingSolution, category: e.target.value })}
-                      >
-                        {INDUSTRY_CATEGORIES.filter(c => c !== "All Industries").map(cat => (
-                          <option key={cat} value={cat}>
-                            {cat}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Badge
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingSolution.badge || ""}
-                        onChange={e => setEditingSolution({ ...editingSolution, badge: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Modules Count
-                      </label>
-                      <input
-                        type="number"
-                        min={1}
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingSolution.modulesCount}
-                        onChange={e => setEditingSolution({ ...editingSolution, modulesCount: Number(e.target.value) })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Status
-                      </label>
-                      <select
-                        className="select-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingSolution.status}
-                        onChange={e => setEditingSolution({ ...editingSolution, status: e.target.value as any })}
-                      >
-                        <option value="PUBLISHED">Published (Live)</option>
-                        <option value="DRAFT">Draft</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        ROI / Efficiency Metric
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingSolution.roiMetric || ""}
-                        onChange={e => setEditingSolution({ ...editingSolution, roiMetric: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Price / Tier
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingSolution.price || ""}
-                        onChange={e => setEditingSolution({ ...editingSolution, price: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                      Description *
-                    </label>
-                    <textarea
-                      required
-                      rows={3}
-                      className="input-premium w-full px-4 py-2.5 rounded-xl text-xs"
-                      value={editingSolution.description}
-                      onChange={e => setEditingSolution({ ...editingSolution, description: e.target.value })}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                      Core Functional Modules (comma-separated) *
-                    </label>
-                    <input
-                      type="text"
-                      className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                      value={Array.isArray(editingSolution.modules) ? editingSolution.modules.join(", ") : editingSolution.modules || ""}
-                      onChange={e =>
-                        setEditingSolution({
-                          ...editingSolution,
-                          modules: e.target.value.split(",").map(m => m.trim()).filter(Boolean),
-                        })
-                      }
-                    />
-                  </div>
-
-                  {/* Thumbnail Image */}
-                  <div>
-                    <label className="block text-xs font-bold mb-1.5 uppercase text-slate-300">
-                      Hero Thumbnail Image
-                    </label>
-                    <div className="flex items-center gap-4 p-3 rounded-xl border" style={{ background: "var(--bg-base)", borderColor: "var(--border-soft)" }}>
-                      <div className="w-20 h-16 rounded-xl overflow-hidden shrink-0 border border-white/10 bg-black/20">
-                        {editingSolution.image ? (
-                          <img src={editingSolution.image} alt="Preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-xs text-gray-500 flex items-center justify-center h-full">No image</span>
-                        )}
-                      </div>
-                      <div className="flex-1 space-y-1.5">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="file"
-                            accept="image/*"
-                            ref={editFileInputRef}
-                            className="hidden"
-                            onChange={e => {
-                              const file = e.target.files?.[0];
-                              if (file) handleImageFileUpload(file, "edit");
-                            }}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => editFileInputRef.current?.click()}
-                            disabled={isUploadingImage}
-                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#0055FF] text-white hover:bg-blue-600 transition-colors cursor-pointer"
-                          >
-                            {isUploadingImage ? "Uploading..." : "📁 Upload Image"}
-                          </button>
-                        </div>
-                        <input
-                          type="url"
-                          className="input-premium w-full px-3 py-1.5 rounded-lg text-xs"
-                          placeholder="Or paste image URL"
-                          value={editingSolution.image || ""}
-                          onChange={e => setEditingSolution({ ...editingSolution, image: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sticky Footer */}
-                <div
-                  className="px-6 py-4 border-t flex justify-end gap-3 shrink-0"
-                  style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setEditingSolution(null)}
-                    className="btn-secondary px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg cursor-pointer"
-                  >
-                    {isSubmitting ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>

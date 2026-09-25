@@ -145,17 +145,27 @@ export const courses = [
 ];
 
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_SPONSORED_AD, SponsoredAd } from "@/lib/sponsoredAd";
 
 export const dynamic = "force-dynamic";
 
 export default async function CoursesCatalog() {
-  const [cmsData, dbCourses] = await Promise.all([
+  let sponsoredAd: SponsoredAd = DEFAULT_SPONSORED_AD;
+
+  const [cmsData, dbCourses, adRecord] = await Promise.all([
     getSiteContent("public-courses"),
     prisma.course.findMany({
       where: { status: "PUBLISHED" },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.siteContent.findUnique({
+      where: { pageId: "ourteam-sponsored-ad" },
+    }),
   ]);
+
+  if (adRecord && adRecord.content) {
+    sponsoredAd = adRecord.content as any;
+  }
 
   const activeCourses = dbCourses.length > 0
     ? dbCourses.map((c) => ({
@@ -174,5 +184,5 @@ export default async function CoursesCatalog() {
       }))
     : courses;
 
-  return <CoursesCatalogClient cmsData={cmsData} courses={activeCourses} />;
-}
+  return <CoursesCatalogClient cmsData={cmsData} courses={activeCourses} initialSponsoredAd={sponsoredAd} />;
+}

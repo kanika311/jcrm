@@ -1,16 +1,28 @@
 import { TEAM_MEMBERS, TeamMember } from "@/lib/teamData";
 import TeamDirectoryClient from "../im/TeamDirectoryClient";
 import { prisma } from "@/lib/prisma";
+import { DEFAULT_SPONSORED_AD, SponsoredAd } from "@/lib/sponsoredAd";
 
 export const dynamic = "force-dynamic";
 
 export default async function OurTeamAliasPage() {
   let dbApproved: TeamMember[] = [];
+  let sponsoredAd: SponsoredAd = DEFAULT_SPONSORED_AD;
+
   try {
-    const records = await prisma.teamMember.findMany({
-      where: { status: "APPROVED" },
-      orderBy: { createdAt: "desc" },
-    });
+    const [records, adRecord] = await Promise.all([
+      prisma.teamMember.findMany({
+        where: { status: "APPROVED" },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.siteContent.findUnique({
+        where: { pageId: "ourteam-sponsored-ad" },
+      }),
+    ]);
+
+    if (adRecord && adRecord.content) {
+      sponsoredAd = adRecord.content as any;
+    }
 
     dbApproved = records.map((m) => {
       const maskedPhone = m.phone ? m.phone.replace(/(\d{6})\d{4}/, "xxxxxx$2") : "xxxxxx9070";
@@ -34,10 +46,11 @@ export default async function OurTeamAliasPage() {
       };
     });
   } catch (err) {
-    console.error("Error fetching approved team members:", err);
+    console.error("Error fetching approved team members or sponsored ad:", err);
   }
 
   // Single source of truth: DB approved members
   const displayMembers = dbApproved.length > 0 ? dbApproved : TEAM_MEMBERS;
-  return <TeamDirectoryClient members={displayMembers} />;
+  return <TeamDirectoryClient members={displayMembers} initialSponsoredAd={sponsoredAd} />;
 }
+

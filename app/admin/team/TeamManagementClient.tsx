@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
+import SponsoredAdModal from "@/components/SponsoredAdModal";
 
 export interface TeamMemberItem {
   id: string;
@@ -42,6 +44,8 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [editingMember, setEditingMember] = useState<TeamMemberItem | null>(null);
+  const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
+  const [sponsoredAd, setSponsoredAd] = useState<SponsoredAd>(DEFAULT_SPONSORED_AD);
 
   // Form states for New Member
   const [newName, setNewName] = useState("");
@@ -71,6 +75,12 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
   useEffect(() => {
     setMounted(true);
+    fetch("/api/admin/sponsored")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.ad) setSponsoredAd(data.ad);
+      })
+      .catch((err) => console.error("Failed to load sponsored ad:", err));
   }, []);
 
   // Lock background scrolling when modal is open
@@ -385,22 +395,32 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
   });
 
   return (
-    <div className="space-y-8 pb-20">
-      {/* Top Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div className="space-y-6 pb-20">
+      {/* Top Action Bar (Header text removed as requested) */}
+      <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="heading-font text-3xl font-extrabold mb-2">Our Team & Join Us Approvals</h1>
-          <p className="text-xs text-[var(--text-secondary)]">
-            Review candidate applications from Join Us form, approve them to appear on the public Our Team page, and manage team profiles.
-          </p>
+          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
+            Candidate &amp; Team Management
+          </span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setIsSponsoredModalOpen(true)}
+            className="bg-blue-50 hover:bg-blue-100 text-[#0055FF] border border-[#D4E8F8] px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
+            title="Configure Right-Panel Sponsored Ad"
+          >
+            <span>📢</span>
+            <span>Sponsored Banner</span>
+          </button>
+
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="btn-primary px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg transition-transform hover:scale-105 cursor-pointer"
+            className="bg-[#0055FF] hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] cursor-pointer"
           >
-            <span className="text-lg leading-none">+</span> Add Team Member
+            <span className="text-base leading-none font-bold">+</span>
+            <span>Add Team Member</span>
           </button>
         </div>
       </div>
@@ -412,105 +432,107 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
           onClick={() => setActiveTab("PLACED")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "PLACED"
-              ? "border-emerald-500/60 bg-emerald-500/10 shadow-lg"
-              : "hover:border-emerald-500/30"
+              ? "border-emerald-500 bg-emerald-50/80 shadow-md ring-2 ring-emerald-500/20"
+              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
           }`}
-          style={{ background: activeTab !== "PLACED" ? "var(--bg-card)" : undefined, borderColor: activeTab !== "PLACED" ? "var(--border-soft)" : undefined }}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
               🎓 Placed
             </span>
-            <span className="px-2 py-0.5 rounded text-[9px] font-black bg-emerald-500/20 text-emerald-300">
+            <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800">
               HOME
             </span>
           </div>
-          <div className="text-3xl font-extrabold text-white">{placedCount}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Live in Home carousel</p>
+          <div className="text-3xl font-black text-slate-900">{placedCount}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">Live in Home carousel</p>
         </div>
+
+        {/* Pending Review Card */}
         <div
           onClick={() => setActiveTab("PENDING")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "PENDING"
-              ? "border-amber-500/60 bg-amber-500/10 shadow-lg"
-              : "hover:border-amber-500/30"
+              ? "border-amber-500 bg-amber-50/80 shadow-md ring-2 ring-amber-500/20"
+              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
           }`}
-          style={{ background: activeTab !== "PENDING" ? "var(--bg-card)" : undefined, borderColor: activeTab !== "PENDING" ? "var(--border-soft)" : undefined }}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-amber-700">
               ⏳ Pending Review
             </span>
             {pendingCount > 0 && (
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400 animate-ping" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
             )}
           </div>
-          <div className="text-3xl font-extrabold text-white">{pendingCount}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">From Join Us form</p>
+          <div className="text-3xl font-black text-slate-900">{pendingCount}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">From Join Us form</p>
         </div>
 
+        {/* Approved & Live Card */}
         <div
           onClick={() => setActiveTab("APPROVED")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "APPROVED"
-              ? "border-emerald-500/60 bg-emerald-500/10 shadow-lg"
-              : "hover:border-emerald-500/30"
+              ? "border-blue-500 bg-blue-50/80 shadow-md ring-2 ring-blue-500/20"
+              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
           }`}
-          style={{ background: activeTab !== "APPROVED" ? "var(--bg-card)" : undefined, borderColor: activeTab !== "APPROVED" ? "var(--border-soft)" : undefined }}
         >
-          <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 block mb-2">
-            ✅ Approved & Live
+          <span className="text-xs font-bold uppercase tracking-wider text-blue-700 block mb-2">
+            ✅ Approved &amp; Live
           </span>
-          <div className="text-3xl font-extrabold text-white">{approvedCount}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Visible on /ourteam</p>
+          <div className="text-3xl font-black text-slate-900">{approvedCount}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">Visible on /ourteam</p>
         </div>
 
+        {/* Total Profiles Card */}
         <div
           onClick={() => setActiveTab("ALL")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "ALL"
-              ? "border-blue-500/60 bg-blue-500/10 shadow-lg"
-              : "hover:border-blue-500/30"
+              ? "border-indigo-500 bg-indigo-50/80 shadow-md ring-2 ring-indigo-500/20"
+              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
           }`}
-          style={{ background: activeTab !== "ALL" ? "var(--bg-card)" : undefined, borderColor: activeTab !== "ALL" ? "var(--border-soft)" : undefined }}
         >
-          <span className="text-xs font-bold uppercase tracking-wider text-[#38bdf8] block mb-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 block mb-2">
             👥 Total Profiles
           </span>
-          <div className="text-3xl font-extrabold text-white">{members.length}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">All database records</p>
+          <div className="text-3xl font-black text-slate-900">{members.length}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">All database records</p>
         </div>
 
+        {/* Rejected Card */}
         <div
           onClick={() => setActiveTab("REJECTED")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
             activeTab === "REJECTED"
-              ? "border-rose-500/60 bg-rose-500/10 shadow-lg"
-              : "hover:border-rose-500/30"
+              ? "border-rose-500 bg-rose-50/80 shadow-md ring-2 ring-rose-500/20"
+              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
           }`}
-          style={{ background: activeTab !== "REJECTED" ? "var(--bg-card)" : undefined, borderColor: activeTab !== "REJECTED" ? "var(--border-soft)" : undefined }}
         >
-          <span className="text-xs font-bold uppercase tracking-wider text-rose-400 block mb-2">
+          <span className="text-xs font-bold uppercase tracking-wider text-rose-700 block mb-2">
             ❌ Rejected
           </span>
-          <div className="text-3xl font-extrabold text-white">{rejectedCount}</div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1">Archived applications</p>
+          <div className="text-3xl font-black text-slate-900">{rejectedCount}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">Archived applications</p>
         </div>
       </div>
 
       {/* Tabs & Search Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-2 p-1.5 rounded-2xl border w-full sm:w-auto" style={{ background: "var(--bg-card)", borderColor: "var(--border-soft)" }}>
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl border border-slate-200 bg-white shadow-xs">
           <button
             onClick={() => setActiveTab("PENDING")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === "PENDING"
-                ? "bg-amber-500 text-black shadow-md"
-                : "text-[var(--text-secondary)] hover:text-white"
+                ? "bg-amber-500 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             <span>Pending Approvals</span>
-            <span className="px-1.5 py-0.2 rounded-full text-[10px] bg-black/20 font-extrabold">
+            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
+              activeTab === "PENDING" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
+            }`}>
               {pendingCount}
             </span>
           </button>
@@ -519,8 +541,8 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
             onClick={() => setActiveTab("APPROVED")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === "APPROVED"
-                ? "bg-[#0055FF] text-white shadow-md"
-                : "text-[var(--text-secondary)] hover:text-white"
+                ? "bg-[#0055FF] text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             <span>Approved ({approvedCount})</span>
@@ -530,8 +552,8 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
             onClick={() => setActiveTab("PLACED")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
               activeTab === "PLACED"
-                ? "bg-emerald-500 text-black shadow-md font-black"
-                : "text-[var(--text-secondary)] hover:text-white"
+                ? "bg-emerald-600 text-white shadow-xs font-black"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             <span>🎓 Placed ({placedCount})</span>
@@ -541,8 +563,8 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
             onClick={() => setActiveTab("ALL")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "ALL"
-                ? "bg-white/15 text-white shadow-sm"
-                : "text-[var(--text-secondary)] hover:text-white"
+                ? "bg-slate-900 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             All ({members.length})
@@ -552,29 +574,31 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
             onClick={() => setActiveTab("REJECTED")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
               activeTab === "REJECTED"
-                ? "bg-rose-500/80 text-white shadow-sm"
-                : "text-[var(--text-secondary)] hover:text-white"
+                ? "bg-rose-600 text-white shadow-xs"
+                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
             }`}
           >
             Rejected ({rejectedCount})
           </button>
         </div>
 
-        <input
-          type="text"
-          placeholder="Search by name, role, college, skill..."
-          className="input-premium px-4 py-2.5 rounded-xl text-sm w-full sm:w-80"
-          value={searchTerm}
-          onChange={e => setSearchTerm(e.target.value)}
-        />
+        <div className="relative w-full sm:w-80">
+          <input
+            type="text"
+            placeholder="Search by name, role, college, skill..."
+            className="w-full bg-white text-slate-800 placeholder-slate-400 text-xs font-medium rounded-xl px-4 py-2.5 border border-slate-200 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 shadow-xs transition"
+            value={searchTerm}
+            onChange={e => setSearchTerm(e.target.value)}
+          />
+        </div>
       </div>
 
       {feedbackMsg && (
         <div
-          className={`p-4 rounded-xl text-sm font-semibold flex items-center justify-between gap-3 ${
+          className={`p-4 rounded-xl text-sm font-semibold flex items-center justify-between gap-3 shadow-xs ${
             feedbackMsg.type === "success"
-              ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
-              : "bg-red-500/10 border border-red-500/30 text-red-400"
+              ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+              : "bg-red-50 border border-red-200 text-red-800"
           }`}
         >
           <span>{feedbackMsg.text}</span>
@@ -585,52 +609,46 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
       )}
 
       {/* Team Members Table */}
-      <div
-        className="rounded-[24px] overflow-hidden shadow-2xl"
-        style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
-      >
+      <div className="rounded-2xl overflow-hidden shadow-xs bg-white border border-slate-200">
         <div className="overflow-x-auto">
-          <table className="data-table w-full text-left">
+          <table className="w-full text-left border-collapse">
             <thead>
-              <tr
-                className="border-b text-xs uppercase"
-                style={{ borderColor: "var(--border-soft)", color: "var(--text-secondary)" }}
-              >
+              <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
                 <th className="p-4 font-bold">Candidate / Member</th>
-                <th className="p-4 font-bold">Role & Department</th>
-                <th className="p-4 font-bold">Location & College</th>
+                <th className="p-4 font-bold">Role &amp; Department</th>
+                <th className="p-4 font-bold">Location &amp; College</th>
                 <th className="p-4 font-bold">Status</th>
                 <th className="p-4 font-bold">Placement (Home Page)</th>
                 <th className="p-4 font-bold text-right">Approval Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: "var(--border-soft)" }}>
+            <tbody className="divide-y divide-slate-100">
               {filteredMembers.map(member => (
-                <tr key={member.id} className="hover:bg-white/[0.02] transition-colors">
+                <tr key={member.id} className="hover:bg-slate-50/70 transition-colors">
                   {/* Candidate Info */}
                   <td className="p-4 max-w-xs">
                     <div className="flex items-center gap-3">
-                      <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-white/15 bg-black/20">
+                      <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
                         {member.image ? (
                           <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center font-bold text-xs bg-[#0055FF]/20 text-[#0055FF]">
+                          <div className="w-full h-full flex items-center justify-center font-bold text-xs bg-blue-50 text-[#0055FF]">
                             {member.name.slice(0, 2).toUpperCase()}
                           </div>
                         )}
                         {member.isVerified && (
-                          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-slate-900 flex items-center justify-center text-[8px] text-white">
+                          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] text-white">
                             ✓
                           </div>
                         )}
                       </div>
                       <div>
-                        <div className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                        <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
                           <span>{member.name}</span>
                         </div>
-                        <div className="text-xs text-slate-500 dark:text-slate-400">{member.email}</div>
+                        <div className="text-xs text-slate-500">{member.email}</div>
                         {member.phone && (
-                          <div className="text-[11px] text-slate-400">{member.phone}</div>
+                          <div className="text-[11px] text-slate-400 font-mono">{member.phone}</div>
                         )}
                       </div>
                     </div>
@@ -638,10 +656,10 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
                   {/* Role & Department */}
                   <td className="p-4">
-                    <div className="text-sm font-semibold text-slate-900 dark:text-white">{member.role}</div>
-                    <div className="text-xs text-[var(--text-secondary)]">{member.department || "Engineering"}</div>
+                    <div className="text-sm font-bold text-slate-900">{member.role}</div>
+                    <div className="text-xs text-slate-500 font-medium">{member.department || "Engineering"}</div>
                     {member.experience && (
-                      <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold rounded bg-white/5 text-slate-300">
+                      <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold rounded bg-slate-100 text-slate-600 border border-slate-200">
                         {member.experience}
                       </span>
                     )}
@@ -649,11 +667,11 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
                   {/* Location & College */}
                   <td className="p-4 max-w-xs">
-                    <div className="text-xs font-semibold text-slate-300">
+                    <div className="text-xs font-semibold text-slate-700">
                       📍 {member.city || "Bangalore"}, {member.state || "Karnataka"}
                     </div>
                     {member.college && (
-                      <div className="text-[11px] text-[var(--text-secondary)] truncate mt-0.5" title={member.college}>
+                      <div className="text-[11px] text-slate-500 truncate mt-0.5" title={member.college}>
                         🎓 {member.college}
                       </div>
                     )}
@@ -662,18 +680,18 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                   {/* Status Badge */}
                   <td className="p-4">
                     {member.status === "PENDING" && (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center gap-1.5 w-fit">
-                        <span className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5 w-fit shadow-2xs">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                         Pending Approval
                       </span>
                     )}
                     {member.status === "APPROVED" && (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 w-fit">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 w-fit shadow-2xs">
                         ✓ Approved (Live)
                       </span>
                     )}
                     {member.status === "REJECTED" && (
-                      <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1.5 w-fit">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5 w-fit shadow-2xs">
                         ✕ Rejected
                       </span>
                     )}
@@ -686,12 +704,12 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                       if (placement) {
                         return (
                           <div className="space-y-1">
-                            <span className="px-2.5 py-1 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 w-fit">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1.5 w-fit shadow-2xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
                               <span>Placed at {placement.company}</span>
                             </span>
                             {placement.package && (
-                              <span className="text-[11px] font-bold text-slate-400 block pl-1">
+                              <span className="text-[11px] font-bold text-slate-500 block pl-1">
                                 Pkg: {placement.package}
                               </span>
                             )}
@@ -699,7 +717,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                         );
                       }
                       return (
-                        <span className="text-xs text-slate-500 italic">Not placed</span>
+                        <span className="text-xs text-slate-400 italic">Not placed</span>
                       );
                     })()}
                   </td>
@@ -713,7 +731,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                           <button
                             disabled={isSubmitting}
                             onClick={() => handleQuickStatusChange(member.id, "APPROVED")}
-                            className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer flex items-center gap-1"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1"
                             title="Approve candidate to show on Our Team page"
                           >
                             <span>✓ Approve</span>
@@ -722,7 +740,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                           <button
                             disabled={isSubmitting}
                             onClick={() => handleQuickStatusChange(member.id, "REJECTED")}
-                            className="bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                            className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
                           >
                             Reject
                           </button>
@@ -736,7 +754,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                             href={`/ourteam/${member.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="bg-[#0055FF]/15 hover:bg-[#0055FF]/25 text-[#38bdf8] border border-[#0055FF]/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1"
+                            className="bg-blue-50 hover:bg-blue-100 text-[#0055FF] border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1"
                             title="View Live Profile on Our Team directory"
                           >
                             <span>Live ↗</span>
@@ -745,7 +763,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                           <button
                             disabled={isSubmitting}
                             onClick={() => handleQuickStatusChange(member.id, "PENDING")}
-                            className="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
+                            className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
                             title="Revoke approval back to pending"
                           >
                             Revoke
@@ -760,7 +778,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                                   <button
                                     type="button"
                                     onClick={() => openPlacementModal(member)}
-                                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-400 bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/30 transition cursor-pointer"
+                                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer"
                                     title="Edit placement details"
                                   >
                                     Edit Placed
@@ -768,7 +786,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                                   <button
                                     type="button"
                                     onClick={() => handleUnmarkPlacement(member)}
-                                    className="px-2 py-1.5 rounded-lg text-xs font-semibold text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
+                                    className="px-2 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
                                     title="Remove from Placed section on Home Page"
                                   >
                                     Unmark
@@ -780,7 +798,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                               <button
                                 type="button"
                                 onClick={() => openPlacementModal(member)}
-                                className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-blue-300 bg-[#0055FF]/20 hover:bg-[#0055FF]/30 border border-[#0055FF]/40 transition flex items-center gap-1 cursor-pointer shadow-xs"
+                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition flex items-center gap-1 cursor-pointer shadow-2xs"
                                 title="Mark candidate as Placed to show on Home Page"
                               >
                                 <span>🎓 Mark Placed</span>
@@ -795,7 +813,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                         <button
                           disabled={isSubmitting}
                           onClick={() => handleQuickStatusChange(member.id, "APPROVED")}
-                          className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
                         >
                           Approve
                         </button>
@@ -804,7 +822,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                       {/* Edit Member */}
                       <button
                         onClick={() => setEditingMember(member)}
-                        className="btn-secondary px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer"
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
                       >
                         Edit
                       </button>
@@ -813,7 +831,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                       <button
                         disabled={isSubmitting}
                         onClick={() => handleDeleteMember(member.id, member.name)}
-                        className="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                        className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
                         title="Permanently delete this record"
                       >
                         🗑
@@ -825,7 +843,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
               {filteredMembers.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="p-12 text-center text-gray-500">
+                  <td colSpan={6} className="p-12 text-center text-slate-500 font-medium">
                     {activeTab === "PENDING"
                       ? "No pending candidate applications. Submissions from Join Us will appear here for review."
                       : "No team members found matching criteria."}
@@ -1528,6 +1546,17 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
           </div>,
           document.body
         )}
+
+      {/* Sponsored Ad Management Modal */}
+      <SponsoredAdModal
+        isOpen={isSponsoredModalOpen}
+        onClose={() => setIsSponsoredModalOpen(false)}
+        initialAd={sponsoredAd}
+        onSaveSuccess={(updated) => {
+          setSponsoredAd(updated);
+          setFeedbackMsg({ type: "success", text: "Sponsored banner published and live on Our Team!" });
+        }}
+      />
 
     </div>
   );
