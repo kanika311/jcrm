@@ -20,8 +20,7 @@ export default function DynamicForm({ schema, data, onChange }: DynamicFormProps
         const val = data?.[key] ?? field.default;
         return (
           <div key={key} className="p-4 rounded-xl border" style={{ borderColor: 'var(--border-soft)', background: 'var(--bg-surface)' }}>
-            <label className="block text-sm font-bold mb-1">{field.label}</label>
-            <div className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>Key: {key}</div>
+            <label className="block text-sm font-bold mb-3">{field.label}</label>
             
             {field.type === "string" && (
               <input 

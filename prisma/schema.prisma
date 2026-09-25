@@ -36,6 +36,10 @@ enum TeamApprovalStatus {
   PENDING
   APPROVED
   REJECTED
+  CANDIDATE
+  STUDENT
+  PLACED
+  ALUMNI
 }
 
 // --- MODELS ---
@@ -350,7 +354,8 @@ model TeamMember {
   experience  String?            @default("Fresher / Intern")
   skills      String[]           @default([])
   bio         String?
-  status      TeamApprovalStatus @default(PENDING)
+  company     String?
+  status      TeamApprovalStatus @default(CANDIDATE)
   isVerified  Boolean            @default(true) @map("is_verified")
   createdAt   DateTime           @default(now()) @map("created_at")
   updatedAt   DateTime           @updatedAt @map("updated_at")

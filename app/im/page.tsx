@@ -12,7 +12,7 @@ export default async function TeamDirectoryPage() {
   try {
     const [records, adRecord] = await Promise.all([
       prisma.teamMember.findMany({
-        where: { status: "APPROVED" },
+        where: { status: { in: ["STUDENT", "APPROVED"] } },
         orderBy: { createdAt: "desc" },
       }),
       prisma.siteContent.findUnique({

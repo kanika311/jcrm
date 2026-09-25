@@ -6,6 +6,20 @@ import { usePathname } from "next/navigation";
 
 export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?: string }) {
   const pathname = usePathname();
+  const bannerText = cmsData?.bannerText || "Empowering Businesses with Smart ERP Solutions";
+  const brandDescription =
+    cmsData?.brandDescription ||
+    cmsData?.footerDescription ||
+    "We build powerful ERP systems and digital solutions that help businesses scale, automate workflows, and achieve operational excellence.";
+  const locationText =
+    cmsData?.locationText ||
+    "404, 1st floor, 4th A Cross Rd, HRBR Layout 2nd Block, HRBR Layout, Kalyan Nagar, Bengaluru, Karnataka 560043";
+  const contactEmail = cmsData?.contactEmail || "hr@jcrm.in";
+  const contactPhone = cmsData?.contactPhone || "+91 8310531309";
+  const copyright =
+    cmsData?.copyright ||
+    cmsData?.copyrightText ||
+    "© 2026 JCRM TECHNOLOGIES • All Rights Reserved";
   const isPublicPage =
     
     !pathname?.startsWith("/admin") &&
@@ -18,7 +32,7 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
     <footer className="relative z-10 border-t border-white/90 bg-white/80 backdrop-blur-2xl text-slate-800 shadow-[0_-12px_45px_rgba(0,85,255,0.06)] overflow-hidden">
       {/* Top Banner Tagline Strip */}
       <div className="bg-blue-50/90 border-y border-blue-100/80 text-[#0055FF] py-3.5 px-4 text-center text-sm sm:text-base font-extrabold tracking-wide uppercase">
-        Empowering Businesses with Smart ERP Solutions
+        {bannerText}
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-12">
@@ -38,7 +52,7 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
                 </span>
               </Link>
               <p className="text-slate-600 font-medium text-sm sm:text-base leading-relaxed mb-6 max-w-md">
-                We build powerful ERP systems and digital solutions that help businesses scale, automate workflows, and achieve operational excellence.
+                {brandDescription}
               </p>
             </div>
 
@@ -130,21 +144,21 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span>404, 1st floor, 4th A Cross Rd, HRBR Layout 2nd Block, HRBR Layout, Kalyan Nagar, Bengaluru, Karnataka 560043</span>
+                <span>{locationText}</span>
               </div>
 
               <div className="flex items-center gap-3">
                 <svg className="w-5 h-5 text-[#0055FF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                <a href="mailto:hr@jcrm.in" className="hover:text-[#0055FF] transition-colors font-bold text-slate-900">hr@jcrm.in</a>
+                <a href={`mailto:${contactEmail}`} className="hover:text-[#0055FF] transition-colors font-bold text-slate-900">{contactEmail}</a>
               </div>
 
               <div className="flex items-center gap-3">
                 <svg className="w-5 h-5 text-[#0055FF] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                 </svg>
-                <a href="tel:+918310531309" className="hover:text-[#0055FF] transition-colors font-bold text-slate-900">+91 8310531309</a>
+                <a href={`tel:${contactPhone.replace(/\s+/g, "")}`} className="hover:text-[#0055FF] transition-colors font-bold text-slate-900">{contactPhone}</a>
               </div>
             </div>
           </div>
@@ -154,7 +168,7 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
         {/* Bottom Copyright & Legal Links */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs sm:text-sm text-slate-500 font-semibold">
           <div>
-            Â© 2026 JCRM TECHNOLOGIES â€¢ All Rights Reserved
+            {copyright}
           </div>
 
           <div className="flex items-center gap-3">

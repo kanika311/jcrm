@@ -600,48 +600,7 @@ export default function LandingPageClient({
         </div>
       </section>
 
-      {/* 5. How it works */}
-      <section className="py-10 sm:py-20 md:py-28 relative backdrop-blur-md border-y border-blue-100/60 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-50px" }}
-            className="text-center max-w-3xl mx-auto mb-8 sm:mb-14"
-          >
-            <h2 className="heading-font text-2xl sm:text-4xl font-extrabold mb-2 text-slate-900">How it works</h2>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 relative">
-            <div className="hidden md:block absolute top-10 left-[16%] right-[16%] h-0.5 border-t-2 border-dashed border-blue-200 z-0"></div>
-
-            {(initialData.howItWorks && initialData.howItWorks.filter((h: any) => h.isActive !== false).length > 0) ? (
-              initialData.howItWorks.filter((h: any) => h.isActive !== false).map((item: any, i: number) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true, margin: "-50px" }}
-                  transition={{ delay: i * 0.15 }}
-                  className="relative z-10 flex flex-col items-center text-center p-3"
-                >
-                  <div className="w-12 h-12 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl flex items-center justify-center heading-font text-lg sm:text-2xl font-extrabold mb-3 sm:mb-5 shadow-md backdrop-blur-xl bg-white/80 border-2 border-white text-[#0055FF]">
-                    {item.step || (i + 1)}
-                  </div>
-                  <h3 className="text-base sm:text-xl font-bold mb-1.5 sm:mb-2 text-slate-900">{item.title}</h3>
-                  <p className="text-xs sm:text-sm text-slate-600 font-medium">{item.description}</p>
-                </motion.div>
-              ))
-            ) : (
-              <div className="md:col-span-3 text-center py-6 text-slate-500 italic text-sm">
-                No "How It Works" steps added in CMS
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
-
-      {/* 5.5 Training & 100% Placement Assistance Section */}
+      {/* 5. Training & 100% Placement Assistance Section */}
       <section className="py-10 sm:py-20 md:py-24 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div

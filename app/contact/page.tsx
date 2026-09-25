@@ -3,6 +3,11 @@ import { getSiteContent } from "@/lib/cms";
 
 export default async function ContactPage() {
   const cmsData = await getSiteContent("public-contact");
+  const heading = cmsData?.heading || "Contact & Consultation";
+  const subtitle = cmsData?.subtitle || "Let's Build Something Smarter Together";
+  const address = cmsData?.address || "404, 1st Floor, 4th A Cross Rd, HRBR Layout 2nd Block, Kalyan Nagar, Bengaluru, Karnataka 560043";
+  const email = cmsData?.email || "hr@jcrm.in";
+  const phone = cmsData?.phone || "+91 8310531309";
 
   return (
     <div className="min-h-screen pt-32 pb-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
@@ -17,7 +22,7 @@ export default async function ContactPage() {
             GET IN TOUCH
           </span>
           <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 mb-4 tracking-tight">
-            Contact & <span className="text-[#0055FF]">Consultation</span>
+            {heading}
           </h1>
         
         </div>
@@ -33,7 +38,7 @@ export default async function ContactPage() {
                   GET IN TOUCH
                 </span>
                 <h2 className="heading-font text-2xl sm:text-3xl font-extrabold text-slate-900 mb-3 tracking-tight">
-                  Let's Build Something Smarter Together
+                  {subtitle}
                 </h2>
 
 
@@ -51,7 +56,7 @@ export default async function ContactPage() {
                     <div>
                       <h4 className="heading-font font-bold text-slate-900 text-base mb-1">Corporate HQ</h4>
                       <p className="text-xs sm:text-sm font-semibold text-slate-600 leading-relaxed">
-                        404, 1st Floor, 4th A Cross Rd, HRBR Layout 2nd Block, Kalyan Nagar, Bengaluru, Karnataka 560043
+                        {address}
                       </p>
                     </div>
                   </div>
@@ -66,7 +71,7 @@ export default async function ContactPage() {
                     <div>
                       <h4 className="heading-font font-bold text-slate-900 text-base mb-1">HR & Careers Desk</h4>
                       <p className="text-xs sm:text-sm font-semibold text-slate-600">
-                        <a href="mailto:hr@jcrm.in" className="hover:text-[#0055FF] transition-colors">hr@jcrm.in</a> • <a href="mailto:info@jcrm.in" className="hover:text-[#0055FF] transition-colors">info@jcrm.in</a>
+                        <a href={`mailto:${email}`} className="hover:text-[#0055FF] transition-colors">{email}</a>
                       </p>
                     </div>
                   </div>
@@ -81,7 +86,7 @@ export default async function ContactPage() {
                     <div>
                       <h4 className="heading-font font-bold text-slate-900 text-base mb-1">Direct Support Helpline</h4>
                       <p className="text-xs sm:text-sm font-semibold text-slate-600">
-                        <a href="tel:+918310531309" className="hover:text-[#0055FF] transition-colors font-bold text-slate-900">+91 8310531309</a>
+                        <a href={`tel:${String(phone).replace(/\s+/g, "")}`} className="hover:text-[#0055FF] transition-colors font-bold text-slate-900">{phone}</a>
                         <span className="text-xs font-semibold text-slate-500 block mt-0.5">(24x7 Technical Desk)</span>
                       </p>
                     </div>

@@ -255,18 +255,18 @@ Candidate is requesting fast-track review for interview scheduling.`;
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto rounded-[36px] bg-[#D4E8F8]/90 backdrop-blur-2xl border border-white/90 shadow-[0_20px_60px_rgba(0,85,255,0.15)] overflow-hidden p-6 sm:p-12 relative">
+    <div className="w-full max-w-4xl mx-auto rounded-2xl sm:rounded-[36px] bg-[#D4E8F8]/90 backdrop-blur-2xl border border-white/90 shadow-[0_20px_60px_rgba(0,85,255,0.15)] overflow-hidden p-4 sm:p-8 lg:p-12 relative">
       
       {/* Form Title Header */}
-      <div className="text-center max-w-2xl mx-auto mb-10">
-        <span className="inline-block px-4 py-1.5 mb-3 text-xs font-extrabold uppercase tracking-widest text-[#0055FF] bg-white/90 rounded-full border border-blue-100 shadow-xs">
+      <div className="text-center max-w-2xl mx-auto mb-6 sm:mb-10">
+        <span className="inline-block px-3 sm:px-4 py-1 sm:py-1.5 mb-3 text-[10px] sm:text-xs font-extrabold uppercase tracking-wide sm:tracking-widest text-[#0055FF] bg-white/90 rounded-full border border-blue-100 shadow-xs">
           SMART CANDIDATE REGISTRATION
         </span>
-        <h2 className="heading-font text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h2 className="heading-font text-[22px] leading-snug sm:text-4xl font-extrabold text-slate-900 tracking-tight">
           Join JCRM Engineering & Internship Program
         </h2>
-        <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-2">
-          Smart autocomplete inputs, cascading location selectors & modern DOB calendar picker.
+        <p className="text-xs sm:text-sm font-semibold text-slate-600 mt-2 px-1">
+          Fill your details to apply for JCRM engineering and internship roles.
         </p>
       </div>
 
@@ -290,33 +290,33 @@ Candidate is requesting fast-track review for interview scheduling.`;
       </datalist>
 
       {/* SMART FORM (EXACT SCREENSHOT LAYOUT MATCH) */}
-      <form onSubmit={handleSubmit} className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
         
         {/* Row 1: Full Name & Phone Number */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Full Name *
             </label>
             <input
               type="text"
               required
               placeholder="e.g. Akasha Sharma"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
               value={formData.fullName}
               onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Phone Number *
             </label>
             <input
               type="tel"
               required
               placeholder="+91 98765 43210"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
               value={formData.phoneNumber}
               onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
             />
@@ -324,16 +324,16 @@ Candidate is requesting fast-track review for interview scheduling.`;
         </div>
 
         {/* Row 2: Email Address & SMART DOB PICKER (TYPE DIRECTLY OR CALENDAR POPUP) */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Email Address *
             </label>
             <input
               type="email"
               required
               placeholder="candidate@gmail.com"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
               value={formData.emailAddress}
               onChange={(e) => setFormData({ ...formData, emailAddress: e.target.value })}
             />
@@ -341,7 +341,7 @@ Candidate is requesting fast-track review for interview scheduling.`;
 
           {/* SMART DOB SECTION WITH DIRECT TYPE + MODERN CALENDAR */}
           <div className="relative">
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Date of Birth * (Type or Pick Calendar)
             </label>
 
@@ -350,7 +350,7 @@ Candidate is requesting fast-track review for interview scheduling.`;
                 type="text"
                 required
                 placeholder="YYYY-MM-DD (e.g. 2003-08-15)"
-                className="w-full pr-12 pl-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+                className="w-full pr-12 pl-3.5 sm:pl-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
                 value={formData.dateOfBirth}
                 onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
               />
@@ -367,7 +367,7 @@ Candidate is requesting fast-track review for interview scheduling.`;
 
             {/* MODERN CALENDAR POPUP MODAL */}
             {showCalendar && (
-              <div className="absolute top-full left-0 right-0 mt-2 z-40 p-4 rounded-3xl bg-white/95 backdrop-blur-2xl border border-blue-200 shadow-2xl space-y-3 animate-fade-in">
+              <div className="absolute top-full left-0 right-0 mt-2 z-40 p-3 sm:p-4 rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-2xl border border-blue-200 shadow-2xl space-y-3 animate-fade-in">
                 
                 {/* Year & Month Selection Header */}
                 <div className="flex items-center justify-between gap-2 border-b border-blue-100 pb-3">
@@ -433,15 +433,15 @@ Candidate is requesting fast-track review for interview scheduling.`;
         </div>
 
         {/* Row 3: COUNTRY & STATE DROPDOWNS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Country *
             </label>
             <div className="relative">
               <select
                 required
-                className="w-full px-4 py-3.5 pr-10 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
+                className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 pr-10 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
                 value={formData.country}
                 onChange={(e) => {
                   const newCountry = e.target.value;
@@ -472,7 +472,7 @@ Candidate is requesting fast-track review for interview scheduling.`;
                 type="text"
                 required
                 placeholder="Type your country name..."
-                className="mt-2 w-full px-4 py-2.5 rounded-xl bg-white border border-blue-200 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
+                className="mt-2 w-full px-3.5 sm:px-4 py-3 rounded-xl bg-white border border-blue-200 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
                 value={customCountry}
                 onChange={(e) => setCustomCountry(e.target.value)}
               />
@@ -480,13 +480,13 @@ Candidate is requesting fast-track review for interview scheduling.`;
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               State *
             </label>
             <div className="relative">
               <select
                 required
-                className="w-full px-4 py-3.5 pr-10 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
+                className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 pr-10 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
                 value={formData.state}
                 onChange={(e) => {
                   const newState = e.target.value;
@@ -516,7 +516,7 @@ Candidate is requesting fast-track review for interview scheduling.`;
                 type="text"
                 required
                 placeholder="Type your state name..."
-                className="mt-2 w-full px-4 py-2.5 rounded-xl bg-white border border-blue-200 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
+                className="mt-2 w-full px-3.5 sm:px-4 py-3 rounded-xl bg-white border border-blue-200 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
                 value={customState}
                 onChange={(e) => setCustomState(e.target.value)}
               />
@@ -525,15 +525,15 @@ Candidate is requesting fast-track review for interview scheduling.`;
         </div>
 
         {/* Row 4: CITY & PIN CODE */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               City *
             </label>
             <div className="relative">
               <select
                 required
-                className="w-full px-4 py-3.5 pr-10 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
+                className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 pr-10 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer appearance-none"
                 value={formData.city}
                 onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               >
@@ -554,7 +554,7 @@ Candidate is requesting fast-track review for interview scheduling.`;
                 type="text"
                 required
                 placeholder="Type your city name..."
-                className="mt-2 w-full px-4 py-2.5 rounded-xl bg-white border border-blue-200 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
+                className="mt-2 w-full px-3.5 sm:px-4 py-3 rounded-xl bg-white border border-blue-200 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
                 value={customCity}
                 onChange={(e) => setCustomCity(e.target.value)}
               />
@@ -562,14 +562,14 @@ Candidate is requesting fast-track review for interview scheduling.`;
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Pin Code *
             </label>
             <input
               type="text"
               required
               placeholder="576101 / 560001"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
               value={formData.pinCode}
               onChange={(e) => setFormData({ ...formData, pinCode: e.target.value })}
             />
@@ -577,13 +577,13 @@ Candidate is requesting fast-track review for interview scheduling.`;
         </div>
 
         {/* Row 5: Department & Skills */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Department / Target Role *
             </label>
             <select
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer"
               value={formData.department}
               onChange={(e) => setFormData({ ...formData, department: e.target.value })}
             >
@@ -598,13 +598,13 @@ Candidate is requesting fast-track review for interview scheduling.`;
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Skills (comma separated)
             </label>
             <input
               type="text"
               placeholder="e.g. Python, React, PyTorch, SQL..."
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
               value={formData.skills}
               onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
             />
@@ -612,30 +612,30 @@ Candidate is requesting fast-track review for interview scheduling.`;
         </div>
 
         {/* Row 6: College / University & Course / Major */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               College / University *
             </label>
             <input
               type="text"
               required
               placeholder="e.g. SMVITM Udupi / Christ Univ"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
               value={formData.college}
               onChange={(e) => setFormData({ ...formData, college: e.target.value })}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Course / Major *
             </label>
             <input
               type="text"
               required
               placeholder="e.g. B.E. CSE / B.Tech IT / BCA"
-              className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
               value={formData.courseMajor}
               onChange={(e) => setFormData({ ...formData, courseMajor: e.target.value })}
             />
@@ -644,11 +644,11 @@ Candidate is requesting fast-track review for interview scheduling.`;
 
         {/* Row 7: Experience Level */}
         <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
             Experience Level *
           </label>
           <select
-            className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+            className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs cursor-pointer"
             value={formData.experienceLevel}
             onChange={(e) => setFormData({ ...formData, experienceLevel: e.target.value })}
           >
@@ -660,82 +660,95 @@ Candidate is requesting fast-track review for interview scheduling.`;
 
         {/* Row 8: Profile Photo Upload with Live Thumbnail Preview (MANDATORY) */}
         <div>
-          <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider">
-              Profile Photo <span className="text-red-500 font-black">* (Mandatory)</span>
+          <div className="flex flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between mb-2">
+            <label htmlFor="join-photo-upload" className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider">
+              Profile Photo <span className="text-red-500 font-black">*</span>
             </label>
             {photoPreview ? (
-              <span className="text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                ✓ Photo Uploaded
+              <span className="w-fit text-[10px] sm:text-[11px] font-bold text-emerald-600 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Photo uploaded
               </span>
             ) : (
-              <span className="text-[11px] font-bold text-red-500 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
-                * Photo Required
+              <span className="w-fit text-[10px] sm:text-[11px] font-bold text-red-500 bg-red-50 px-2.5 py-0.5 rounded-full border border-red-200">
+                Photo required
               </span>
             )}
           </div>
-          <div className={`flex items-center gap-4 bg-white p-3 rounded-2xl border transition-all ${
-            !photoPreview ? 'border-dashed border-red-300 bg-red-50/20' : 'border-emerald-300 bg-emerald-50/10'
-          }`}>
-            <input
-              type="file"
-              accept="image/*"
-              required
-              className="text-xs text-slate-600 font-semibold file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-blue-50 file:text-[#0055FF] hover:file:bg-blue-100 cursor-pointer flex-1"
-              onChange={handlePhotoUpload}
-            />
 
+          <label
+            htmlFor="join-photo-upload"
+            className={`flex flex-col items-center justify-center gap-3 min-h-[148px] sm:min-h-0 sm:flex-row sm:justify-start p-4 sm:p-3 rounded-2xl border-2 border-dashed transition-all cursor-pointer ${
+              !photoPreview
+                ? "border-red-300 bg-white"
+                : "border-emerald-300 bg-emerald-50/20"
+            }`}
+          >
             {photoPreview ? (
-              <div className="w-14 h-14 rounded-xl overflow-hidden border-2 border-[#0055FF] shrink-0 shadow-md relative">
+              <div className="w-20 h-20 sm:w-14 sm:h-14 rounded-2xl overflow-hidden border-2 border-[#0055FF] shrink-0 shadow-md">
                 <img src={photoPreview} alt="Preview" className="w-full h-full object-cover" />
               </div>
             ) : (
-              <div className="w-14 h-14 rounded-xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center shrink-0 text-slate-400">
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="w-16 h-16 sm:w-14 sm:h-14 rounded-2xl border border-dashed border-slate-300 bg-slate-50 flex items-center justify-center shrink-0 text-slate-400">
+                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
             )}
-          </div>
-          <p className="text-[11px] text-slate-500 font-medium mt-1">
-            Please upload a clear, professional portrait photo. Max size 5MB (JPG, PNG, WebP).
-          </p>
+
+            <div className="text-center sm:text-left">
+              <span className="block text-sm font-extrabold text-[#0055FF]">
+                {photoPreview ? "Change photo" : "Tap to upload photo"}
+              </span>
+              <span className="block text-[11px] text-slate-500 font-medium mt-0.5">
+                Clear portrait · JPG, PNG, WebP · Max 5MB
+              </span>
+            </div>
+
+            <input
+              id="join-photo-upload"
+              type="file"
+              accept="image/*"
+              required
+              className="sr-only"
+              onChange={handlePhotoUpload}
+            />
+          </label>
         </div>
 
         {/* Row 9: About Yourself */}
         <div>
-          <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
             About Yourself
           </label>
           <textarea
             rows={4}
             placeholder="Tell us about your final year projects, career aspirations, and programming interests..."
-            className="w-full px-4 py-3.5 rounded-2xl bg-white border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
+            className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs resize-y min-h-[120px]"
             value={formData.aboutYourself}
             onChange={(e) => setFormData({ ...formData, aboutYourself: e.target.value })}
           />
         </div>
 
         {/* Row 10: Terms & Conditions Checkbox */}
-        <div className="flex items-center gap-2.5 pt-2">
+        <div className="flex items-start gap-3 pt-1">
           <input
             type="checkbox"
             id="terms"
-            className="w-4 h-4 rounded text-[#0055FF] focus:ring-[#0055FF] border-slate-300 cursor-pointer"
+            className="mt-0.5 w-5 h-5 shrink-0 rounded text-[#0055FF] focus:ring-[#0055FF] border-slate-300 cursor-pointer"
             checked={formData.agreeTerms}
             onChange={(e) => setFormData({ ...formData, agreeTerms: e.target.checked })}
           />
-          <label htmlFor="terms" className="text-xs font-bold text-slate-700 cursor-pointer">
+          <label htmlFor="terms" className="text-xs sm:text-sm font-bold text-slate-700 cursor-pointer leading-relaxed">
             I agree to the <span className="text-[#0055FF] hover:underline">Terms & Conditions</span> and consent to candidate profile indexing in the JCRM Talent Directory.
           </label>
         </div>
 
-        {/* Submit Action Button (Exact Style Match to Orange/Copper Button in Screenshot) */}
-        <div className="pt-4 text-center">
+        {/* Submit Action Button */}
+        <div className="pt-2 sm:pt-4 text-center pb-2">
           <button
             type="submit"
             disabled={isSubmitting}
-            className="px-10 py-4 rounded-2xl text-sm font-extrabold text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 transition-all shadow-lg hover:shadow-orange-500/30 hover:scale-105 cursor-pointer inline-flex items-center gap-2.5"
+            className="w-full sm:w-auto px-8 py-3.5 sm:py-4 rounded-2xl text-sm font-extrabold text-white bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 transition-all shadow-lg hover:shadow-orange-500/30 sm:hover:scale-105 cursor-pointer inline-flex items-center justify-center gap-2.5 disabled:opacity-60"
           >
             {isSubmitting ? (
               <span>Submitting Candidate Profile...</span>

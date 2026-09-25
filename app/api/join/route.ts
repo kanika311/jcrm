@@ -53,7 +53,7 @@ export async function POST(req: Request) {
         experience: experienceLevel || "Fresher / Intern",
         skills: skillsArray,
         bio: aboutYourself || null,
-        status: "PENDING", // Awaiting Admin Approval
+        status: "CANDIDATE",
         isVerified: false,
       },
     });

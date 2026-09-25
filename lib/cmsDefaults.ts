@@ -14,6 +14,15 @@ export interface PageSchema {
   schema: Record<string, FieldSchema>;
 }
 
+export const CMS_EDITOR_PAGES: { id: string; name: string; path: string; description: string }[] = [
+  { id: "public-home", name: "Home Page", path: "/", description: "Hero text, stats, and homepage sections" },
+  { id: "public-about", name: "About Page", path: "/about", description: "About heading, story, and team" },
+  { id: "public-contact", name: "Contact Page", path: "/contact", description: "Contact heading, email, phone, and address" },
+  { id: "public-privacy", name: "Privacy Policy", path: "/legal/privacy", description: "Privacy policy text and clauses" },
+  { id: "public-terms", name: "Terms & Conditions", path: "/legal/terms", description: "Terms and conditions text" },
+  { id: "global-footer", name: "Footer", path: "/", description: "Footer text, contact details, and copyright" },
+];
+
 export const CMS_SCHEMAS: PageSchema[] = [
   {
     id: "cms-config",
@@ -129,15 +138,15 @@ export const CMS_SCHEMAS: PageSchema[] = [
   },
   {
     id: "global-footer",
-    name: "Global Footer & Links",
+    name: "Footer",
     category: "global",
     schema: {
-      footerDescription: { type: "text", label: "Footer Company Description", default: "JCRM Technologies is an advanced engineering academy and software consulting enterprise providing production-ready training and enterprise automation solutions." },
-      newsletterHeading: { type: "string", label: "Newsletter Box Heading", default: "Stay Ahead in Tech" },
-      newsletterSubtext: { type: "string", label: "Newsletter Subtext", default: "Get weekly tech roadmaps, internship updates & placement insights." },
-      contactEmail: { type: "string", label: "Footer Contact Email", default: "info@jcrmtechnologies.com" },
-      contactPhone: { type: "string", label: "Footer Contact Phone", default: "+91 98765 43210" },
-      locationText: { type: "string", label: "Footer Location", default: "Bangalore, India" },
+      bannerText: { type: "string", label: "Top banner text", default: "Empowering Businesses with Smart ERP Solutions" },
+      brandDescription: { type: "text", label: "Company description", default: "We build powerful ERP systems and digital solutions that help businesses scale, automate workflows, and achieve operational excellence." },
+      locationText: { type: "text", label: "Office address", default: "404, 1st floor, 4th A Cross Rd, HRBR Layout 2nd Block, HRBR Layout, Kalyan Nagar, Bengaluru, Karnataka 560043" },
+      contactEmail: { type: "string", label: "Email", default: "hr@jcrm.in" },
+      contactPhone: { type: "string", label: "Phone", default: "+91 8310531309" },
+      copyright: { type: "string", label: "Copyright text", default: "© 2026 JCRM TECHNOLOGIES • All Rights Reserved" },
     }
   },
   {
@@ -297,22 +306,12 @@ export const CMS_SCHEMAS: PageSchema[] = [
   },
   {
     id: "public-about",
-    name: "About Us Page",
+    name: "About Page",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Page Heading", default: "About JCRM Technology" },
-      story: { type: "text", label: "Our Story", default: "We started with a simple idea..." },
-      team: {
-        type: "array",
-        label: "Team Members",
-        itemSchema: {
-          name: { type: "string", label: "Name", default: "John Doe" },
-          role: { type: "string", label: "Role", default: "Instructor" },
-          imageUrl: { type: "image", label: "Photo", default: "" },
-          isActive: { type: "boolean", label: "Is Active?", default: true }
-        },
-        default: []
-      }
+      heroTitle: { type: "string", label: "Page heading", default: "Bridging Enterprise Technology with Next-Gen Engineering Talent" },
+      heroSubtitle: { type: "text", label: "Intro text", default: "We build ERP systems enterprises own, and train engineers on real production code." },
+      story: { type: "text", label: "Our story", default: "We started with a simple idea: software you truly own, and training that ships real products." },
     }
   },
   // --- ADDITIONAL PUBLIC PAGES ---
@@ -390,13 +389,14 @@ export const CMS_SCHEMAS: PageSchema[] = [
   },
   {
     id: "public-contact",
-    name: "Contact Us",
+    name: "Contact Page",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Heading", default: "Get in Touch" },
-      subtitle: { type: "text", label: "Subtitle", default: "We'd love to hear from you." },
-      email: { type: "string", label: "Support Email", default: "support@example.com" },
-      address: { type: "text", label: "Office Address", default: "123 Engineering Way, Tech City" }
+      heading: { type: "string", label: "Page heading", default: "Contact & Consultation" },
+      subtitle: { type: "text", label: "Intro text", default: "Let's Build Something Smarter Together" },
+      address: { type: "text", label: "Office address", default: "404, 1st Floor, 4th A Cross Rd, HRBR Layout 2nd Block, Kalyan Nagar, Bengaluru, Karnataka 560043" },
+      email: { type: "string", label: "Email", default: "hr@jcrm.in" },
+      phone: { type: "string", label: "Phone", default: "+91 8310531309" },
     }
   },
   {
@@ -612,57 +612,6 @@ export const CMS_SCHEMAS: PageSchema[] = [
     category: "admin",
     schema: {
       heading: { type: "string", label: "Heading", default: "Financial Reports" }
-    }
-  },
-  {
-    id: "global-footer",
-    name: "Footer Settings",
-    category: "global",
-    schema: {
-      brandDescription: { type: "text", label: "Brand Description", default: "Engineering education for the future. Built by engineers, for engineers." },
-      copyright: { type: "string", label: "Copyright Text", default: "© 2026 JCRM Technology Education Inc. All rights reserved." },
-      learnLinks: {
-        type: "array",
-        label: "Learn Section Links",
-        itemSchema: {
-          label: { type: "string", label: "Label", default: "" },
-          url: { type: "string", label: "URL", default: "" }
-        },
-        default: [
-          { label: "Courses", url: "/courses" },
-          { label: "Placements", url: "/placements" },
-          { label: "Testimonials", url: "/testimonials" },
-          { label: "Insights", url: "/insights" }
-        ]
-      },
-      companyLinks: {
-        type: "array",
-        label: "Company Section Links",
-        itemSchema: {
-          label: { type: "string", label: "Label", default: "" },
-          url: { type: "string", label: "URL", default: "" }
-        },
-        default: [
-          { label: "About Us", url: "/about" },
-          { label: "Careers", url: "/careers" },
-          { label: "Contact", url: "/contact" },
-          { label: "Feedback", url: "/feedback" }
-        ]
-      },
-      legalLinks: {
-        type: "array",
-        label: "Legal Section Links",
-        itemSchema: {
-          label: { type: "string", label: "Label", default: "" },
-          url: { type: "string", label: "URL", default: "" }
-        },
-        default: [
-          { label: "Privacy Policy", url: "/legal/privacy" },
-          { label: "Terms of Service", url: "/legal/terms" },
-          { label: "Cookie Policy", url: "/legal/cookies" },
-          { label: "Refund Policy", url: "/legal/refund" }
-        ]
-      }
     }
   },
   {

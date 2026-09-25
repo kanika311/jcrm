@@ -2,8 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import Link from "next/link";
 import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
 import SponsoredAdModal from "@/components/SponsoredAdModal";
+import { normalizeTeamStatus, TEAM_STATUSES, TEAM_STATUS_LABELS, type TeamStatus } from "@/lib/teamStatus";
 
 export interface TeamMemberItem {
   id: string;
@@ -23,7 +25,8 @@ export interface TeamMemberItem {
   experience?: string | null;
   skills: string[];
   bio?: string | null;
-  status: "PENDING" | "APPROVED" | "REJECTED";
+  company?: string | null;
+  status: "PENDING" | "APPROVED" | "REJECTED" | "CANDIDATE" | "STUDENT" | "PLACED" | "ALUMNI";
   isVerified: boolean;
   createdAt: string;
   updatedAt: string;
@@ -31,7 +34,7 @@ export interface TeamMemberItem {
 
 export default function TeamManagementClient({ initialMembers, initialPlacedCandidates = [] }: { initialMembers: TeamMemberItem[]; initialPlacedCandidates?: any[] }) {
   const [members, setMembers] = useState<TeamMemberItem[]>(initialMembers);
-  const [activeTab, setActiveTab] = useState<"ALL" | "PENDING" | "APPROVED" | "REJECTED" | "PLACED">("PENDING");
+  const [activeTab, setActiveTab] = useState<"ALL" | "CANDIDATE" | "STUDENT" | "PLACED" | "ALUMNI">("CANDIDATE");
   const [searchTerm, setSearchTerm] = useState("");
 
   // Placed Candidates State (Synced with Home Page)
@@ -43,7 +46,6 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingMember, setEditingMember] = useState<TeamMemberItem | null>(null);
   const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
   const [sponsoredAd, setSponsoredAd] = useState<SponsoredAd>(DEFAULT_SPONSORED_AD);
 
@@ -62,7 +64,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
   const [newSkills, setNewSkills] = useState("Python, React, Machine Learning");
   const [newBio, setNewBio] = useState("");
   const [newImage, setNewImage] = useState("");
-  const [newStatus, setNewStatus] = useState<"PENDING" | "APPROVED" | "REJECTED">("APPROVED");
+  const [newStatus, setNewStatus] = useState<"CANDIDATE" | "STUDENT" | "PLACED" | "ALUMNI">("STUDENT");
   const [newIsVerified, setNewIsVerified] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -71,7 +73,6 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
   const [mounted, setMounted] = useState(false);
 
   const addFileInputRef = useRef<HTMLInputElement>(null);
-  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -85,14 +86,14 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
   // Lock background scrolling when modal is open
   useEffect(() => {
-    if (isAddModalOpen || editingMember) {
+    if (isAddModalOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [isAddModalOpen, editingMember]);
+  }, [isAddModalOpen]);
 
   // Handle Image File Upload
   const handleImageFileUpload = async (file: File, target: "add" | "edit") => {
@@ -115,7 +116,6 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
         const data = await res.json();
         if (data.url) {
           if (target === "add") setNewImage(data.url);
-          else if (editingMember) setEditingMember({ ...editingMember, image: data.url });
           return;
         }
       }
@@ -123,7 +123,6 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
       reader.onload = e => {
         const url = e.target?.result as string;
         if (target === "add") setNewImage(url);
-        else if (editingMember) setEditingMember({ ...editingMember, image: url });
       };
       reader.readAsDataURL(file);
     } catch {
@@ -131,7 +130,6 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
       reader.onload = e => {
         const url = e.target?.result as string;
         if (target === "add") setNewImage(url);
-        else if (editingMember) setEditingMember({ ...editingMember, image: url });
       };
       reader.readAsDataURL(file);
     } finally {
@@ -185,6 +183,22 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to save placement");
 
+      await fetch("/api/admin/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: placementModalMember.id,
+          status: "PLACED",
+          company: placementCompany.trim(),
+        }),
+      });
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === placementModalMember.id
+            ? { ...m, status: "PLACED", company: placementCompany.trim() }
+            : m
+        )
+      );
       setPlacedList(data.candidates);
       setPlacementModalMember(null);
       setFeedbackMsg({
@@ -220,6 +234,14 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to unmark placement");
 
+      await fetch("/api/admin/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: member.id, status: "STUDENT" }),
+      });
+      setMembers((prev) =>
+        prev.map((m) => (m.id === member.id ? { ...m, status: "STUDENT" } : m))
+      );
       setPlacedList(data.candidates);
       setFeedbackMsg({
         type: "success",
@@ -232,27 +254,38 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
     }
   };
 
-  // Quick Status Action (Approve / Reject)
-  const handleQuickStatusChange = async (id: string, newStatus: "APPROVED" | "REJECTED" | "PENDING") => {
+  const handleStatusSelect = (member: TeamMemberItem, nextStatus: TeamStatus) => {
+    if (normalizeTeamStatus(member.status) === nextStatus) return;
+    if (nextStatus === "PLACED") {
+      openPlacementModal(member);
+      return;
+    }
+    void handleQuickStatusChange(member.id, nextStatus);
+  };
+
+  const handleQuickStatusChange = async (id: string, nextStatus: TeamStatus) => {
     setIsSubmitting(true);
     setFeedbackMsg(null);
     try {
       const res = await fetch("/api/admin/team", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: newStatus }),
+        body: JSON.stringify({ id, status: nextStatus }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to update status");
 
       setMembers(prev =>
-        prev.map(m => (m.id === id ? { ...m, status: newStatus } : m))
+        prev.map(m => (m.id === id ? { ...m, status: nextStatus } : m))
       );
       setFeedbackMsg({
         type: "success",
-        text: newStatus === "APPROVED"
-          ? "Candidate approved! They are now live on the public Our Team directory."
-          : `Candidate status updated to ${newStatus}.`,
+        text:
+          nextStatus === "STUDENT"
+            ? "Marked as Student. Profile can appear on Our Team."
+            : nextStatus === "PLACED" || nextStatus === "ALUMNI"
+            ? `Marked as ${nextStatus === "PLACED" ? "Placed" : "Alumni"}. They will show on the home page.`
+            : "Status updated to Candidate.",
       });
     } catch (err: any) {
       setFeedbackMsg({ type: "error", text: err.message || "An error occurred" });
@@ -312,35 +345,6 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
     }
   };
 
-  // Handle Edit Member Form Submit
-  const handleEditMemberSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingMember) return;
-    setIsSubmitting(true);
-    setFeedbackMsg(null);
-
-    try {
-      const res = await fetch("/api/admin/team", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(editingMember),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to update member");
-
-      setMembers(prev =>
-        prev.map(m => (m.id === editingMember.id ? { ...m, ...editingMember } : m))
-      );
-      setEditingMember(null);
-      setFeedbackMsg({ type: "success", text: `Member "${editingMember.name}" updated successfully!` });
-    } catch (err: any) {
-      setFeedbackMsg({ type: "error", text: err.message || "Failed to update member" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   // Handle Delete Member
   const handleDeleteMember = async (id: string, name: string) => {
     if (!window.confirm(`Are you sure you want to permanently delete "${name}"? This action cannot be undone.`)) {
@@ -367,20 +371,15 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
   };
 
   // Calculate counts
-  const pendingCount = members.filter(m => m.status === "PENDING").length;
-  const approvedCount = members.filter(m => m.status === "APPROVED").length;
-  const rejectedCount = members.filter(m => m.status === "REJECTED").length;
-  const placedCount = placedList.length;
+  const candidateCount = members.filter(m => normalizeTeamStatus(m.status) === "CANDIDATE").length;
+  const studentCount = members.filter(m => normalizeTeamStatus(m.status) === "STUDENT").length;
+  const placedCount = members.filter(m => normalizeTeamStatus(m.status) === "PLACED").length;
+  const alumniCount = members.filter(m => normalizeTeamStatus(m.status) === "ALUMNI").length;
 
   // Filtered members list
   const filteredMembers = members.filter(m => {
-    const isPlaced = Boolean(getPlacementInfo(m));
     const matchesTab =
-      activeTab === "ALL"
-        ? true
-        : activeTab === "PLACED"
-        ? isPlaced
-        : m.status === activeTab;
+      activeTab === "ALL" ? true : normalizeTeamStatus(m.status) === activeTab;
     const searchLower = searchTerm.toLowerCase();
     const matchesSearch =
       m.name.toLowerCase().includes(searchLower) ||
@@ -427,7 +426,32 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Placed Candidates Card */}
+        <div
+          onClick={() => setActiveTab("CANDIDATE")}
+          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            activeTab === "CANDIDATE"
+              ? "border-amber-500 bg-amber-50/80 shadow-md ring-2 ring-amber-500/20"
+              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
+          }`}
+        >
+          <span className="text-xs font-bold text-amber-700 block mb-2">Candidate</span>
+          <div className="text-3xl font-black text-slate-900">{candidateCount}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">Join Us applications</p>
+        </div>
+
+        <div
+          onClick={() => setActiveTab("STUDENT")}
+          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
+            activeTab === "STUDENT"
+              ? "border-blue-500 bg-blue-50/80 shadow-md ring-2 ring-blue-500/20"
+              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
+          }`}
+        >
+          <span className="text-xs font-bold text-blue-700 block mb-2">Student</span>
+          <div className="text-3xl font-black text-slate-900">{studentCount}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">Visible on Our Team</p>
+        </div>
+
         <div
           onClick={() => setActiveTab("PLACED")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
@@ -437,84 +461,40 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
           }`}
         >
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">
-              🎓 Placed
-            </span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800">
-              HOME
-            </span>
+            <span className="text-xs font-bold text-emerald-700">Placed</span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">HOME</span>
           </div>
           <div className="text-3xl font-black text-slate-900">{placedCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">Live in Home carousel</p>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">Shows on home page</p>
         </div>
 
-        {/* Pending Review Card */}
         <div
-          onClick={() => setActiveTab("PENDING")}
+          onClick={() => setActiveTab("ALUMNI")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "PENDING"
-              ? "border-amber-500 bg-amber-50/80 shadow-md ring-2 ring-amber-500/20"
-              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-700">
-              ⏳ Pending Review
-            </span>
-            {pendingCount > 0 && (
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-ping" />
-            )}
-          </div>
-          <div className="text-3xl font-black text-slate-900">{pendingCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">From Join Us form</p>
-        </div>
-
-        {/* Approved & Live Card */}
-        <div
-          onClick={() => setActiveTab("APPROVED")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "APPROVED"
-              ? "border-blue-500 bg-blue-50/80 shadow-md ring-2 ring-blue-500/20"
-              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
-          }`}
-        >
-          <span className="text-xs font-bold uppercase tracking-wider text-blue-700 block mb-2">
-            ✅ Approved &amp; Live
-          </span>
-          <div className="text-3xl font-black text-slate-900">{approvedCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">Visible on /ourteam</p>
-        </div>
-
-        {/* Total Profiles Card */}
-        <div
-          onClick={() => setActiveTab("ALL")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "ALL"
+            activeTab === "ALUMNI"
               ? "border-indigo-500 bg-indigo-50/80 shadow-md ring-2 ring-indigo-500/20"
               : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
           }`}
         >
-          <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 block mb-2">
-            👥 Total Profiles
-          </span>
-          <div className="text-3xl font-black text-slate-900">{members.length}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">All database records</p>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-bold text-indigo-700">Alumni</span>
+            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">HOME</span>
+          </div>
+          <div className="text-3xl font-black text-slate-900">{alumniCount}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">Shows on home page</p>
         </div>
 
-        {/* Rejected Card */}
         <div
-          onClick={() => setActiveTab("REJECTED")}
+          onClick={() => setActiveTab("ALL")}
           className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "REJECTED"
-              ? "border-rose-500 bg-rose-50/80 shadow-md ring-2 ring-rose-500/20"
+            activeTab === "ALL"
+              ? "border-slate-500 bg-slate-50 shadow-md ring-2 ring-slate-500/20"
               : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
           }`}
         >
-          <span className="text-xs font-bold uppercase tracking-wider text-rose-700 block mb-2">
-            ❌ Rejected
-          </span>
-          <div className="text-3xl font-black text-slate-900">{rejectedCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">Archived applications</p>
+          <span className="text-xs font-bold text-slate-700 block mb-2">Total</span>
+          <div className="text-3xl font-black text-slate-900">{members.length}</div>
+          <p className="text-[11px] font-medium text-slate-500 mt-1">All profiles</p>
         </div>
       </div>
 
@@ -522,63 +502,44 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl border border-slate-200 bg-white shadow-xs">
           <button
-            onClick={() => setActiveTab("PENDING")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "PENDING"
-                ? "bg-amber-500 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            onClick={() => setActiveTab("CANDIDATE")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "CANDIDATE" ? "bg-amber-500 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <span>Pending Approvals</span>
-            <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-extrabold ${
-              activeTab === "PENDING" ? "bg-white/20 text-white" : "bg-slate-200 text-slate-700"
-            }`}>
-              {pendingCount}
-            </span>
+            Candidate ({candidateCount})
           </button>
-
           <button
-            onClick={() => setActiveTab("APPROVED")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "APPROVED"
-                ? "bg-[#0055FF] text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            onClick={() => setActiveTab("STUDENT")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "STUDENT" ? "bg-[#0055FF] text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <span>Approved ({approvedCount})</span>
+            Student ({studentCount})
           </button>
-
           <button
             onClick={() => setActiveTab("PLACED")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-              activeTab === "PLACED"
-                ? "bg-emerald-600 text-white shadow-xs font-black"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "PLACED" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
-            <span>🎓 Placed ({placedCount})</span>
+            Placed ({placedCount})
           </button>
-
+          <button
+            onClick={() => setActiveTab("ALUMNI")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+              activeTab === "ALUMNI" ? "bg-indigo-600 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            Alumni ({alumniCount})
+          </button>
           <button
             onClick={() => setActiveTab("ALL")}
             className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "ALL"
-                ? "bg-slate-900 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
+              activeTab === "ALL" ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
             }`}
           >
             All ({members.length})
-          </button>
-
-          <button
-            onClick={() => setActiveTab("REJECTED")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "REJECTED"
-                ? "bg-rose-600 text-white shadow-xs"
-                : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
-            }`}
-          >
-            Rejected ({rejectedCount})
           </button>
         </div>
 
@@ -619,7 +580,7 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                 <th className="p-4 font-bold">Location &amp; College</th>
                 <th className="p-4 font-bold">Status</th>
                 <th className="p-4 font-bold">Placement (Home Page)</th>
-                <th className="p-4 font-bold text-right">Approval Actions</th>
+                <th className="p-4 font-bold text-right">Status / Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -679,22 +640,26 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
                   {/* Status Badge */}
                   <td className="p-4">
-                    {member.status === "PENDING" && (
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5 w-fit shadow-2xs">
-                        <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                        Pending Approval
-                      </span>
-                    )}
-                    {member.status === "APPROVED" && (
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1.5 w-fit shadow-2xs">
-                        ✓ Approved (Live)
-                      </span>
-                    )}
-                    {member.status === "REJECTED" && (
-                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 border border-rose-200 flex items-center gap-1.5 w-fit shadow-2xs">
-                        ✕ Rejected
-                      </span>
-                    )}
+                    {(() => {
+                      const status = normalizeTeamStatus(member.status);
+                      const styles = {
+                        CANDIDATE: "bg-amber-50 text-amber-800 border-amber-200",
+                        STUDENT: "bg-blue-50 text-blue-800 border-blue-200",
+                        PLACED: "bg-emerald-50 text-emerald-800 border-emerald-200",
+                        ALUMNI: "bg-indigo-50 text-indigo-800 border-indigo-200",
+                      }[status];
+                      const labels = {
+                        CANDIDATE: "Candidate",
+                        STUDENT: "Student",
+                        PLACED: "Placed",
+                        ALUMNI: "Alumni",
+                      }[status];
+                      return (
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold border w-fit ${styles}`}>
+                          {labels}
+                        </span>
+                      );
+                    })()}
                   </td>
 
                   {/* Placement Status */}
@@ -725,107 +690,25 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                   {/* Actions */}
                   <td className="p-4 text-right">
                     <div className="flex gap-2 justify-end items-center">
-                      {/* If PENDING: show prominent Approve and Reject buttons */}
-                      {member.status === "PENDING" && (
-                        <>
-                          <button
-                            disabled={isSubmitting}
-                            onClick={() => handleQuickStatusChange(member.id, "APPROVED")}
-                            className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1"
-                            title="Approve candidate to show on Our Team page"
-                          >
-                            <span>✓ Approve</span>
-                          </button>
+                      <select
+                        disabled={isSubmitting}
+                        value={normalizeTeamStatus(member.status)}
+                        onChange={(e) => handleStatusSelect(member, e.target.value as TeamStatus)}
+                        className="appearance-auto bg-white text-slate-800 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer min-w-[130px] focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/15"
+                      >
+                        {TEAM_STATUSES.map((status) => (
+                          <option key={status} value={status}>
+                            {TEAM_STATUS_LABELS[status]}
+                          </option>
+                        ))}
+                      </select>
 
-                          <button
-                            disabled={isSubmitting}
-                            onClick={() => handleQuickStatusChange(member.id, "REJECTED")}
-                            className="bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                          >
-                            Reject
-                          </button>
-                        </>
-                      )}
-
-                      {/* If APPROVED: provide link to live profile & revoke */}
-                      {member.status === "APPROVED" && (
-                        <>
-                          <a
-                            href={`/ourteam/${member.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="bg-blue-50 hover:bg-blue-100 text-[#0055FF] border border-blue-200 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors inline-flex items-center gap-1"
-                            title="View Live Profile on Our Team directory"
-                          >
-                            <span>Live ↗</span>
-                          </a>
-
-                          <button
-                            disabled={isSubmitting}
-                            onClick={() => handleQuickStatusChange(member.id, "PENDING")}
-                            className="bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors cursor-pointer"
-                            title="Revoke approval back to pending"
-                          >
-                            Revoke
-                          </button>
-
-                          {/* Placed Action Button */}
-                          {(() => {
-                            const placement = getPlacementInfo(member);
-                            if (placement) {
-                              return (
-                                <div className="flex items-center gap-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => openPlacementModal(member)}
-                                    className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 transition cursor-pointer"
-                                    title="Edit placement details"
-                                  >
-                                    Edit Placed
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleUnmarkPlacement(member)}
-                                    className="px-2 py-1.5 rounded-lg text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                                    title="Remove from Placed section on Home Page"
-                                  >
-                                    Unmark
-                                  </button>
-                                </div>
-                              );
-                            }
-                            return (
-                              <button
-                                type="button"
-                                onClick={() => openPlacementModal(member)}
-                                className="px-3 py-1.5 rounded-lg text-xs font-bold text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 transition flex items-center gap-1 cursor-pointer shadow-2xs"
-                                title="Mark candidate as Placed to show on Home Page"
-                              >
-                                <span>🎓 Mark Placed</span>
-                              </button>
-                            );
-                          })()}
-                        </>
-                      )}
-
-                      {/* If REJECTED: allow reconsider */}
-                      {member.status === "REJECTED" && (
-                        <button
-                          disabled={isSubmitting}
-                          onClick={() => handleQuickStatusChange(member.id, "APPROVED")}
-                          className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-xs font-bold transition-all shadow-xs cursor-pointer"
-                        >
-                          Approve
-                        </button>
-                      )}
-
-                      {/* Edit Member */}
-                      <button
-                        onClick={() => setEditingMember(member)}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
+                      <Link
+                        href={`/admin/team/${member.id}/edit`}
+                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
                       >
                         Edit
-                      </button>
+                      </Link>
 
                       {/* Delete Member */}
                       <button
@@ -844,8 +727,8 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
               {filteredMembers.length === 0 && (
                 <tr>
                   <td colSpan={6} className="p-12 text-center text-slate-500 font-medium">
-                    {activeTab === "PENDING"
-                      ? "No pending candidate applications. Submissions from Join Us will appear here for review."
+                    {activeTab === "CANDIDATE"
+                      ? "No candidate applications yet. Join Us submissions will appear here."
                       : "No team members found matching criteria."}
                   </td>
                 </tr>
@@ -1091,17 +974,18 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Initial Approval Status
+                      <label className="block text-xs font-bold mb-1 text-slate-300">
+                        Status
                       </label>
                       <select
                         className="select-premium w-full px-4 py-2 rounded-xl text-sm"
                         value={newStatus}
                         onChange={e => setNewStatus(e.target.value as any)}
                       >
-                        <option value="APPROVED">Approved (Visible on Our Team)</option>
-                        <option value="PENDING">Pending (Requires Review)</option>
-                        <option value="REJECTED">Rejected</option>
+                        <option value="CANDIDATE">Candidate</option>
+                        <option value="STUDENT">Student</option>
+                        <option value="PLACED">Placed</option>
+                        <option value="ALUMNI">Alumni</option>
                       </select>
                     </div>
 
@@ -1146,290 +1030,6 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
           document.body
         )}
 
-      {/* MODAL: EDIT TEAM MEMBER */}
-      {mounted &&
-        editingMember &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in"
-            style={{ margin: 0 }}
-            onClick={() => setEditingMember(null)}
-          >
-            <div
-              className="relative w-full max-w-2xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden m-auto"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div
-                className="flex justify-between items-center px-6 py-4 border-b shrink-0"
-                style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-              >
-                <div>
-                  <h3 className="text-xl font-bold">Edit Team Member</h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                    Modify profile details, skills, and change approval status.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingMember(null)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Form Body */}
-              <form onSubmit={handleEditMemberSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="p-6 overflow-y-auto space-y-4 flex-1 min-h-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Full Name *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.name}
-                        onChange={e => setEditingMember({ ...editingMember, name: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Email Address *
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.email}
-                        onChange={e => setEditingMember({ ...editingMember, email: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Phone Number
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.phone || ""}
-                        onChange={e => setEditingMember({ ...editingMember, phone: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Role / Designation *
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.role}
-                        onChange={e => setEditingMember({ ...editingMember, role: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Department
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.department || ""}
-                        onChange={e => setEditingMember({ ...editingMember, department: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        City
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.city || ""}
-                        onChange={e => setEditingMember({ ...editingMember, city: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        State
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.state || ""}
-                        onChange={e => setEditingMember({ ...editingMember, state: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        College / Institution
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.college || ""}
-                        onChange={e => setEditingMember({ ...editingMember, college: e.target.value })}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Education / Degree
-                      </label>
-                      <input
-                        type="text"
-                        className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.education || ""}
-                        onChange={e => setEditingMember({ ...editingMember, education: e.target.value })}
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                      Key Skills (comma-separated)
-                    </label>
-                    <input
-                      type="text"
-                      className="input-premium w-full px-4 py-2 rounded-xl text-sm"
-                      value={Array.isArray(editingMember.skills) ? editingMember.skills.join(", ") : editingMember.skills || ""}
-                      onChange={e =>
-                        setEditingMember({
-                          ...editingMember,
-                          skills: e.target.value.split(",").map(s => s.trim()).filter(Boolean),
-                        })
-                      }
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                      Bio / Summary
-                    </label>
-                    <textarea
-                      rows={3}
-                      className="input-premium w-full px-4 py-2 rounded-xl text-xs"
-                      value={editingMember.bio || ""}
-                      onChange={e => setEditingMember({ ...editingMember, bio: e.target.value })}
-                    />
-                  </div>
-
-                  {/* Profile Picture */}
-                  <div>
-                    <label className="block text-xs font-bold mb-1.5 uppercase text-slate-300">
-                      Profile Picture
-                    </label>
-                    <div className="flex items-center gap-4 p-3 rounded-xl border" style={{ background: "var(--bg-base)", borderColor: "var(--border-soft)" }}>
-                      <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-white/10 bg-black/20">
-                        {editingMember.image ? (
-                          <img src={editingMember.image} alt="Preview" className="w-full h-full object-cover" />
-                        ) : (
-                          <span className="text-xs text-gray-500 flex items-center justify-center h-full">No img</span>
-                        )}
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <input
-                          type="file"
-                          accept="image/*"
-                          ref={editFileInputRef}
-                          className="hidden"
-                          onChange={e => {
-                            const file = e.target.files?.[0];
-                            if (file) handleImageFileUpload(file, "edit");
-                          }}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => editFileInputRef.current?.click()}
-                          disabled={isUploadingImage}
-                          className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#0055FF] text-white hover:bg-blue-600 transition-colors cursor-pointer"
-                        >
-                          {isUploadingImage ? "Uploading..." : "📁 Upload Photo"}
-                        </button>
-                        <input
-                          type="url"
-                          className="input-premium w-full px-3 py-1.5 rounded-lg text-xs mt-1"
-                          placeholder="Or paste image URL"
-                          value={editingMember.image || ""}
-                          onChange={e => setEditingMember({ ...editingMember, image: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
-                    <div>
-                      <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
-                        Approval Status
-                      </label>
-                      <select
-                        className="select-premium w-full px-4 py-2 rounded-xl text-sm"
-                        value={editingMember.status}
-                        onChange={e => setEditingMember({ ...editingMember, status: e.target.value as any })}
-                      >
-                        <option value="APPROVED">Approved (Visible on Our Team)</option>
-                        <option value="PENDING">Pending Approval</option>
-                        <option value="REJECTED">Rejected</option>
-                      </select>
-                    </div>
-
-                    <div className="flex items-center gap-2 pt-6">
-                      <input
-                        type="checkbox"
-                        id="editIsVerified"
-                        checked={editingMember.isVerified}
-                        onChange={e => setEditingMember({ ...editingMember, isVerified: e.target.checked })}
-                        className="w-4 h-4 rounded text-blue-600 cursor-pointer"
-                      />
-                      <label htmlFor="editIsVerified" className="text-xs font-bold text-slate-300 cursor-pointer">
-                        Mark Profile as Verified Badge ✓
-                      </label>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Sticky Footer */}
-                <div
-                  className="px-6 py-4 border-t flex justify-end gap-3 shrink-0"
-                  style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setEditingMember(null)}
-                    className="btn-secondary px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg cursor-pointer"
-                  >
-                    {isSubmitting ? "Saving..." : "Save Changes"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>,
-          document.body
-        )}
       {/* PLACEMENT MODAL */}
       {mounted &&
         placementModalMember &&

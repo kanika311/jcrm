@@ -93,7 +93,7 @@ export default function GlobalWhatsAppWidget() {
   };
 
   return (
-    <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[9999] font-sans selection:bg-emerald-500 selection:text-white">
+    <div className="fixed bottom-4 right-3 sm:bottom-6 sm:right-6 z-[9999] font-sans selection:bg-emerald-500 selection:text-white">
       {/* POPUP CHAT BOX */}
       {isOpen && (
         <div className="mb-3.5 w-[calc(100vw-2.5rem)] sm:w-[360px] max-w-[370px] bg-white rounded-3xl shadow-2xl border border-slate-200/90 overflow-hidden animate-fade-in-up transition-all">

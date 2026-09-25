@@ -47,7 +47,7 @@ export async function GET(req: Request) {
     const statusParam = searchParams.get("status");
 
     let whereClause: any = {};
-    if (statusParam && ["PENDING", "APPROVED", "REJECTED"].includes(statusParam)) {
+    if (statusParam && ["CANDIDATE", "STUDENT", "PLACED", "ALUMNI", "PENDING", "APPROVED", "REJECTED"].includes(statusParam)) {
       whereClause.status = statusParam;
     }
 
@@ -121,7 +121,7 @@ export async function POST(req: Request) {
         experience: experience || "Fresher / Intern",
         skills: skillsArray,
         bio: bio || null,
-        status: status || "APPROVED",
+        status: status || "STUDENT",
         isVerified: isVerified ?? true,
       },
     });
@@ -152,9 +152,19 @@ export async function PUT(req: Request) {
       updates.skills = updates.skills.split(",").map((s: string) => s.trim()).filter(Boolean);
     }
 
+    const allowed = [
+      "name", "email", "phone", "role", "department", "image", "city", "state",
+      "country", "pinCode", "dateOfBirth", "college", "education", "experience",
+      "skills", "bio", "company", "status", "isVerified",
+    ];
+    const data: Record<string, any> = {};
+    for (const key of allowed) {
+      if (updates[key] !== undefined) data[key] = updates[key];
+    }
+
     const updatedMember = await prisma.teamMember.update({
       where: { id },
-      data: updates,
+      data,
     });
 
     return NextResponse.json({ success: true, member: updatedMember }, { status: 200 });

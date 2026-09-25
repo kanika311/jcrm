@@ -8,8 +8,8 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
   const [activeTab, setActiveTab] = useState<"business" | "students">("business");
 
   // Fallbacks if CMS content is not yet populated
-  const heroTitle = cmsData?.heroTitle || "Bridging Enterprise Technology with Next-Gen Engineering Talent";
-  const heroSubtitle = cmsData?.heroSubtitle || "";
+  const heroTitle = cmsData?.heroTitle || cmsData?.heading || "Bridging Enterprise Technology with Next-Gen Engineering Talent";
+  const heroSubtitle = cmsData?.heroSubtitle || cmsData?.story || "";
 
   const milestones = [
     {
