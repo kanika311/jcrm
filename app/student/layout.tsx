@@ -3,6 +3,7 @@ import { getSiteContent } from "@/lib/cms";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -11,20 +12,30 @@ export default async function StudentLayout({ children }: { children: React.Reac
     redirect("/auth?callbackUrl=/student");
   }
 
-  // If a teacher logs in and tries to access /student, redirect them to their faculty portal
-  if (session.user.role === "INSTRUCTOR") {
-    redirect("/faculty");
-  }
+  const enrollmentCount = await prisma.enrollment
+    .count({
+      where: {
+        studentId: session.user.id,
+        paymentStatus: "COMPLETED",
+      },
+    })
+    .catch(() => 0);
 
-  // If an admin accesses /student, redirect them to admin console
-  if (session.user.role === "ADMIN") {
-    redirect("/admin");
+  // Admins/instructors who just bought a course must reach the classroom.
+  // Only bounce them to their own dashboard when they have no enrollment.
+  if (enrollmentCount === 0) {
+    if (session.user.role === "INSTRUCTOR") {
+      redirect("/faculty");
+    }
+    if (session.user.role === "ADMIN") {
+      redirect("/admin");
+    }
   }
 
   const cmsData = await getSiteContent("student-navbar");
 
   return (
-    <StudentLayoutClient cmsData={cmsData}>
+    <StudentLayoutClient cmsData={cmsData} hasEnrollment={enrollmentCount > 0}>
       {children}
     </StudentLayoutClient>
   );

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signOut, useSession } from "next-auth/react";
 import {
   FiGrid,
@@ -30,6 +30,29 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const { data: session } = useSession();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  useEffect(() => {
+    const loadUnread = () => {
+      fetch("/api/admin/messages/unread")
+        .then((res) => (res.ok ? res.json() : null))
+        .then((data) => {
+          if (typeof data?.count === "number") setUnreadCount(data.count);
+        })
+        .catch(() => {});
+    };
+    loadUnread();
+    const timer = window.setInterval(loadUnread, 5000);
+    const onUnread = (event: Event) => {
+      const count = (event as CustomEvent<number>).detail;
+      if (typeof count === "number") setUnreadCount(count);
+    };
+    window.addEventListener("jcrm-admin-unread", onUnread);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("jcrm-admin-unread", onUnread);
+    };
+  }, []);
 
   const navLinks = [
     { name: "Dashboard", href: "/admin", icon: FiGrid },
@@ -79,6 +102,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           >
             <Icon className={`w-4 h-4 shrink-0 ${isActive ? "text-white" : "text-slate-400"}`} />
             <span>{link.name}</span>
+            {link.href === "/admin/messages" && unreadCount > 0 && (
+              <span className="ml-auto min-w-[18px] h-[18px] px-1 rounded-full bg-rose-500 text-white text-[10px] font-black flex items-center justify-center">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
           </Link>
         );
       })}
@@ -124,9 +152,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="min-h-screen flex bg-[#f8fafc] text-slate-800 font-sans">
-      {/* Desktop Left Sidebar (Yogsathi Style) */}
-      <aside className="hidden lg:flex w-64 h-screen sticky top-0 flex-col bg-[#0F172A] text-slate-300 border-r border-slate-800 shrink-0 z-40 select-none">
+    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans">
+      {/* Desktop Left Sidebar — fixed so it never scrolls with the page */}
+      <aside className="hidden lg:flex w-64 fixed inset-y-0 left-0 flex-col bg-[#0F172A] text-slate-300 border-r border-slate-800 z-40 select-none">
         {/* Header / Logo */}
         <div className="p-4 flex items-center justify-between border-b border-slate-800/80 shrink-0">
           <Link href="/admin" className="flex items-center gap-3">
@@ -238,7 +266,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Main Content Area (Right of Sidebar) */}
-      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
+      <div className="lg:pl-64 min-w-0 flex flex-col min-h-screen">
         {/* Top Header Bar */}
         <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-8 py-3 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">

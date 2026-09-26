@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import {
   FiGrid,
@@ -12,19 +12,29 @@ import {
   FiFileText,
   FiBarChart2,
   FiBell,
+  FiMessageSquare,
   FiSettings,
   FiMenu,
   FiX,
   FiCheckCircle,
 } from "react-icons/fi";
 
+const STUDENT_ONLY_PATHS = [
+  "/faculty/students",
+  "/faculty/submissions",
+  "/faculty/analytics",
+];
+
 export default function FacultyLayoutClient({
   children,
+  hasStudents = false,
 }: {
   children: React.ReactNode;
   cmsData?: any;
+  hasStudents?: boolean;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -32,16 +42,24 @@ export default function FacultyLayoutClient({
   const userName = user?.name || (user as any)?.fullName || "Instructor";
   const userInitial = userName[0]?.toUpperCase() || "I";
 
+  useEffect(() => {
+    if (hasStudents) return;
+    if (STUDENT_ONLY_PATHS.some((path) => pathname.startsWith(path))) {
+      router.replace("/faculty");
+    }
+  }, [hasStudents, pathname, router]);
+
   const navLinks = [
     { name: "Dashboard Overview", href: "/faculty", icon: FiGrid },
     { name: "My Courses", href: "/faculty/courses", icon: FiBookOpen },
     { name: "Course Builder & Live", href: "/faculty/courses/builder", icon: FiVideo },
-    { name: "Students", href: "/faculty/students", icon: FiUsers },
-    { name: "Submissions", href: "/faculty/submissions", icon: FiFileText, badge: "12" },
-    { name: "Analytics & Revenue", href: "/faculty/analytics", icon: FiBarChart2 },
+    { name: "Students", href: "/faculty/students", icon: FiUsers, requiresStudents: true },
+    { name: "Messages", href: "/faculty/messages", icon: FiMessageSquare },
+    { name: "Assignments", href: "/faculty/submissions", icon: FiFileText, requiresStudents: true },
+    { name: "Analytics & Revenue", href: "/faculty/analytics", icon: FiBarChart2, requiresStudents: true },
     { name: "Announcements", href: "/faculty/announcements", icon: FiBell },
     { name: "Profile & Settings", href: "/faculty/settings", icon: FiSettings },
-  ];
+  ].filter((link) => hasStudents || !link.requiresStudents);
 
   const isActive = (href: string) => {
     if (href === "/faculty") return pathname === "/faculty";
@@ -118,15 +136,6 @@ export default function FacultyLayoutClient({
                 <Icon className={`w-4 h-4 shrink-0 ${active ? "text-white" : "text-slate-500"}`} />
                 <span className="truncate">{link.name}</span>
               </div>
-              {link.badge && (
-                <span
-                  className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
-                    active ? "bg-white text-blue-600" : "bg-rose-500 text-white"
-                  }`}
-                >
-                  {link.badge}
-                </span>
-              )}
             </Link>
           );
         })}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import CalendarClockPicker from "@/components/CalendarClockPicker";
 
 interface Lesson {
   id: string;
@@ -30,6 +31,14 @@ interface LiveSession {
   description?: string;
   status: "SCHEDULED" | "LIVE_NOW" | "COMPLETED";
   recordingUrl?: string;
+  attendance?: { studentId: string; status: "present" | "absent" }[];
+}
+
+interface EnrolledStudent {
+  id: string;
+  name: string;
+  email: string;
+  image?: string | null;
 }
 
 interface CourseData {
@@ -50,16 +59,19 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
   const router = useRouter();
   const searchParams = useSearchParams();
   const requestedId = searchParams.get("id");
+  const requestedTab = searchParams.get("tab") === "live" ? "live" : "modules";
 
   const [selectedCourseId, setSelectedCourseId] = useState<string>(
     requestedId || initialCourses[0]?.id || ""
   );
   const [course, setCourse] = useState<CourseData | null>(null);
+  const [enrolledStudents, setEnrolledStudents] = useState<EnrolledStudent[]>([]);
   const [modules, setModules] = useState<Module[]>([]);
   const [liveSessions, setLiveSessions] = useState<LiveSession[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<"modules" | "live">("modules");
+  const [activeTab, setActiveTab] = useState<"modules" | "live">(requestedTab);
+  const [attendanceSessionId, setAttendanceSessionId] = useState<string | null>(null);
   const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
 
   // New module modal / form state
@@ -79,7 +91,8 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
   // New live session modal / form state
   const [showAddLive, setShowAddLive] = useState(false);
   const [newLiveTitle, setNewLiveTitle] = useState("");
-  const [newLiveDateTime, setNewLiveDateTime] = useState("");
+  const [newLiveDate, setNewLiveDate] = useState("");
+  const [newLiveTime, setNewLiveTime] = useState("");
   const [newLiveDuration, setNewLiveDuration] = useState(60);
   const [newLiveMeetingUrl, setNewLiveMeetingUrl] = useState("");
   const [newLiveDesc, setNewLiveDesc] = useState("");
@@ -100,6 +113,7 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
           const curr = data.course.curriculum || {};
           setModules(curr.modules || []);
           setLiveSessions(curr.liveSessions || []);
+          setEnrolledStudents(data.course.students || []);
         } else {
           setMessage({ text: data.error || "Failed to load course", type: "error" });
         }
@@ -112,10 +126,28 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
   }, [selectedCourseId]);
 
   // Handle course switch
-  const handleCourseSwitch = (id: string) => {
+  const handleCourseSwitch = (id: string, tab = activeTab) => {
     setSelectedCourseId(id);
-    router.push(`/faculty/courses/builder?id=${id}`);
+    router.push(`/faculty/courses/builder?id=${id}${tab === "live" ? "&tab=live" : ""}`);
   };
+
+  const courseSelectField = (
+    <div>
+      <label className="block text-xs font-bold text-slate-700 mb-1">Assign to course *</label>
+      <select
+        value={selectedCourseId}
+        onChange={(e) => handleCourseSwitch(e.target.value, showAddLive || attendanceSessionId ? "live" : "modules")}
+        className="w-full px-3 py-2.5 text-sm font-semibold rounded-xl border border-slate-200 bg-white text-slate-900"
+      >
+        {initialCourses.map((c) => (
+          <option key={c.id} value={c.id}>
+            {c.title}
+          </option>
+        ))}
+      </select>
+      <p className="text-[11px] text-slate-400 mt-1">This item will be saved on the selected course.</p>
+    </div>
+  );
 
   // Save all curriculum changes
   const saveCurriculum = async () => {
@@ -149,6 +181,38 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
     } finally {
       setSaving(false);
     }
+  };
+
+  const persistSessions = async (nextSessions: LiveSession[]) => {
+    setLiveSessions(nextSessions);
+    if (!selectedCourseId) return;
+    await fetch(`/api/faculty/courses/${selectedCourseId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ curriculum: { modules, liveSessions: nextSessions } }),
+    });
+  };
+
+  const setAttendance = (sessionId: string, studentId: string, status: "present" | "absent") => {
+    const next = liveSessions.map((session) => {
+      if (session.id !== sessionId) return session;
+      const current = session.attendance || [];
+      const attendance = current.some((row) => row.studentId === studentId)
+        ? current.map((row) => (row.studentId === studentId ? { ...row, status } : row))
+        : [...current, { studentId, status }];
+      return { ...session, attendance };
+    });
+    persistSessions(next);
+  };
+
+  const markAllAttendance = (sessionId: string, status: "present" | "absent") => {
+    persistSessions(
+      liveSessions.map((session) =>
+        session.id === sessionId
+          ? { ...session, attendance: enrolledStudents.map((student) => ({ studentId: student.id, status })) }
+          : session
+      )
+    );
   };
 
   // Add a new module (supports advance modules for upcoming days)
@@ -228,14 +292,18 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
   // Schedule a new live session
   const handleAddLiveSession = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newLiveTitle.trim() || !newLiveDateTime) return;
+    if (!newLiveTitle.trim()) return;
+    if (!newLiveDate || !newLiveTime) {
+      setMessage({ text: "Please pick a class date from the calendar and a time from the clock.", type: "error" });
+      return;
+    }
 
     const autoRoomUrl = newLiveMeetingUrl.trim() || `https://meet.jit.si/jcrm-live-${selectedCourseId}-${Date.now().toString(36)}`;
 
     const newSession: LiveSession = {
       id: "live_" + Date.now().toString(36),
       title: newLiveTitle.trim(),
-      scheduledAt: newLiveDateTime,
+      scheduledAt: `${newLiveDate}T${newLiveTime}`,
       duration: Number(newLiveDuration) || 60,
       meetingUrl: autoRoomUrl,
       description: newLiveDesc.trim(),
@@ -244,7 +312,8 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
 
     setLiveSessions([...liveSessions, newSession]);
     setNewLiveTitle("");
-    setNewLiveDateTime("");
+    setNewLiveDate("");
+    setNewLiveTime("");
     setNewLiveDuration(60);
     setNewLiveMeetingUrl("");
     setNewLiveDesc("");
@@ -299,11 +368,11 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
         <div className="flex flex-wrap items-center gap-3">
           {/* Select Course dropdown */}
           <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-400">Switch Course:</span>
+            <span className="text-xs font-bold text-slate-500">Working on course:</span>
             <select
               value={selectedCourseId}
               onChange={(e) => handleCourseSwitch(e.target.value)}
-              className="px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900 focus:outline-none"
+              className="px-3 py-2 text-sm font-bold rounded-xl border-2 border-[#0055FF] bg-white text-slate-900 focus:outline-none min-w-[200px]"
             >
               {initialCourses.map(c => (
                 <option key={c.id} value={c.id}>{c.title}</option>
@@ -345,7 +414,10 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
       {/* Tabs */}
       <div className="flex border-b gap-6" style={{ borderColor: "var(--border-soft)" }}>
         <button
-          onClick={() => setActiveTab("modules")}
+          onClick={() => {
+            setActiveTab("modules");
+            if (selectedCourseId) router.replace(`/faculty/courses/builder?id=${selectedCourseId}`);
+          }}
           className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
             activeTab === "modules"
               ? "border-[#0055FF] text-[#0055FF]"
@@ -359,7 +431,10 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
         </button>
 
         <button
-          onClick={() => setActiveTab("live")}
+          onClick={() => {
+            setActiveTab("live");
+            if (selectedCourseId) router.replace(`/faculty/courses/builder?id=${selectedCourseId}&tab=live`);
+          }}
           className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
             activeTab === "live"
               ? "border-[#0055FF] text-[#0055FF]"
@@ -533,7 +608,16 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
               </p>
             </div>
             <button
-              onClick={() => setShowAddLive(true)}
+              onClick={() => {
+                const now = new Date();
+                if (!newLiveDate) {
+                  setNewLiveDate(
+                    `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+                  );
+                }
+                if (!newLiveTime) setNewLiveTime("08:30");
+                setShowAddLive(true);
+              }}
               className="btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 bg-rose-600 hover:bg-rose-700"
             >
               + Schedule Live Class
@@ -548,7 +632,16 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                 Schedule a live Q&A, project walkthrough, or doubt session. Students will see a countdown in their portal and both teacher and students can join with 1 click.
               </p>
               <button
-                onClick={() => setShowAddLive(true)}
+                onClick={() => {
+                  const now = new Date();
+                  if (!newLiveDate) {
+                    setNewLiveDate(
+                      `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`
+                    );
+                  }
+                  if (!newLiveTime) setNewLiveTime("08:30");
+                  setShowAddLive(true);
+                }}
                 className="btn-secondary px-4 py-2 rounded-xl text-xs font-bold"
               >
                 + Schedule Live Class Now
@@ -603,6 +696,10 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                         {session.description && (
                           <span className="italic">{session.description}</span>
                         )}
+                        <span className="font-semibold text-slate-600">
+                          {session.attendance?.filter((row) => row.status === "present").length || 0}/
+                          {enrolledStudents.length || 0} present
+                        </span>
                       </div>
                     </div>
 
@@ -621,6 +718,13 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                       </a>
 
                       {/* Status Toggle Buttons */}
+                      <button
+                        type="button"
+                        onClick={() => setAttendanceSessionId(session.id)}
+                        className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                      >
+                        Mark attendance
+                      </button>
                       <select
                         value={session.status}
                         onChange={(e) => updateSessionStatus(session.id, e.target.value as any)}
@@ -657,6 +761,7 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
             </p>
 
             <form onSubmit={handleAddModule} className="space-y-4">
+              {courseSelectField}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Module Title *
@@ -726,6 +831,7 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
             </p>
 
             <form onSubmit={handleAddLesson} className="space-y-3">
+              {courseSelectField}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Lecture / Class Title *
@@ -816,7 +922,7 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
       {/* MODAL: SCHEDULE LIVE CLASS */}
       {showAddLive && (
         <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="w-full max-w-lg p-6 rounded-3xl bg-white dark:bg-gray-900 shadow-2xl border border-slate-200 dark:border-gray-800 space-y-4">
+          <div className="w-full max-w-lg p-6 rounded-3xl bg-white shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
             <h3 className="heading-font text-lg font-bold flex items-center gap-2">
               <span className="text-rose-500">🔴</span> Schedule Live Class
             </h3>
@@ -825,6 +931,7 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
             </p>
 
             <form onSubmit={handleAddLiveSession} className="space-y-3">
+              {courseSelectField}
               <div>
                 <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
                   Live Class Topic / Title *
@@ -839,33 +946,25 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Scheduled Date & Time *
-                  </label>
-                  <input
-                    type="datetime-local"
-                    required
-                    value={newLiveDateTime}
-                    onChange={(e) => setNewLiveDateTime(e.target.value)}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-800 focus:outline-none focus:border-[#0055FF]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
-                    Duration (Minutes)
-                  </label>
-                  <input
-                    type="number"
-                    min="15"
-                    step="15"
-                    value={newLiveDuration}
-                    onChange={(e) => setNewLiveDuration(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-800 focus:outline-none focus:border-[#0055FF]"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-2">Class date & time *</label>
+                <CalendarClockPicker
+                  date={newLiveDate}
+                  time={newLiveTime}
+                  onDateChange={setNewLiveDate}
+                  onTimeChange={setNewLiveTime}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Duration (min)</label>
+                <input
+                  type="number"
+                  min="15"
+                  step="15"
+                  value={newLiveDuration}
+                  onChange={(e) => setNewLiveDuration(Number(e.target.value))}
+                  className="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-[#0055FF]"
+                />
               </div>
 
               <div>
@@ -913,6 +1012,87 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {attendanceSessionId && (
+        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="w-full max-w-lg p-6 rounded-3xl bg-white shadow-2xl border border-slate-200 space-y-4 max-h-[85vh] overflow-y-auto">
+            <h3 className="heading-font text-lg font-bold text-slate-900">Mark live class attendance</h3>
+            <p className="text-xs text-slate-500">
+              {course?.title} · {liveSessions.find((s) => s.id === attendanceSessionId)?.title}
+            </p>
+            {enrolledStudents.length === 0 ? (
+              <p className="text-sm text-slate-500 py-8 text-center">No students have purchased this course yet.</p>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => markAllAttendance(attendanceSessionId, "present")}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-700"
+                  >
+                    Mark all present
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => markAllAttendance(attendanceSessionId, "absent")}
+                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-700"
+                  >
+                    Mark all absent
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {enrolledStudents.map((student) => {
+                    const status =
+                      liveSessions
+                        .find((s) => s.id === attendanceSessionId)
+                        ?.attendance?.find((row) => row.studentId === student.id)?.status || "";
+                    return (
+                      <div
+                        key={student.id}
+                        className="flex items-center justify-between gap-3 p-3 rounded-xl border border-slate-200"
+                      >
+                        <div>
+                          <div className="text-sm font-bold text-slate-900">{student.name}</div>
+                          <div className="text-xs text-slate-500">{student.email}</div>
+                        </div>
+                        <div className="flex gap-1">
+                          <button
+                            type="button"
+                            onClick={() => setAttendance(attendanceSessionId, student.id, "present")}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                              status === "present" ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            Present
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setAttendance(attendanceSessionId, student.id, "absent")}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold ${
+                              status === "absent" ? "bg-rose-500 text-white" : "bg-slate-100 text-slate-600"
+                            }`}
+                          >
+                            Absent
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </>
+            )}
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setAttendanceSessionId(null)}
+                className="btn-primary px-5 py-2 rounded-xl text-xs font-bold"
+              >
+                Done
+              </button>
+            </div>
           </div>
         </div>
       )}

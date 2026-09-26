@@ -48,6 +48,7 @@ export default async function AdminLeadsPage() {
   });
 
   contactMessages.forEach((c) => {
+    if (c.source?.startsWith("chat:")) return;
     leads.push({
       id: c.id,
       source: `Contact Form ${c.source ? `(${c.source})` : ""}`,

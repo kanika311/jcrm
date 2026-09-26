@@ -4,7 +4,7 @@ import Link from "next/link";
 import React from "react";
 import { usePathname } from "next/navigation";
 
-export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?: string }) {
+export default function Footer({ cmsData, siteName, forceShow = false }: { cmsData?: any, siteName?: string, forceShow?: boolean }) {
   const pathname = usePathname();
   const bannerText = cmsData?.bannerText || "Empowering Businesses with Smart ERP Solutions";
   const brandDescription =
@@ -21,12 +21,11 @@ export default function Footer({ cmsData, siteName }: { cmsData?: any, siteName?
     cmsData?.copyrightText ||
     "© 2026 JCRM TECHNOLOGIES • All Rights Reserved";
   const isPublicPage =
-    
     !pathname?.startsWith("/admin") &&
     !pathname?.startsWith("/auth") &&
     !pathname?.startsWith("/jcrm-sushant");
 
-  if (!isPublicPage) return null;
+  if (!isPublicPage && !forceShow) return null;
 
   return (
     <footer className="relative z-10 border-t border-white/90 bg-white/80 backdrop-blur-2xl text-slate-800 shadow-[0_-12px_45px_rgba(0,85,255,0.06)] overflow-hidden">

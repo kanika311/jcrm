@@ -27,6 +27,34 @@ export default async function StudentDashboard() {
   const welcomePrefix = cmsData?.welcomeMessage || "Welcome back,";
   const showQuickStats = cmsData?.showQuickStats !== false;
 
+  const enrolledCourseIds = data.enrollments.map((e: any) => e.course?.id).filter(Boolean);
+  const upcomingAssignments = enrolledCourseIds.length
+    ? await prisma.assignment.findMany({
+        where: { courseId: { in: enrolledCourseIds } },
+        include: { course: { select: { title: true } } },
+        orderBy: { dueDate: "asc" },
+        take: 4,
+      }).catch(() => [])
+    : [];
+
+  const upcomingLives: { title: string; at: Date; course: string }[] = [];
+  if (enrolledCourseIds.length) {
+    const liveCourses = await prisma.course.findMany({
+      where: { id: { in: enrolledCourseIds } },
+      select: { title: true, curriculum: true },
+    }).catch(() => []);
+    for (const course of liveCourses) {
+      const sessions = ((course.curriculum as any)?.liveSessions || []) as any[];
+      for (const sessionItem of sessions) {
+        if (!sessionItem?.scheduledAt) continue;
+        const at = new Date(sessionItem.scheduledAt);
+        if (isNaN(at.getTime()) || at.getTime() < Date.now() - 60 * 60 * 1000) continue;
+        upcomingLives.push({ title: sessionItem.title || "Live class", at, course: course.title });
+      }
+    }
+    upcomingLives.sort((a, b) => a.at.getTime() - b.at.getTime());
+  }
+
   return (
     <div className="space-y-6 pb-20">
        
@@ -35,19 +63,17 @@ export default async function StudentDashboard() {
           <div className="absolute top-0 right-0 w-64 h-64 blur-[80px] opacity-20 pointer-events-none" style={{ background: 'var(--accent-primary)' }}></div>
           
           <div className="relative z-10 flex-1">
-             <div className="flex items-center gap-3 mb-4">
-                <span className="bg-surf-hover dark:bg-black/20 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-2" style={{ border: '1px solid var(--border-soft)' }}>
-                   <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-                   Live Class in 45m
-                </span>
-             </div>
              <h1 className="heading-font text-3xl md:text-4xl font-bold mb-2">{welcomePrefix} {userName} 👋</h1>
-             <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>You're on a 12-day learning streak. Keep it up!</p>
+             <p className="text-lg" style={{ color: 'var(--text-secondary)' }}>
+               {data.enrollments.length === 0
+                 ? "Buy a course to unlock classroom, live classes, assignments, and instructor chat."
+                 : "Continue where you left off."}
+             </p>
           </div>
           
           <div className="relative z-10 shrink-0 w-full md:w-auto">
-             <Link href="/student/live" className="btn-primary w-full md:w-auto px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(124,58,237,0.3)] hover:shadow-[0_0_40px_rgba(124,58,237,0.5)] transition-shadow">
-                Join Live Session
+             <Link href={data.enrollments.length === 0 ? "/courses" : "/student/live"} className="btn-primary w-full md:w-auto px-8 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-2 shadow-[0_0_30px_rgba(124,58,237,0.3)] hover:shadow-[0_0_40px_rgba(124,58,237,0.5)] transition-shadow">
+                {data.enrollments.length === 0 ? "Browse Courses" : "Join Live Session"}
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
              </Link>
           </div>
@@ -58,8 +84,8 @@ export default async function StudentDashboard() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
              {[
                 { label: "Enrolled Courses", value: data.activeCount.toString(), icon: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253", color: "var(--accent-primary)" },
-                { label: "Learning Streak", value: "12 Days", icon: "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z", color: "var(--accent-warning)" },
-                { label: "Learning Time", value: "48h 20m", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "var(--accent-cyan)" },
+                { label: "Learning Streak", value: data.enrollments.length === 0 ? "0 Days" : "12 Days", icon: "M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z", color: "var(--accent-warning)" },
+                { label: "Learning Time", value: data.enrollments.length === 0 ? "0h" : "48h 20m", icon: "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z", color: "var(--accent-cyan)" },
                 { label: "Certificates", value: data.completedCount.toString(), icon: "M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z", color: "var(--accent-success)" }
              ].map((stat, i) => (
                 <div key={i} className="p-6 rounded-[20px] card-hover flex flex-col justify-between" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}>
@@ -125,7 +151,7 @@ export default async function StudentDashboard() {
                 )}
              </div>
              
-             {/* Activity Chart */}
+             {data.enrollments.length > 0 && (
              <div className="p-6 md:p-8 rounded-[24px]" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}>
                 <h2 className="heading-font text-xl font-bold mb-8">Learning Activity</h2>
                 <div className="h-48 flex items-end justify-between gap-2 px-2">
@@ -150,37 +176,34 @@ export default async function StudentDashboard() {
                    ))}
                 </div>
              </div>
+             )}
           </div>
 
-          {/* Right Rail */}
+          {data.enrollments.length > 0 && (
           <div className="space-y-6">
-             {/* Up Next Live */}
              <div className="p-6 rounded-[24px] relative overflow-hidden" style={{ background: 'var(--bg-surface)', border: '1px solid var(--border-soft)' }}>
                 <div className="absolute top-0 right-0 w-32 h-32 blur-[40px] opacity-20 pointer-events-none" style={{ background: 'var(--accent-warning)' }}></div>
                 <h3 className="font-bold text-lg mb-6">Upcoming Events</h3>
                 
                 <div className="space-y-4">
-                   <div className="flex gap-4 p-4 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}>
-                      <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg" style={{ background: 'var(--bg-surface)' }}>
-                         <span className="text-xs font-bold text-rose-500">FEB</span>
-                         <span className="text-lg font-bold">14</span>
-                      </div>
-                      <div>
-                         <h4 className="font-bold text-sm">System Design Q&A</h4>
-                         <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>2:00 PM EST • with Marcus Chen</p>
-                      </div>
-                   </div>
-                   
-                   <div className="flex gap-4 p-4 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}>
-                      <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg" style={{ background: 'var(--bg-surface)' }}>
-                         <span className="text-xs font-bold" style={{ color: 'var(--text-tertiary)' }}>FEB</span>
-                         <span className="text-lg font-bold">16</span>
-                      </div>
-                      <div>
-                         <h4 className="font-bold text-sm">Project Review Session</h4>
-                         <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>11:00 AM EST • Cohort B</p>
-                      </div>
-                   </div>
+                   {upcomingLives.length === 0 ? (
+                     <p className="text-sm text-slate-500">No live classes scheduled yet for your courses.</p>
+                   ) : (
+                     upcomingLives.slice(0, 3).map((item, i) => (
+                       <div key={`${item.title}-${i}`} className="flex gap-4 p-4 rounded-xl" style={{ background: 'var(--bg-card)', border: '1px solid var(--border-soft)' }}>
+                          <div className="flex flex-col items-center justify-center w-12 h-12 rounded-lg" style={{ background: 'var(--bg-surface)' }}>
+                             <span className="text-xs font-bold text-rose-500">{item.at.toLocaleDateString("en-IN", { month: "short" }).toUpperCase()}</span>
+                             <span className="text-lg font-bold">{item.at.getDate()}</span>
+                          </div>
+                          <div>
+                             <h4 className="font-bold text-sm">{item.title}</h4>
+                             <p className="text-xs mt-1" style={{ color: 'var(--text-secondary)' }}>
+                               {item.at.toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" })} · {item.course}
+                             </p>
+                          </div>
+                       </div>
+                     ))
+                   )}
                 </div>
                 <Link href="/student/calendar" className="btn-secondary w-full mt-4 py-2 text-sm rounded-lg">View Full Calendar</Link>
              </div>
@@ -192,23 +215,26 @@ export default async function StudentDashboard() {
                    Upcoming Deadlines
                 </h3>
                 <div className="space-y-3">
-                   <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--bg-card)' }}>
-                      <div>
-                         <div className="font-bold text-sm">E-commerce API</div>
-                         <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Due in 2 days</div>
-                      </div>
-                      <Link href="/student/assignments" className="text-xs font-bold px-3 py-1.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400">Submit</Link>
-                   </div>
-                   <div className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--bg-card)' }}>
-                      <div>
-                         <div className="font-bold text-sm">Dockerize Application</div>
-                         <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>Due in 5 days</div>
-                      </div>
-                      <Link href="/student/assignments" className="text-xs font-bold px-3 py-1.5 rounded" style={{ background: 'var(--bg-surface)', color: 'var(--text-primary)' }}>Start</Link>
-                   </div>
+                   {upcomingAssignments.length === 0 ? (
+                     <p className="text-sm text-slate-500">No assignments from your instructor yet.</p>
+                   ) : (
+                     upcomingAssignments.map((item) => (
+                       <div key={item.id} className="flex items-center justify-between p-3 rounded-lg" style={{ background: 'var(--bg-card)' }}>
+                          <div>
+                             <div className="font-bold text-sm">{item.title}</div>
+                             <div className="text-xs" style={{ color: 'var(--text-secondary)' }}>
+                               {item.course.title}
+                               {item.dueDate ? ` · Due ${item.dueDate.toLocaleDateString()}` : ""}
+                             </div>
+                          </div>
+                          <Link href="/student/assignments" className="text-xs font-bold px-3 py-1.5 rounded bg-rose-500/10 text-rose-600">Open</Link>
+                       </div>
+                     ))
+                   )}
                 </div>
              </div>
           </div>
+          )}
           
        </div>
     </div>

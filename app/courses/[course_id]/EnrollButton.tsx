@@ -92,14 +92,14 @@ export default function EnrollButton({
 
       // If already enrolled
       if (orderData.alreadyEnrolled) {
-        router.push("/student/courses");
+        router.push(`/student/classroom?courseId=${courseId}`);
         return;
       }
 
       // If course is free
       if (orderData.freeEnrollment) {
         alert("🎉 Congratulations! You have successfully enrolled in this course.");
-        router.push("/student/courses");
+        router.push(`/student/classroom?courseId=${courseId}`);
         return;
       }
 
@@ -147,7 +147,7 @@ export default function EnrollButton({
 
             if (verifyRes.ok && verifyData.success) {
               alert("Payment Successful! Course has been added to My Courses.");
-              router.push("/student/courses");
+              router.push(`/student/classroom?courseId=${courseId}`);
             } else {
               setErrorMessage(verifyData.error || "Payment verification failed. Please contact support.");
               setLoading(false);
@@ -181,10 +181,10 @@ export default function EnrollButton({
     return (
       <div className="w-full space-y-2">
         <Link
-          href="/student/courses"
+          href={`/student/classroom?courseId=${courseId}`}
           className="w-full py-4 px-6 rounded-xl font-extrabold text-base bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
         >
-          <span>✓ Enrolled — Go to My Courses</span>
+          <span>✓ Enrolled — Go to Classroom</span>
         </Link>
         <span className="text-center text-xs text-slate-400 block">
           You have active access to this course

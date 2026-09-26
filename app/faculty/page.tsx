@@ -30,17 +30,38 @@ export default async function FacultyDashboard() {
     }
   }
 
-  // Fetch real teacher courses from DB
   const courses = await prisma.course.findMany({
     where: session.user.role === "ADMIN" ? {} : { facultyId: session.user.id },
     include: {
-      _count: { select: { enrollments: true } },
+      enrollments: {
+        include: {
+          student: { select: { id: true, name: true, fullName: true, email: true, image: true } },
+        },
+        orderBy: { enrolledAt: "desc" },
+      },
     },
     orderBy: { createdAt: "desc" },
   });
 
-  const totalStudents = courses.reduce((acc, c) => acc + (c._count.enrollments || 0), 0);
-  const totalRevenue = courses.reduce((acc, c) => acc + (c._count.enrollments || 0) * (c.price || 0), 0);
+  const courseCards = courses.map((course) => ({
+    id: course.id,
+    title: course.title,
+    status: course.status,
+    price: course.price || 0,
+    students: course.enrollments
+      .filter((row) => row.paymentStatus === "COMPLETED")
+      .map((row) => ({
+        id: row.student.id,
+        name: row.student.fullName || row.student.name || row.student.email,
+        email: row.student.email,
+      })),
+    liveCount: Array.isArray((course.curriculum as any)?.liveSessions)
+      ? (course.curriculum as any).liveSessions.length
+      : 0,
+  }));
+
+  const totalStudents = courseCards.reduce((acc, course) => acc + course.students.length, 0);
+  const totalRevenue = courseCards.reduce((acc, course) => acc + course.students.length * course.price, 0);
 
   const welcomePrefix = cmsData?.welcomeMessage || `Welcome back, ${userName}`;
 
@@ -69,7 +90,7 @@ export default async function FacultyDashboard() {
         {[
           {
             label: "My Courses",
-            value: courses.length.toString(),
+            value: courseCards.length.toString(),
             trend: "Active",
             color: "var(--accent-primary)",
           },
@@ -131,62 +152,68 @@ export default async function FacultyDashboard() {
               className="p-6 border-b flex justify-between items-center"
               style={{ borderColor: "var(--border-soft)" }}
             >
-              <h2 className="heading-font text-lg font-bold">My Courses ({courses.length})</h2>
+              <h2 className="heading-font text-lg font-bold">Students by course</h2>
               <Link
-                href="/faculty/courses"
+                href="/faculty/students"
                 className="text-sm font-semibold hover:underline"
                 style={{ color: "var(--accent-primary)" }}
               >
-                View All
+                Full directory
               </Link>
             </div>
-            <div className="overflow-x-auto">
-              {courses.length === 0 ? (
-                <div className="p-8 text-center">
+            <div className="p-6 space-y-4">
+              {courseCards.length === 0 ? (
+                <div className="text-center">
                   <p className="text-sm text-slate-500 mb-4">You have not created any courses yet.</p>
                   <Link href="/faculty/create" className="btn-primary px-4 py-2 rounded-lg text-xs font-bold">
                     + Create Your First Course
                   </Link>
                 </div>
               ) : (
-                <table className="data-table">
-                  <thead>
-                    <tr>
-                      <th>Course Name</th>
-                      <th>Status</th>
-                      <th>Students</th>
-                      <th>Price</th>
-                      <th>Action</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {courses.slice(0, 5).map((c) => (
-                      <tr key={c.id}>
-                        <td className="font-bold">{c.title}</td>
-                        <td>
+                courseCards.map((course) => (
+                  <div key={course.id} className="rounded-2xl border border-slate-200 p-4 bg-slate-50/70">
+                    <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                      <div>
+                        <h3 className="font-extrabold text-slate-900">{course.title}</h3>
+                        <p className="text-xs text-slate-500">
+                          {course.students.length} student{course.students.length === 1 ? "" : "s"} purchased
+                          {course.liveCount ? ` · ${course.liveCount} live class${course.liveCount === 1 ? "" : "es"}` : ""}
+                        </p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Link
+                          href={`/faculty/courses/builder?id=${course.id}&tab=live`}
+                          className="text-xs font-bold text-rose-600 hover:underline"
+                        >
+                          Live + attendance
+                        </Link>
+                        <Link
+                          href={`/faculty/students`}
+                          className="text-xs font-bold text-[#0055FF] hover:underline"
+                        >
+                          Students
+                        </Link>
+                      </div>
+                    </div>
+                    {course.students.length === 0 ? (
+                      <p className="text-xs text-slate-400">No completed enrollments yet.</p>
+                    ) : (
+                      <div className="flex flex-wrap gap-2">
+                        {course.students.map((student) => (
                           <span
-                            className={`px-2 py-0.5 rounded text-xs font-bold ${
-                              c.status === "PUBLISHED" ? "badge-success" : "badge-warning"
-                            }`}
+                            key={student.id}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white border border-slate-200 text-xs font-semibold text-slate-700"
                           >
-                            {c.status}
+                            <span className="w-5 h-5 rounded-full bg-[#0055FF] text-white text-[10px] font-black flex items-center justify-center">
+                              {student.name[0]?.toUpperCase() || "S"}
+                            </span>
+                            {student.name}
                           </span>
-                        </td>
-                        <td>{c._count.enrollments || 0}</td>
-                        <td>₹{Number(c.price || 0).toLocaleString()}</td>
-                        <td>
-                          <Link
-                            href={`/courses/${c.id}`}
-                            target="_blank"
-                            className="text-xs font-bold text-[#0055FF] hover:underline"
-                          >
-                            Preview ↗
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
               )}
             </div>
           </div>
@@ -208,6 +235,13 @@ export default async function FacultyDashboard() {
                 className="w-full py-3 px-4 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0055FF] text-xs font-bold flex items-center justify-between transition-colors"
               >
                 <span>+ Create New Course</span>
+                <span>→</span>
+              </Link>
+              <Link
+                href="/faculty/courses/builder"
+                className="w-full py-3 px-4 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-bold flex items-center justify-between transition-colors"
+              >
+                <span>Schedule live class & attendance</span>
                 <span>→</span>
               </Link>
               <Link

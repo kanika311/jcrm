@@ -19,9 +19,11 @@ export async function GET(
       where: { id: course_id },
       include: {
         enrollments: {
-          select: { id: true, paymentStatus: true }
-        }
-      }
+          include: {
+            student: { select: { id: true, name: true, fullName: true, email: true, image: true } },
+          },
+        },
+      },
     });
 
     if (!course) {
@@ -32,11 +34,18 @@ export async function GET(
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
+    const enrolled = course.enrollments.filter((e) => e.paymentStatus === "COMPLETED");
     return NextResponse.json({
       course: {
         ...course,
-        studentCount: course.enrollments.filter(e => e.paymentStatus === "COMPLETED").length,
-      }
+        studentCount: enrolled.length,
+        students: enrolled.map((row) => ({
+          id: row.student.id,
+          name: row.student.fullName || row.student.name || row.student.email,
+          email: row.student.email,
+          image: row.student.image,
+        })),
+      },
     });
   } catch (error: any) {
     console.error("Error fetching course:", error);

@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   FiSearch,
   FiPlus,
@@ -42,7 +42,7 @@ export interface Course {
   };
 }
 
-const DEFAULT_MODULES_FOR_TITLE = (title: string): CourseModule[] => {
+export const DEFAULT_MODULES_FOR_TITLE = (title: string): CourseModule[] => {
   const cleanTitle = title.trim() || "Technology";
   return [
     {
@@ -78,7 +78,7 @@ const DEFAULT_MODULES_FOR_TITLE = (title: string): CourseModule[] => {
   ];
 };
 
-const DEFAULT_WHAT_YOU_LEARN = (title: string): string => {
+export const DEFAULT_WHAT_YOU_LEARN = (title: string): string => {
   const clean = title.trim() || "modern software engineering";
   return [
     `Master foundational to advanced concepts in ${clean}`,
@@ -288,7 +288,6 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
 
   // Form states for New Course
   const [newTitle, setNewTitle] = useState("");
@@ -307,10 +306,6 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
   const [newWhatYouLearn, setNewWhatYouLearn] = useState<string>(DEFAULT_WHAT_YOU_LEARN("Frontend Development"));
   const [newCurriculum, setNewCurriculum] = useState<CourseModule[]>(DEFAULT_MODULES_FOR_TITLE("Frontend Development"));
 
-  // State for Edit Course specific fields
-  const [editWhatYouLearn, setEditWhatYouLearn] = useState<string>("");
-  const [editCurriculum, setEditCurriculum] = useState<CourseModule[]>([]);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [feedbackMsg, setFeedbackMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -322,51 +317,19 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
 
   // Lock background scrolling when any modal is open
   useEffect(() => {
-    if (isAddModalOpen || editingCourse) {
+    if (isAddModalOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = "hidden";
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
-  }, [isAddModalOpen, editingCourse]);
+  }, [isAddModalOpen]);
 
   const addFileInputRef = useRef<HTMLInputElement>(null);
-  const editFileInputRef = useRef<HTMLInputElement>(null);
-
-  const router = useRouter();
-
-  // Open Edit Modal with initialized values
-  const startEditing = (course: Course) => {
-    let parsedCurriculum: CourseModule[] = [];
-    if (Array.isArray(course.curriculum)) {
-      parsedCurriculum = course.curriculum;
-    } else if (typeof course.curriculum === "string") {
-      try {
-        parsedCurriculum = JSON.parse(course.curriculum);
-      } catch {
-        parsedCurriculum = [];
-      }
-    }
-    if (!parsedCurriculum || parsedCurriculum.length === 0) {
-      parsedCurriculum = DEFAULT_MODULES_FOR_TITLE(course.title);
-    }
-
-    const learnText = Array.isArray(course.whatYouLearn) && course.whatYouLearn.length > 0
-      ? course.whatYouLearn.join("\n")
-      : DEFAULT_WHAT_YOU_LEARN(course.title);
-
-    setEditWhatYouLearn(learnText);
-    setEditCurriculum(parsedCurriculum);
-    setEditingCourse({
-      ...course,
-      instructorRole: course.instructorRole || "Senior Tech Lead & Industry Practitioner",
-      duration: course.duration || "3 Months • 120 Hours",
-    });
-  };
 
   // Handle Image File Upload
-  const handleImageFileUpload = async (file: File, target: "add" | "edit") => {
+  const handleImageFileUpload = async (file: File, target: "add" = "add") => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       alert("Please select a valid image file (PNG, JPG, WEBP, etc.)");
@@ -386,7 +349,6 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
         const data = await res.json();
         if (data.url) {
           if (target === "add") setNewImage(data.url);
-          else if (editingCourse) setEditingCourse({ ...editingCourse, image: data.url });
           return;
         }
       }
@@ -394,7 +356,6 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
       reader.onload = e => {
         const url = e.target?.result as string;
         if (target === "add") setNewImage(url);
-        else if (editingCourse) setEditingCourse({ ...editingCourse, image: url });
       };
       reader.readAsDataURL(file);
     } catch {
@@ -402,7 +363,6 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
       reader.onload = e => {
         const url = e.target?.result as string;
         if (target === "add") setNewImage(url);
-        else if (editingCourse) setEditingCourse({ ...editingCourse, image: url });
       };
       reader.readAsDataURL(file);
     } finally {
@@ -481,64 +441,6 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
       setNewCurriculum(DEFAULT_MODULES_FOR_TITLE(""));
     } catch (err: any) {
       setFeedbackMsg({ type: "error", text: err.message || "Failed to create course" });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  // Handle Edit Course Submit
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingCourse) return;
-    setIsSubmitting(true);
-    setFeedbackMsg(null);
-
-    try {
-      const parsedWhatYouLearn = editWhatYouLearn
-        .split("\n")
-        .map(s => s.trim())
-        .filter(Boolean);
-
-      const res = await fetch("/api/admin/courses", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          id: editingCourse.id,
-          title: editingCourse.title,
-          description: editingCourse.description,
-          price: Number(editingCourse.price),
-          status: editingCourse.status,
-          level: editingCourse.level,
-          badge: editingCourse.badge,
-          instructor: editingCourse.instructor,
-          instructorRole: editingCourse.instructorRole,
-          duration: editingCourse.duration,
-          image: editingCourse.image,
-          tags: editingCourse.tags,
-          whatYouLearn: parsedWhatYouLearn,
-          curriculum: editCurriculum,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Failed to save changes");
-
-      setCourses(prev =>
-        prev.map(c =>
-          c.id === editingCourse.id
-            ? {
-                ...c,
-                ...editingCourse,
-                whatYouLearn: parsedWhatYouLearn,
-                curriculum: editCurriculum,
-              }
-            : c
-        )
-      );
-      setEditingCourse(null);
-      setFeedbackMsg({ type: "success", text: `Course "${editingCourse.title}" updated successfully!` });
-    } catch (err: any) {
-      setFeedbackMsg({ type: "error", text: err.message || "Failed to update course" });
     } finally {
       setIsSubmitting(false);
     }
@@ -739,13 +641,13 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                         </button>
                       )}
 
-                      <button
-                        onClick={() => startEditing(course)}
+                      <Link
+                        href={`/admin/courses/${course.id}/edit`}
                         className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 transition-all cursor-pointer shadow-2xs"
                         title="Edit Course"
                       >
                         <FiEdit2 className="w-4 h-4" />
-                      </button>
+                      </Link>
 
                       <button
                         disabled={isSubmitting}
@@ -1116,366 +1018,6 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                     className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg cursor-pointer"
                   >
                     {isSubmitting ? "Creating..." : "Add Course & Modules"}
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>,
-          document.body
-        )}
-
-      {/* MODAL: EDIT COURSE */}
-      {mounted &&
-        editingCourse &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[99999] flex items-center justify-center p-3 sm:p-6 bg-black/75 backdrop-blur-sm animate-fade-in"
-            style={{ margin: 0 }}
-            onClick={() => setEditingCourse(null)}
-          >
-            <div
-              className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden m-auto"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
-              onClick={e => e.stopPropagation()}
-            >
-              {/* Header */}
-              <div
-                className="flex justify-between items-center px-6 py-4 border-b shrink-0"
-                style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-              >
-                <div>
-                  <h3 className="text-xl font-bold">Edit Course & Syllabus</h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
-                    Update course curriculum modules, learning takeaways, and metadata.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setEditingCourse(null)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              {/* Form Body + Footer */}
-              <form onSubmit={handleEditSubmit} className="flex flex-col flex-1 min-h-0 overflow-hidden">
-                <div className="p-6 overflow-y-auto space-y-6 flex-1 min-h-0">
-                  {/* Basic Details Section */}
-                  <div className="space-y-4">
-                    <h4 className="text-xs font-bold text-[#0055FF] uppercase tracking-wider">
-                      1. Course Information
-                    </h4>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Course Title *
-                        </label>
-                        <input
-                          type="text"
-                          required
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.title}
-                          onChange={e => setEditingCourse({ ...editingCourse, title: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Instructor Name
-                        </label>
-                        <input
-                          type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.instructor || ""}
-                          onChange={e => setEditingCourse({ ...editingCourse, instructor: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Instructor Role / Title
-                        </label>
-                        <input
-                          type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.instructorRole || ""}
-                          onChange={e => setEditingCourse({ ...editingCourse, instructorRole: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Duration & Hours
-                        </label>
-                        <input
-                          type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.duration || ""}
-                          onChange={e => setEditingCourse({ ...editingCourse, duration: e.target.value })}
-                        />
-                      </div>
-                    </div>
-
-                    <div>
-                      <label
-                        className="block text-xs font-bold mb-1 uppercase"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
-                        Description
-                      </label>
-                      <textarea
-                        required
-                        rows={3}
-                        className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                        value={editingCourse.description}
-                        onChange={e => setEditingCourse({ ...editingCourse, description: e.target.value })}
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Price (₹)
-                        </label>
-                        <input
-                          type="number"
-                          required
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.price}
-                          onChange={e => setEditingCourse({ ...editingCourse, price: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Level
-                        </label>
-                        <select
-                          className="select-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.level || "Beginner"}
-                          onChange={e => setEditingCourse({ ...editingCourse, level: e.target.value })}
-                        >
-                          <option value="Beginner">Beginner</option>
-                          <option value="Beginner to Advanced">Beginner to Advanced</option>
-                          <option value="Intermediate">Intermediate</option>
-                          <option value="Advanced">Advanced</option>
-                          <option value="Specialized">Specialized</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Status
-                        </label>
-                        <select
-                          className="select-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.status}
-                          onChange={e => setEditingCourse({ ...editingCourse, status: e.target.value as any })}
-                        >
-                          <option value="DRAFT">Draft</option>
-                          <option value="PUBLISHED">Published</option>
-                          <option value="ARCHIVED">Archived</option>
-                        </select>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Badge
-                        </label>
-                        <input
-                          type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={editingCourse.badge || ""}
-                          onChange={e => setEditingCourse({ ...editingCourse, badge: e.target.value })}
-                        />
-                      </div>
-
-                      <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Tags (comma-separated)
-                        </label>
-                        <input
-                          type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
-                          value={
-                            Array.isArray(editingCourse.tags)
-                              ? editingCourse.tags.join(", ")
-                              : editingCourse.tags || ""
-                          }
-                          onChange={e =>
-                            setEditingCourse({
-                              ...editingCourse,
-                              tags: e.target.value
-                                .split(",")
-                                .map(t => t.trim())
-                                .filter(Boolean),
-                            })
-                          }
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Image Section */}
-                  <div className="space-y-2 pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
-                    <h4 className="text-xs font-bold text-[#0055FF] uppercase tracking-wider">
-                      2. Course Thumbnail Image
-                    </h4>
-
-                    <div
-                      className="space-y-3 p-4 rounded-2xl border"
-                      style={{ background: "var(--bg-base)", borderColor: "var(--border-soft)" }}
-                    >
-                      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <div
-                          className="relative w-28 h-20 rounded-xl overflow-hidden border shrink-0 bg-black/10 flex items-center justify-center"
-                          style={{ borderColor: "var(--border-soft)" }}
-                        >
-                          {editingCourse.image ? (
-                            <img
-                              src={editingCourse.image}
-                              alt="Course preview"
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <span className="text-xs text-gray-400">No Image</span>
-                          )}
-                        </div>
-
-                        <div className="flex-1 space-y-2 w-full">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <input
-                              type="file"
-                              accept="image/*"
-                              ref={editFileInputRef}
-                              className="hidden"
-                              onChange={e => {
-                                const file = e.target.files?.[0];
-                                if (file) handleImageFileUpload(file, "edit");
-                              }}
-                            />
-                            <button
-                              type="button"
-                              onClick={() => editFileInputRef.current?.click()}
-                              disabled={isUploadingImage}
-                              className="px-4 py-2 rounded-xl text-xs font-bold bg-[#0055FF] text-white hover:bg-blue-600 transition-colors cursor-pointer flex items-center gap-1.5 shadow-sm disabled:opacity-50"
-                            >
-                              {isUploadingImage ? "Uploading..." : "📁 Upload Image from Device"}
-                            </button>
-
-                            {editingCourse.image && (
-                              <button
-                                type="button"
-                                onClick={() => setEditingCourse({ ...editingCourse, image: "" })}
-                                className="px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
-                              >
-                                Remove
-                              </button>
-                            )}
-                          </div>
-                          <p className="text-[11px] text-[var(--text-tertiary)]">PNG, JPG, WEBP up to 5MB.</p>
-                        </div>
-                      </div>
-
-                      <div className="pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
-                        <input
-                          type="url"
-                          className="input-premium w-full px-3 py-2 rounded-xl text-xs"
-                          placeholder="https://images.unsplash.com/..."
-                          value={editingCourse.image || ""}
-                          onChange={e => setEditingCourse({ ...editingCourse, image: e.target.value })}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* What You'll Learn Section */}
-                  <div className="space-y-2 pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
-                    <div className="flex items-center justify-between">
-                      <h4 className="text-xs font-bold text-[#0055FF] uppercase tracking-wider">
-                        3. What You'll Learn (Outcomes)
-                      </h4>
-                      <button
-                        type="button"
-                        onClick={() => setEditWhatYouLearn(DEFAULT_WHAT_YOU_LEARN(editingCourse.title))}
-                        className="text-xs font-bold text-purple-400 hover:underline cursor-pointer"
-                      >
-                        ✨ Reset Suggestions
-                      </button>
-                    </div>
-                    <p className="text-[11px] text-[var(--text-tertiary)]">
-                      Enter each learning takeaway on a new line.
-                    </p>
-                    <textarea
-                      rows={4}
-                      className="input-premium w-full px-4 py-2.5 rounded-xl text-xs font-mono leading-relaxed"
-                      placeholder="Master key technical skills&#10;Build real-world production projects"
-                      value={editWhatYouLearn}
-                      onChange={e => setEditWhatYouLearn(e.target.value)}
-                    />
-                  </div>
-
-                  {/* Curriculum Modules Section */}
-                  <div className="pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
-                    <CurriculumEditor
-                      modules={editCurriculum}
-                      onChange={setEditCurriculum}
-                      courseTitle={editingCourse.title}
-                    />
-                  </div>
-                </div>
-
-                {/* Sticky Footer */}
-                <div
-                  className="px-6 py-4 border-t flex justify-end gap-3 shrink-0"
-                  style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-                >
-                  <button
-                    type="button"
-                    onClick={() => setEditingCourse(null)}
-                    className="btn-secondary px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={isSubmitting}
-                    className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg cursor-pointer"
-                  >
-                    {isSubmitting ? "Saving..." : "Save Changes"}
                   </button>
                 </div>
               </form>

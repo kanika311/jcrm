@@ -191,8 +191,9 @@ export default function WorkshopCatalogClient({
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-24 bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent font-sans">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+    <div className="pt-16 sm:pt-20 min-h-screen bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent font-sans">
+      <div className="lg:h-[calc(100dvh-5rem)] lg:overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:h-full lg:min-h-0 space-y-6 lg:space-y-4">
 
         {/* Short Screen Filter Bar (Sirf Icon Button on Left) */}
         <div className="lg:hidden flex items-center justify-between gap-3 bg-white border border-[#D4E8F8] rounded-2xl p-3 shadow-xs">
@@ -226,13 +227,10 @@ export default function WorkshopCatalogClient({
         </div>
 
         {/* 3-PANEL MASTER GRID LAYOUT */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:h-full lg:min-h-0">
           
-          {/* ====================================================================== */}
-          {/* 1. LEFT PANEL: SEARCH & TOPIC NAMES LIST (STICKY SIDEBAR - DESKTOP)    */}
-          {/* ====================================================================== */}
-          <aside className="hidden lg:block lg:col-span-3 lg:sticky lg:top-24 space-y-4">
-            <div className="bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-4 sm:p-5">
+          <aside className="hidden lg:flex lg:flex-col lg:col-span-3 lg:h-full lg:min-h-0 lg:overflow-hidden space-y-4">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-4 sm:p-5">
               {renderTopicsList(false)}
             </div>
 
@@ -261,7 +259,7 @@ export default function WorkshopCatalogClient({
           {/* ====================================================================== */}
           {/* 2. CENTER PANEL: SELECTED WORKSHOP CONTENT                             */}
           {/* ====================================================================== */}
-          <main className="lg:col-span-6 space-y-6">
+          <main className="lg:col-span-6 space-y-6 min-h-0 lg:h-full lg:overflow-y-scroll lg:overscroll-contain lg:pr-1 pb-24 lg:pb-16">
             {currentWorkshop ? (
               <div className="space-y-6 animate-fade-in">
                 
@@ -453,7 +451,7 @@ export default function WorkshopCatalogClient({
           {/* ====================================================================== */}
           {/* 3. RIGHT PANEL: SPONSORED BANNER (STICKY SIDEBAR)                      */}
           {/* ====================================================================== */}
-          <aside className="lg:col-span-3 lg:sticky lg:top-24 space-y-4">
+          <aside className="lg:col-span-3 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain space-y-4">
             {sponsoredAd && sponsoredAd.isActive ? (
               <div className="bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5 space-y-4 relative group">
                 {/* Header: Only Sponsored badge */}
@@ -502,6 +500,7 @@ export default function WorkshopCatalogClient({
           </aside>
 
         </div>
+      </div>
       </div>
 
       {/* ====================================================================== */}

@@ -716,7 +716,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
   let dbCourse = null;
   try {
     dbCourse = await prisma.course.findUnique({
-      where: { id: course_id }
+      where: { id: course_id },
+      include: { faculty: { select: { id: true, name: true, fullName: true, image: true, role: true, isBlocked: true } } },
     });
   } catch {
     // If not a valid ObjectId or other error, fallback to searching by slug or title
@@ -724,7 +725,9 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
 
   if (!dbCourse) {
     try {
-      const allDbCourses = await prisma.course.findMany();
+      const allDbCourses = await prisma.course.findMany({
+        include: { faculty: { select: { id: true, name: true, fullName: true, image: true, role: true, isBlocked: true } } },
+      });
       dbCourse = allDbCourses.find(c => {
         const slug = c.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
         return slug === course_id.toLowerCase() || c.id === course_id || c.title.toLowerCase() === course_id.toLowerCase();
@@ -791,8 +794,10 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
       title: dbCourse.title,
       badge: dbCourse.badge || "100% Placement Track",
       level: dbCourse.level || "Beginner to Advanced",
-      instructor: dbCourse.instructor || "JCRM Senior Tech Lead",
+      instructor: dbCourse.instructor || dbCourse.faculty?.fullName || dbCourse.faculty?.name || "JCRM Senior Tech Lead",
       instructorRole: dbCourse.instructorRole || "Senior Industry Practitioner",
+      instructorId: dbCourse.facultyId || dbCourse.faculty?.id || null,
+      instructorImage: dbCourse.faculty?.image || null,
       rating: "4.9",
       ratingsCount: "1,640",
       studentsCount: "12,500",
@@ -841,6 +846,34 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
       ]
     };
   }
+
+  if (!course.instructorId && course.instructor) {
+    try {
+      const instructors = await prisma.user.findMany({
+        where: { role: "INSTRUCTOR", isBlocked: false },
+        select: { id: true, name: true, fullName: true, image: true },
+      });
+      const needle = String(course.instructor).trim().toLowerCase();
+      const match = instructors.find((u) => {
+        const full = (u.fullName || "").trim().toLowerCase();
+        const name = (u.name || "").trim().toLowerCase();
+        return full === needle || name === needle || full.includes(needle) || name.includes(needle);
+      });
+      if (match) {
+        course.instructorId = match.id;
+        course.instructorImage = match.image || course.instructorImage;
+        course.instructor = match.fullName || match.name || course.instructor;
+      }
+    } catch {}
+  }
+
+  const instructorSlug = String(course.instructor || "instructor")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
+  const instructorHref = course.instructorId
+    ? `/engineers/${course.instructorId}`
+    : `/engineers/${instructorSlug}`;
 
   const targetCourseId = dbCourse?.id || course.id || course_id;
   let isEnrolled = false;
@@ -1018,17 +1051,28 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
           {/* Right 5 Cols: Instructor & Advisor */}
           <div className="lg:col-span-5 space-y-8">
             {/* Instructor Card */}
-            <div className="p-8 rounded-[36px] bg-white/85 backdrop-blur-2xl border border-white/90 shadow-[0_12px_45px_rgba(0,85,255,0.1)]">
+            <Link
+              href={instructorHref}
+              className="block p-8 rounded-[36px] bg-white/85 backdrop-blur-2xl border border-white/90 shadow-[0_12px_45px_rgba(0,85,255,0.1)] hover:border-[#0055FF]/40 hover:shadow-[0_16px_50px_rgba(0,85,255,0.16)] transition-all group"
+            >
               <span className="text-xs font-extrabold text-[#0055FF] uppercase tracking-wider block mb-4">
                 YOUR INSTRUCTOR
               </span>
 
               <div className="flex items-center gap-4 mb-4">
-                <div className="w-14 h-14 rounded-2xl bg-[#0055FF] text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">
-                  {course.instructor.split(' ').map((n: string) => n[0]).join('')}
-                </div>
+                {course.instructorImage ? (
+                  <img
+                    src={course.instructorImage}
+                    alt={course.instructor}
+                    className="w-14 h-14 rounded-2xl object-cover border border-blue-100 shadow-md shrink-0"
+                  />
+                ) : (
+                  <div className="w-14 h-14 rounded-2xl bg-[#0055FF] text-white flex items-center justify-center font-black text-xl shadow-md shrink-0">
+                    {course.instructor.split(" ").map((n: string) => n[0]).join("")}
+                  </div>
+                )}
                 <div>
-                  <h3 className="heading-font font-extrabold text-slate-900 text-lg">
+                  <h3 className="heading-font font-extrabold text-slate-900 text-lg group-hover:text-[#0055FF] transition-colors">
                     {course.instructor}
                   </h3>
                   <p className="text-xs font-bold text-[#0055FF]">
@@ -1037,10 +1081,13 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
                 </div>
               </div>
 
-              <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+              <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed mb-4">
                 Experienced industry practitioner dedicated to mentorship, enterprise architecture, and student placement success.
               </p>
-            </div>
+              <span className="text-xs font-extrabold text-[#0055FF]">
+                View full profile →
+              </span>
+            </Link>
 
             {/* Questions Advisor Card */}
             <div className="p-8 rounded-[36px] bg-slate-900 text-white shadow-xl text-center space-y-4">

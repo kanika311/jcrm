@@ -68,9 +68,23 @@ model User {
   insightPosts     InsightPost[]
   insightLikes     InsightLike[]
   insightComments  InsightComment[]
+  facultyAssignments Assignment[] @relation("FacultyAssignments")
+  assignmentSubmissions AssignmentSubmission[] @relation("StudentSubmissions")
 
   @@index([role])
   @@map("Users")
+}
+
+model DirectMessage {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  threadKey  String   @map("thread_key")
+  senderRole String   @map("sender_role")
+  senderId   String   @map("sender_id")
+  text       String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([threadKey])
+  @@map("direct_messages")
 }
 
 model UserProfile {
@@ -123,6 +137,7 @@ model Course {
   faculty     User         @relation("FacultyCourses", fields: [facultyId], references: [id])
   lessons     Lesson[]
   enrollments Enrollment[]
+  assignments Assignment[]
 
   @@index([facultyId])
   @@index([status])
@@ -161,6 +176,49 @@ model Enrollment {
   @@index([studentId])
   @@index([courseId])
   @@map("Enrollments")
+}
+
+enum AssignmentWorkStatus {
+  PENDING
+  SUBMITTED
+  GRADED
+}
+
+model Assignment {
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
+  courseId    String    @map("course_id") @db.ObjectId
+  facultyId   String    @map("faculty_id") @db.ObjectId
+  title       String
+  description String    @default("")
+  dueDate     DateTime? @map("due_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  course      Course    @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  faculty     User      @relation("FacultyAssignments", fields: [facultyId], references: [id], onDelete: Cascade)
+  submissions AssignmentSubmission[]
+
+  @@index([courseId])
+  @@index([facultyId])
+  @@map("assignments")
+}
+
+model AssignmentSubmission {
+  id           String               @id @default(auto()) @map("_id") @db.ObjectId
+  assignmentId String               @map("assignment_id") @db.ObjectId
+  studentId    String               @map("student_id") @db.ObjectId
+  status       AssignmentWorkStatus @default(SUBMITTED)
+  content      String?
+  grade        String?
+  feedback     String?
+  submittedAt  DateTime             @default(now()) @map("submitted_at")
+
+  assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      User       @relation("StudentSubmissions", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([assignmentId, studentId])
+  @@index([assignmentId])
+  @@index([studentId])
+  @@map("assignment_submissions")
 }
 
 model Testimonial {

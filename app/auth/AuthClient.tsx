@@ -33,9 +33,18 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
 
   useEffect(() => {
     const error = searchParams.get("error");
-    if (error) {
-      setErrorMsg(error);
-    }
+    if (!error) return;
+
+    const oauthMessages: Record<string, string> = {
+      OAuthSignin: "Google sign-in is not configured. Use email and password, or add GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.",
+      OAuthCallback: "Google sign-in failed after redirect. Check the Google Cloud callback URL.",
+      OAuthCreateAccount: "Could not create an account from Google. Try email signup instead.",
+      OAuthAccountNotLinked: "This email is already registered. Sign in with email and password.",
+      AccessDenied: "Google sign-in was cancelled or denied.",
+      Configuration: "Login is misconfigured. Check NEXTAUTH_SECRET and Google keys in .env.",
+      Default: "Sign-in failed. Try email and password.",
+    };
+    setErrorMsg(oauthMessages[error] || error);
   }, [searchParams]);
 
   // Route user according to their verified role

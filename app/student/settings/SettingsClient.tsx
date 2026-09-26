@@ -85,6 +85,13 @@ export default function SettingsClient({ cmsData }: { cmsData: any }) {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const normalizeUrl = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (/^https?:\/\//i.test(trimmed)) return trimmed;
+    return `https://${trimmed}`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
@@ -92,6 +99,9 @@ export default function SettingsClient({ cmsData }: { cmsData: any }) {
 
     const payload = {
       ...formData,
+      linkedinUrl: normalizeUrl(formData.linkedinUrl),
+      githubUrl: normalizeUrl(formData.githubUrl),
+      portfolioUrl: normalizeUrl(formData.portfolioUrl),
       techStack: formData.techStack ? formData.techStack.split(",").map(s => s.trim()).filter(Boolean) : []
     };
 
@@ -259,15 +269,15 @@ export default function SettingsClient({ cmsData }: { cmsData: any }) {
                         <div className="space-y-4">
                            <div>
                               <label className="block text-sm font-medium mb-2">LinkedIn URL</label>
-                              <input type="url" name="linkedinUrl" value={formData.linkedinUrl} onChange={handleChange} className="input-premium w-full px-4 py-2.5 rounded-lg text-sm" placeholder="https://linkedin.com/in/username" disabled={cmsData?.allowProfileEdit === false} />
+                              <input type="text" inputMode="url" name="linkedinUrl" value={formData.linkedinUrl} onChange={handleChange} className="input-premium w-full px-4 py-2.5 rounded-lg text-sm" placeholder="linkedin.com/in/username" disabled={cmsData?.allowProfileEdit === false} />
                            </div>
                            <div>
                               <label className="block text-sm font-medium mb-2">GitHub URL</label>
-                              <input type="url" name="githubUrl" value={formData.githubUrl} onChange={handleChange} className="input-premium w-full px-4 py-2.5 rounded-lg text-sm" placeholder="https://github.com/username" disabled={cmsData?.allowProfileEdit === false} />
+                              <input type="text" inputMode="url" name="githubUrl" value={formData.githubUrl} onChange={handleChange} className="input-premium w-full px-4 py-2.5 rounded-lg text-sm" placeholder="github.com/username" disabled={cmsData?.allowProfileEdit === false} />
                            </div>
                            <div>
                               <label className="block text-sm font-medium mb-2">Portfolio Website</label>
-                              <input type="url" name="portfolioUrl" value={formData.portfolioUrl} onChange={handleChange} className="input-premium w-full px-4 py-2.5 rounded-lg text-sm" placeholder="https://mywebsite.com" disabled={cmsData?.allowProfileEdit === false} />
+                              <input type="text" inputMode="url" name="portfolioUrl" value={formData.portfolioUrl} onChange={handleChange} className="input-premium w-full px-4 py-2.5 rounded-lg text-sm" placeholder="mywebsite.com" disabled={cmsData?.allowProfileEdit === false} />
                            </div>
                         </div>
 

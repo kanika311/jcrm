@@ -3,6 +3,7 @@ import { getSiteContent } from "@/lib/cms";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export default async function FacultyLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -16,10 +17,21 @@ export default async function FacultyLayout({ children }: { children: React.Reac
     redirect("/student");
   }
 
+  const studentCount = await prisma.enrollment
+    .count({
+      where: {
+        paymentStatus: "COMPLETED",
+        ...(session.user.role === "ADMIN"
+          ? {}
+          : { course: { facultyId: session.user.id } }),
+      },
+    })
+    .catch(() => 0);
+
   const cmsData = await getSiteContent("faculty-navbar");
 
   return (
-    <FacultyLayoutClient cmsData={cmsData}>
+    <FacultyLayoutClient cmsData={cmsData} hasStudents={studentCount > 0}>
       {children}
     </FacultyLayoutClient>
   );

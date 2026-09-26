@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import {
   FiGrid,
@@ -18,13 +18,24 @@ import {
   FiCheckCircle,
 } from "react-icons/fi";
 
+const COURSE_ONLY_PATHS = [
+  "/student/courses",
+  "/student/classroom",
+  "/student/live",
+  "/student/assignments",
+  "/student/calendar",
+];
+
 export default function StudentLayoutClient({
   children,
+  hasEnrollment = false,
 }: {
   children: React.ReactNode;
   cmsData?: any;
+  hasEnrollment?: boolean;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = useSession();
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
 
@@ -32,16 +43,25 @@ export default function StudentLayoutClient({
   const userName = user?.name || (user as any)?.fullName || "Student";
   const userInitial = userName[0]?.toUpperCase() || "S";
 
-  const navLinks = [
-    { name: "Overview", href: "/student", icon: FiGrid },
-    { name: "My Courses", href: "/student/courses", icon: FiBookOpen },
-    { name: "Classroom & Player", href: "/student/classroom", icon: FiPlayCircle },
-    { name: "Live Sessions", href: "/student/live", icon: FiRadio, hasPulse: true },
-    { name: "Assignments", href: "/student/assignments", icon: FiFileText, badge: "2" },
-    { name: "Calendar", href: "/student/calendar", icon: FiCalendar },
-    { name: "Messages", href: "/student/messages", icon: FiMessageSquare, badge: "3" },
-    { name: "Profile & Settings", href: "/student/settings", icon: FiSettings },
+  useEffect(() => {
+    if (hasEnrollment) return;
+    if (COURSE_ONLY_PATHS.some((path) => pathname.startsWith(path))) {
+      router.replace("/student");
+    }
+  }, [hasEnrollment, pathname, router]);
+
+  const allLinks = [
+    { name: "Overview", href: "/student", icon: FiGrid, requiresCourse: false },
+    { name: "My Courses", href: "/student/courses", icon: FiBookOpen, requiresCourse: true },
+    { name: "Classroom & Player", href: "/student/classroom", icon: FiPlayCircle, requiresCourse: true },
+    { name: "Live Sessions", href: "/student/live", icon: FiRadio, requiresCourse: true, hasPulse: true },
+    { name: "Assignments", href: "/student/assignments", icon: FiFileText, requiresCourse: true },
+    { name: "Calendar", href: "/student/calendar", icon: FiCalendar, requiresCourse: true },
+    { name: "Messages", href: "/student/messages", icon: FiMessageSquare, requiresCourse: false },
+    { name: "Profile & Settings", href: "/student/settings", icon: FiSettings, requiresCourse: false },
   ];
+
+  const navLinks = allLinks.filter((link) => hasEnrollment || !link.requiresCourse);
 
   const isActive = (href: string) => {
     if (href === "/student") return pathname === "/student";
@@ -124,26 +144,32 @@ export default function StudentLayoutClient({
                   </span>
                 )}
               </div>
-              {link.badge && (
-                <span
-                  className={`text-[10px] font-black px-1.5 py-0.5 rounded-full ${
-                    active ? "bg-white text-blue-600" : "bg-rose-500 text-white"
-                  }`}
-                >
-                  {link.badge}
-                </span>
-              )}
             </Link>
           );
         })}
+
+        {!hasEnrollment && (
+          <div className="mt-3 px-3 py-3 rounded-xl bg-blue-50 border border-blue-100">
+            <p className="text-[11px] font-semibold text-slate-600 leading-relaxed mb-2">
+              Courses, live classes, assignments, and instructor chat unlock after you buy a course.
+            </p>
+            <Link
+              href="/courses"
+              onClick={() => setMobileDrawerOpen(false)}
+              className="inline-flex items-center text-[11px] font-extrabold text-[#0055FF]"
+            >
+              Browse courses →
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-slate-50/60 dark:bg-black/40">
-      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Mobile Open Sidebar Button */}
+    <div className="pt-16 sm:pt-20 min-h-screen bg-slate-50/60 dark:bg-black/40">
+      <div className="lg:h-[calc(100dvh-5rem)] lg:overflow-hidden bg-slate-50/60 dark:bg-black/40">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:h-full lg:min-h-0">
         <div className="lg:hidden mb-4">
           <button
             type="button"
@@ -155,7 +181,6 @@ export default function StudentLayoutClient({
           </button>
         </div>
 
-        {/* Mobile Drawer */}
         {mobileDrawerOpen && (
           <div className="fixed inset-0 z-50 lg:hidden">
             <div
@@ -177,18 +202,16 @@ export default function StudentLayoutClient({
           </div>
         )}
 
-        {/* 2-Column Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-          {/* Left Rail */}
-          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 sticky top-28 self-start space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start lg:h-full lg:min-h-0">
+          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain">
             {sidebarContent}
           </aside>
 
-          {/* Main Dashboard Content */}
-          <main className="lg:col-span-8 xl:col-span-9 min-w-0">
+          <main className="lg:col-span-8 xl:col-span-9 min-w-0 min-h-0 lg:h-full lg:overflow-y-scroll lg:overscroll-contain pb-24 lg:pb-16">
             {children}
           </main>
         </div>
+      </div>
       </div>
     </div>
   );
