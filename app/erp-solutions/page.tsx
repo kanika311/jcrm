@@ -6,8 +6,6 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { DEFAULT_SPONSORED_AD, SponsoredAd } from "@/lib/sponsoredAd";
 
-export const erpProducts = ERP_PRODUCTS;
-
 export const dynamic = "force-dynamic";
 
 export default async function ErpSolutionsPage() {

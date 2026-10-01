@@ -1,7 +1,7 @@
 import { getSiteContent } from "@/lib/cms";
 import CoursesCatalogClient from "./CoursesCatalogClient";
 
-export const courses = [
+const courses = [
   {
     id: "frontend-development",
     title: "Frontend Development",

@@ -45,7 +45,7 @@ export default async function SubmissionsPage() {
     ...a,
     dueDate: a.dueDate?.toISOString() || null,
     createdAt: a.createdAt.toISOString(),
-    submissions: a.submissions.map((s) => ({
+    submissions: a.submissions.map((s: any) => ({
       ...s,
       submittedAt: s.submittedAt.toISOString(),
     })),

@@ -37,7 +37,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["firebase-admin"],
+  serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma"],
   images: {
     remotePatterns: [
       {
