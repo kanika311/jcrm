@@ -34,23 +34,6 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
     }
   ];
 
-  const leadership = [
-    {
-      name: "Founder & Chief Architect",
-      role: "Lead Systems Architect & Founder",
-      phone: "+91 831 053 1309",
-      image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
-      quote: "Our mission is simple: empower enterprises with software they truly own, while giving engineering students real production codebases to launch stellar careers."
-    },
-    {
-      name: "Senior Tech Director",
-      role: "VP of Engineering & ERP Solutions",
-      phone: "+91 831 053 1309",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=800&q=80",
-      quote: "We don't build minimum viable prototypes. We build enterprise-grade, sub-second query ERP engines designed for 99.99% reliability."
-    }
-  ];
-
   return (
     <div className="min-h-screen pt-32 pb-24 relative overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
       
@@ -260,40 +243,7 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
           </div>
         </div>
 
-        {/* 4. Leadership & Mentorship Spotlight */}
-        <div className="space-y-10">
-          <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#0055FF]">
-              LEADERSHIP & ENGINEERING DIRECTION
-            </span>
-            <h2 className="heading-font text-3xl sm:text-4xl font-extrabold text-slate-900 mt-1">
-              Guided by Experienced Tech Leaders
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {leadership.map((leader, i) => (
-              <div key={i} className="p-8 rounded-[32px] bg-white/90 border border-blue-100 shadow-md flex flex-col justify-between space-y-6">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl overflow-hidden bg-slate-900 border border-blue-100 shrink-0">
-                    <img src={leader.image} alt={leader.name} className="w-full h-full object-cover" />
-                  </div>
-                  <div>
-                    <h3 className="heading-font text-xl font-extrabold text-slate-900">{leader.name}</h3>
-                    <span className="text-xs font-bold text-[#0055FF] block">{leader.role}</span>
-                    <span className="text-[11px] font-semibold text-slate-500">Contact: {leader.phone}</span>
-                  </div>
-                </div>
-
-                <blockquote className="text-xs sm:text-sm font-medium text-slate-700 italic bg-blue-50/50 p-4 rounded-2xl border border-blue-100/70">
-                  "{leader.quote}"
-                </blockquote>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* 5. Dual Conversion CTA Banner */}
+        {/* Dual Conversion CTA Banner */}
         <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-r from-slate-900 via-slate-800 to-blue-950 text-white shadow-2xl relative overflow-hidden">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center relative z-10">
             <div className="space-y-3">

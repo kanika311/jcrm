@@ -146,6 +146,52 @@ export const TEAM_MEMBERS: TeamMember[] = [
   }
 ];
 
+export function maskPhone(phone?: string | null): string {
+  const digits = String(phone || "").replace(/\D/g, "");
+  if (digits.length < 4) return "xxxxxx••••";
+  return `xxxxxx${digits.slice(-4)}`;
+}
+
+export function maskEmail(email?: string | null): string {
+  const value = String(email || "").trim();
+  if (!value.includes("@")) return "xx@xxxxx.com";
+  return value.replace(/(.{2})(.*)(@.*)/, "$1xxxxxx$3");
+}
+
+export function toPublicTeamMember(m: {
+  id: string;
+  name: string;
+  role?: string | null;
+  image?: string | null;
+  city?: string | null;
+  state?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  college?: string | null;
+  education?: string | null;
+  experience?: string | null;
+  skills?: string[] | null;
+  bio?: string | null;
+  isVerified?: boolean | null;
+}): TeamMember {
+  return {
+    id: m.id,
+    name: m.name,
+    role: m.role || "Software Engineering Intern",
+    image: m.image || "",
+    city: m.city || "Bangalore",
+    state: m.state || "Karnataka",
+    maskedPhone: maskPhone(m.phone),
+    maskedEmail: maskEmail(m.email),
+    college: m.college || "JCRM Engineering",
+    education: m.education || "Bachelor of Technology",
+    experience: m.experience || "Fresher / Intern",
+    skills: m.skills && m.skills.length > 0 ? m.skills : ["Full Stack", "JavaScript", "React"],
+    bio: m.bio || `${m.name} is a software engineer and contributor at JCRM Technologies.`,
+    isVerified: m.isVerified !== false,
+  };
+}
+
 export function getCandidateById(id: string): TeamMember | undefined {
   return TEAM_MEMBERS.find((m) => m.id === id);
 }

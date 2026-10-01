@@ -41,12 +41,7 @@ export default function StudentsClient({
   return (
     <div className="space-y-8 pb-20">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 mb-2">Student Directory</h1>
-          <p className="text-sm font-medium text-slate-500">
-            Students who purchased and enrolled in your courses.
-          </p>
-        </div>
+      
 
         <div className="flex flex-wrap gap-2">
           <div className="relative">

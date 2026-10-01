@@ -1,4 +1,4 @@
-import { getCandidateById, TEAM_MEMBERS } from "@/lib/teamData";
+import { getCandidateById, TEAM_MEMBERS, maskEmail, maskPhone } from "@/lib/teamData";
 import CandidateDetailClient from "../../im/[id]/CandidateDetailClient";
 import { prisma } from "@/lib/prisma";
 
@@ -31,8 +31,8 @@ export default async function OurTeamCandidateDetailPage({ params }: { params: P
   } catch {}
 
   if (dbMember) {
-    const maskedPhone = dbMember.phone ? dbMember.phone.replace(/(\d{6})\d{4}/, "xxxxxx$2") : "xxxxxx9070";
-    const maskedEmail = dbMember.email ? dbMember.email.replace(/(.{2})(.*)(@.*)/, "$1xxxxxx$3") : "xx@gmail.com";
+    const maskedPhone = maskPhone(dbMember.phone);
+    const maskedEmail = maskEmail(dbMember.email);
 
     const member = {
       id: dbMember.id,

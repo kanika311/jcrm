@@ -6,6 +6,7 @@ import Link from "next/link";
 import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
 import SponsoredAdModal from "@/components/SponsoredAdModal";
 import { normalizeTeamStatus, TEAM_STATUSES, TEAM_STATUS_LABELS, type TeamStatus } from "@/lib/teamStatus";
+import NameAvatar from "@/components/NameAvatar";
 
 export interface TeamMemberItem {
   id: string;
@@ -590,13 +591,13 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
                   <td className="p-4 max-w-xs">
                     <div className="flex items-center gap-3">
                       <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
-                        {member.image ? (
-                          <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center font-bold text-xs bg-blue-50 text-[#0055FF]">
-                            {member.name.slice(0, 2).toUpperCase()}
-                          </div>
-                        )}
+                        <NameAvatar
+                          name={member.name}
+                          src={member.image}
+                          alt={member.name}
+                          className="w-full h-full object-cover"
+                          textClassName="text-xs"
+                        />
                         {member.isVerified && (
                           <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] text-white">
                             ✓

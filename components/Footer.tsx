@@ -23,7 +23,8 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
   const isPublicPage =
     !pathname?.startsWith("/admin") &&
     !pathname?.startsWith("/auth") &&
-    !pathname?.startsWith("/jcrm-sushant");
+    !pathname?.startsWith("/jcrm-sushant") &&
+    !pathname?.startsWith("/faculty");
 
   if (!isPublicPage && !forceShow) return null;
 

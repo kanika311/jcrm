@@ -63,7 +63,7 @@ export default async function RootLayout({
         <AuthProvider>
           <DynamicBackgroundExtract />
           <Navbar siteName={globalSettings.siteName} links={navbarConfig.links} logoUrl={globalSettings.logoUrl} />
-          <main className="flex-1 flex flex-col relative z-10">{children}</main>
+          <main className="flex-1 flex flex-col relative z-10 min-h-0">{children}</main>
           <Footer cmsData={footerConfig} siteName={globalSettings.siteName} />
           <GlobalWhatsAppWidget />
         </AuthProvider>

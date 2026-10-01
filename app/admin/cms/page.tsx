@@ -63,7 +63,7 @@ export default function CMSAdminPage() {
   return (
     <div className="flex flex-col lg:flex-row min-h-[calc(100vh-80px)] gap-6">
       <aside className="w-full lg:w-64 shrink-0">
-        <div className="lg:sticky lg:top-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
+        <div className="lg:sticky lg:top-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-xs">
           <p className="text-[11px] font-extrabold uppercase tracking-wider text-slate-400 mb-3 px-1">
             Edit a page
           </p>

@@ -21,5 +21,11 @@ export function isHomepageStatus(status?: string | null) {
 }
 
 export function isOurTeamStatus(status?: string | null) {
-  return normalizeTeamStatus(status) === "STUDENT";
+  const normalized = normalizeTeamStatus(status);
+  return (
+    normalized === "CANDIDATE" ||
+    normalized === "STUDENT" ||
+    normalized === "PLACED" ||
+    normalized === "ALUMNI"
+  );
 }

@@ -3,7 +3,6 @@ import { getSiteContent } from "@/lib/cms";
 
 export default async function ContactPage() {
   const cmsData = await getSiteContent("public-contact");
-  const heading = cmsData?.heading || "Contact & Consultation";
   const subtitle = cmsData?.subtitle || "Let's Build Something Smarter Together";
   const address = cmsData?.address || "404, 1st Floor, 4th A Cross Rd, HRBR Layout 2nd Block, Kalyan Nagar, Bengaluru, Karnataka 560043";
   const email = cmsData?.email || "hr@jcrm.in";
@@ -15,18 +14,6 @@ export default async function ContactPage() {
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-[#0055FF]/10 rounded-full blur-[140px] pointer-events-none"></div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* Top Header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <span className="inline-block px-4 py-1.5 mb-3 text-xs md:text-sm font-extrabold uppercase tracking-widest text-[#0055FF] bg-blue-50/90 rounded-full border border-blue-100/80 shadow-xs">
-            GET IN TOUCH
-          </span>
-          <h1 className="heading-font text-4xl sm:text-5xl md:text-6xl font-extrabold text-slate-900 mb-4 tracking-tight">
-            {heading}
-          </h1>
-        
-        </div>
-
         {/* Top Grid: Info on Left (6 Cols), Form on Right (6 Cols) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-stretch">
           

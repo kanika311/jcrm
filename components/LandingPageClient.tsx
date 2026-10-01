@@ -3,6 +3,7 @@ import Link from "next/link";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import NameAvatar from "@/components/NameAvatar";
 
 export default function LandingPageClient({
   initialData = {},
@@ -786,11 +787,14 @@ export default function LandingPageClient({
                   key={i}
                   className="w-[190px] sm:w-[280px] shrink-0 p-3.5 sm:p-6 rounded-2xl sm:rounded-[28px] bg-white/85 backdrop-blur-xl border border-white/90 shadow-[0_4px_20px_rgba(0,85,255,0.08)] hover:shadow-2xl hover:shadow-blue-500/15 hover:-translate-y-1.5 transition-all duration-300 flex flex-col items-center text-center group pointer-events-auto select-none"
                 >
-                  <div className="w-full h-44 sm:h-56 rounded-xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-5 border border-blue-100/80 relative shadow-sm group-hover:border-blue-300 transition-colors">
-                    <img
+                  <div className="w-full h-44 sm:h-56 rounded-xl sm:rounded-2xl overflow-hidden mb-3 sm:mb-5 border border-blue-100/80 relative shadow-sm group-hover:border-blue-300 transition-colors bg-slate-100">
+                    <NameAvatar
+                      name={candidate.name}
                       src={candidate.image}
                       alt={candidate.name}
+                      showName
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 pointer-events-none"
+                      textClassName="text-4xl sm:text-5xl"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent pointer-events-none"></div>
                   </div>

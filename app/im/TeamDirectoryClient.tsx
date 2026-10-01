@@ -6,6 +6,7 @@ import { useSession } from "next-auth/react";
 import { TeamMember } from "@/lib/teamData";
 import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
 import SponsoredAdModal from "@/components/SponsoredAdModal";
+import NameAvatar from "@/components/NameAvatar";
 import {
   FiSearch,
   FiSliders,
@@ -459,8 +460,8 @@ export default function TeamDirectoryClient({
   );
 
   return (
-    <div className="min-h-screen pt-24 pb-20 bg-[#F0F7FF] relative font-sans text-slate-800">
-      <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <div className="pt-16 sm:pt-20 min-h-screen bg-[#F0F7FF] relative font-sans text-slate-800">
+      <div className="max-w-[1700px] mx-auto px-4 sm:px-6 lg:px-8 py-4 relative z-10">
         
         {/* ==================================================================== */}
         {/* 3-PANEL RESPONSIVE ARCHITECTURE: LEFT | CENTER | RIGHT               */}
@@ -470,17 +471,17 @@ export default function TeamDirectoryClient({
           {/* ================================================================== */}
           {/* 1. LEFT PANEL: SEARCH & MULTI-PARAM FILTERS                        */}
           {/* ================================================================== */}
-          <aside className="hidden lg:block w-72 lg:w-80 shrink-0 sticky top-24 self-start bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5">
+          <aside className="hidden lg:flex w-72 lg:w-80 shrink-0 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] flex-col overflow-y-auto bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5">
             {renderFilterPanel()}
           </aside>
 
           {/* ================================================================== */}
           {/* 2. CENTER PANEL: TOP SEARCH BAR & CANDIDATE CARDS GRID             */}
           {/* ================================================================== */}
-          <main className="flex-1 w-full min-w-0 space-y-5">
+          <main className="flex-1 w-full min-w-0 space-y-5 pb-16">
             
             {/* STICKY TOP SEARCH BAR */}
-            <div className="p-3 rounded-2xl bg-white border border-[#D4E8F8] shadow-xs flex items-center gap-3">
+            <div className="sticky top-24 z-20 p-3 rounded-2xl bg-white border border-[#D4E8F8] shadow-xs flex items-center gap-3">
               {/* Mobile Filter Toggle (Icon only on short screen) */}
               <button
                 onClick={() => setIsMobileFilterOpen(true)}
@@ -621,17 +622,13 @@ export default function TeamDirectoryClient({
                       {/* Circular Avatar (Yogsathi Style) with blue ring */}
                       <div className="relative w-24 h-24 mx-auto mb-3.5">
                         <div className="w-24 h-24 rounded-full overflow-hidden bg-blue-50 border-4 border-[#D4E8F8] group-hover:border-[#0055FF] transition-colors shadow-sm">
-                          {member.image ? (
-                            <img
-                              src={member.image}
-                              alt={member.name}
-                              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-blue-100 text-[#0055FF] font-black text-xl">
-                              {member.name ? member.name.slice(0, 2).toUpperCase() : "TM"}
-                            </div>
-                          )}
+                          <NameAvatar
+                            name={member.name}
+                            src={member.image}
+                            alt={member.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            textClassName="text-xl"
+                          />
                         </div>
 
                         {/* Verified badge */}
@@ -767,7 +764,7 @@ export default function TeamDirectoryClient({
           {/* ================================================================== */}
           {/* 3. RIGHT PANEL: SPONSORED BANNER & ENTERPRISE HIRING SPOTLIGHT     */}
           {/* ================================================================== */}
-          <aside className="w-72 lg:w-80 shrink-0 hidden xl:block sticky top-24 self-start space-y-5">
+          <aside className="w-72 lg:w-80 shrink-0 hidden xl:flex lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] flex-col overflow-y-auto space-y-5">
             {/* SPONSORED ADVERTISEMENT CARD */}
             {sponsoredAd.isActive ? (
               <div className="bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5 space-y-3.5 relative overflow-hidden group hover:border-[#0055FF]/40 transition-all">

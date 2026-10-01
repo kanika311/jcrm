@@ -260,19 +260,19 @@ export default function ErpCatalogClient({
 
   return (
     <div className="pt-16 sm:pt-20 min-h-screen bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent font-sans">
-      <div className="lg:h-[calc(100dvh-5rem)] lg:overflow-hidden bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:h-full lg:min-h-0">
+      <div className="bg-gradient-to-b from-blue-50/50 via-sky-50/20 to-transparent">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:h-full lg:min-h-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
-          <aside className="hidden lg:flex lg:col-span-3 lg:h-full lg:min-h-0 lg:overflow-hidden">
-            <div className="w-full h-full min-h-0 overflow-y-auto overscroll-contain bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-4 sm:p-5">
+          <aside className="hidden lg:flex lg:col-span-3 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)]">
+            <div className="w-full max-h-[calc(100dvh-7rem)] overflow-y-auto bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-4 sm:p-5">
               {renderSidebarContent(false)}
             </div>
           </aside>
 
-          <main className="lg:col-span-6 space-y-5 min-h-0 lg:h-full lg:overflow-y-scroll lg:overscroll-contain lg:pr-1 pb-24 lg:pb-16">
-            <div className="sticky top-0 z-30 p-3 rounded-2xl bg-white/95 backdrop-blur-md border border-[#D4E8F8] shadow-xs flex items-center gap-2.5 sm:gap-3">
+          <main className="lg:col-span-6 space-y-5 pb-16">
+            <div className="sticky top-24 z-30 p-3 rounded-2xl bg-white/95 backdrop-blur-md border border-[#D4E8F8] shadow-xs flex items-center gap-2.5 sm:gap-3">
               {/* Mobile Filter Toggle (Icon only on short screen) */}
               <button
                 type="button"
@@ -522,7 +522,7 @@ export default function ErpCatalogClient({
           {/* ====================================================================== */}
           {/* 3. RIGHT PANEL: SPONSORED BANNER (STICKY SIDEBAR)                      */}
           {/* ====================================================================== */}
-          <aside className="lg:col-span-3 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain space-y-4">
+          <aside className="lg:col-span-3 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] overflow-y-auto space-y-4">
             {sponsoredAd && sponsoredAd.isActive ? (
               <div className="bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5 space-y-4 relative group">
                 {/* Header: Only Sponsored badge */}

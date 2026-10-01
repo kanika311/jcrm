@@ -354,11 +354,11 @@ export default function CoursesCatalogClient({
 
   return (
     <div className="pt-16 sm:pt-20 min-h-screen bg-white font-sans">
-      <div className="lg:h-[calc(100dvh-5rem)] lg:overflow-hidden bg-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:h-full lg:min-h-0">
-        <div className="flex flex-col lg:flex-row items-start gap-6 lg:h-full lg:min-h-0">
+      <div className="bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="flex flex-col lg:flex-row items-start gap-6">
 
-          <aside className="hidden lg:flex w-64 lg:w-72 shrink-0 h-full min-h-0 rounded-2xl border border-[#D4E8F8] bg-white shadow-xs overflow-hidden">
+          <aside className="hidden lg:flex w-64 lg:w-72 shrink-0 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] flex-col rounded-2xl border border-[#D4E8F8] bg-white shadow-xs overflow-hidden">
             {FilterSidebarContent}
           </aside>
 
@@ -378,9 +378,9 @@ export default function CoursesCatalogClient({
           {/* ================================================================ */}
           {/* 2. CENTER PANEL: SEARCH BAR + COURSES GRID                       */}
           {/* ================================================================ */}
-          <main id="courses-center-scroll" className="flex-1 min-w-0 w-full min-h-0 lg:h-full lg:overflow-y-scroll lg:overscroll-contain pb-24 lg:pb-16">
+          <main id="courses-center-scroll" className="flex-1 min-w-0 w-full pb-16">
 
-            <div className="sticky top-0 z-30 mb-5 bg-white/95 backdrop-blur-md pt-1 pb-3">
+            <div className="sticky top-24 z-30 mb-5 bg-white/95 backdrop-blur-md pt-1 pb-3">
               <div className="flex items-center gap-2 sm:gap-3">
 
                 {/* Mobile Filter Toggle Button */}
@@ -641,7 +641,7 @@ export default function CoursesCatalogClient({
           {/* ================================================================ */}
           {/* 3. RIGHT PANEL: SPONSORED BANNER & ENTERPRISE TRAINING SPOTLIGHT  */}
           {/* ================================================================ */}
-          <aside className="w-72 lg:w-80 shrink-0 hidden lg:flex lg:flex-col h-full min-h-0 overflow-y-auto overscroll-contain space-y-5">
+          <aside className="w-72 lg:w-80 shrink-0 hidden lg:flex lg:flex-col lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] overflow-y-auto space-y-5">
             {/* SPONSORED ADVERTISEMENT CARD */}
             {sponsoredAd.isActive ? (
               <div className="bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5 space-y-3.5 relative overflow-hidden group hover:border-[#0055FF]/40 transition-all">

@@ -351,39 +351,37 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
   }
 
   return (
-    <div className="space-y-6 pb-20">
-      {/* Header and Course Selector */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b" style={{ borderColor: "var(--border-soft)" }}>
-        <div>
-          <div className="flex items-center gap-2 text-xs font-semibold mb-2" style={{ color: "var(--text-secondary)" }}>
-            <Link href="/faculty/courses" className="hover:text-[var(--accent-primary)]">My Courses</Link>
-            <span>/</span>
-            <span>Course Builder & Live Manager</span>
-          </div>
-          <h1 className="heading-font text-2xl sm:text-3xl font-bold">
-            {course?.title || "Course Builder"}
-          </h1>
+    <div className="space-y-5 pb-16 min-w-0">
+      <div className="pb-4 border-b space-y-3" style={{ borderColor: "var(--border-soft)" }}>
+        <div className="flex items-center gap-2 text-xs font-semibold" style={{ color: "var(--text-secondary)" }}>
+          <Link href="/faculty/courses" className="hover:text-[var(--accent-primary)]">My Courses</Link>
+          <span>/</span>
+          <span>Course Builder</span>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-          {/* Select Course dropdown */}
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-bold text-slate-500">Working on course:</span>
-            <select
-              value={selectedCourseId}
-              onChange={(e) => handleCourseSwitch(e.target.value)}
-              className="px-3 py-2 text-sm font-bold rounded-xl border-2 border-[#0055FF] bg-white text-slate-900 focus:outline-none min-w-[200px]"
-            >
-              {initialCourses.map(c => (
-                <option key={c.id} value={c.id}>{c.title}</option>
-              ))}
-            </select>
-          </div>
+        <h1 className="heading-font text-2xl font-bold leading-tight break-words">
+          {course?.title || "Course Builder"}
+        </h1>
 
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2.5">
+          <label className="text-[11px] font-bold text-slate-500 uppercase tracking-wide shrink-0">
+            Working on course
+          </label>
+          <select
+            value={selectedCourseId}
+            onChange={(e) => handleCourseSwitch(e.target.value)}
+            className="flex-1 min-w-0 px-3 py-2 text-sm font-bold rounded-xl border-2 border-[#0055FF] bg-white text-slate-900 focus:outline-none"
+          >
+            {initialCourses.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.title}
+              </option>
+            ))}
+          </select>
           <button
             onClick={saveCurriculum}
             disabled={saving || loading}
-            className="btn-primary px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 shadow-lg shadow-blue-500/20 disabled:opacity-50"
+            className="btn-primary px-4 py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 disabled:opacity-50 shrink-0"
           >
             {saving ? (
               <>
@@ -391,9 +389,7 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                 Saving...
               </>
             ) : (
-              <>
-                <span>💾 Save All Changes</span>
-              </>
+              "Save All Changes"
             )}
           </button>
         </div>
@@ -599,12 +595,12 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
         </div>
       ) : (
         /* ================= TAB 2: LIVE CLASS SCHEDULER ================= */
-        <div className="space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-5 rounded-2xl" style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}>
+        <div className="space-y-5 min-w-0">
+          <div className="p-5 rounded-2xl space-y-3" style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}>
             <div>
               <h2 className="heading-font text-lg font-bold">Live Classes & Online Sessions</h2>
-              <p className="text-xs text-slate-500">
-                Schedule live classes with interactive video rooms. Enrolled students will get countdown alerts to join!
+              <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                Schedule live classes with interactive video rooms. Students get countdown alerts to join.
               </p>
             </div>
             <button
@@ -618,7 +614,7 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                 if (!newLiveTime) setNewLiveTime("08:30");
                 setShowAddLive(true);
               }}
-              className="btn-primary px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 shrink-0 bg-rose-600 hover:bg-rose-700"
+              className="btn-primary px-4 py-2 rounded-xl text-xs font-bold inline-flex items-center gap-2 bg-rose-600 hover:bg-rose-700"
             >
               + Schedule Live Class
             </button>
@@ -653,95 +649,98 @@ export default function BuilderClient({ initialCourses }: { initialCourses: { id
                 const sessionDate = new Date(session.scheduledAt);
                 const isLiveNow = session.status === "LIVE_NOW";
                 const isCompleted = session.status === "COMPLETED";
+                const dateLabel = isNaN(sessionDate.getTime())
+                  ? session.scheduledAt
+                  : sessionDate.toLocaleString("en-IN", {
+                      day: "numeric",
+                      month: "short",
+                      year: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    });
+                const presentCount = session.attendance?.filter((row) => row.status === "present").length || 0;
 
                 return (
                   <div
                     key={session.id}
-                    className="p-6 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-6 transition-all"
+                    className="p-5 rounded-2xl space-y-4 min-w-0"
                     style={{
                       background: "var(--bg-card)",
-                      border: isLiveNow ? "2px solid #ef4444" : "1px solid var(--border-soft)"
+                      border: isLiveNow ? "2px solid #ef4444" : "1px solid var(--border-soft)",
                     }}
                   >
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
                         {isLiveNow ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500 text-white flex items-center gap-1.5 animate-pulse shadow-md shadow-rose-500/30">
-                            <span className="w-2 h-2 rounded-full bg-white"></span>
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-rose-500 text-white inline-flex items-center gap-1.5 animate-pulse">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white"></span>
                             LIVE NOW
                           </span>
                         ) : isCompleted ? (
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-600">
-                            ✓ Completed
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">
+                            Completed
                           </span>
                         ) : (
-                          <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-[#0055FF]">
-                            🕒 Scheduled
+                          <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-blue-50 text-[#0055FF]">
+                            Scheduled
                           </span>
                         )}
-
-                        <span className="text-xs font-bold text-slate-500">
-                          ⏱️ {session.duration} mins
-                        </span>
+                        <span className="text-[11px] font-bold text-slate-500">{session.duration} mins</span>
                       </div>
-
-                      <h3 className="heading-font text-xl font-bold text-slate-900 dark:text-white">
-                        {session.title}
-                      </h3>
-
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-500">
-                        <span className="flex items-center gap-1">
-                          📅 {isNaN(sessionDate.getTime()) ? session.scheduledAt : sessionDate.toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" })}
-                        </span>
-                        {session.description && (
-                          <span className="italic">{session.description}</span>
-                        )}
-                        <span className="font-semibold text-slate-600">
-                          {session.attendance?.filter((row) => row.status === "present").length || 0}/
-                          {enrolledStudents.length || 0} present
-                        </span>
-                      </div>
+                      <button
+                        onClick={() => handleDeleteSession(session.id)}
+                        className="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg shrink-0"
+                        title="Delete Session"
+                      >
+                        🗑️
+                      </button>
                     </div>
 
-                    {/* Actions */}
-                    <div className="flex flex-wrap items-center gap-3 shrink-0">
-                      {/* Teacher Join Live Class Button */}
+                    <div className="min-w-0 space-y-2">
+                      <h3 className="heading-font text-lg font-bold text-slate-900 leading-snug break-words">
+                        {session.title}
+                      </h3>
+                      <p className="text-xs font-semibold text-slate-500">
+                        {dateLabel}
+                      </p>
+                      {session.description && (
+                        <p className="text-xs text-slate-500 leading-relaxed">
+                          {session.description}
+                        </p>
+                      )}
+                      <p className="text-xs font-bold text-slate-600">
+                        {presentCount}/{enrolledStudents.length || 0} present
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-100">
                       <a
                         href={session.meetingUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className={`px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 text-white shadow-md transition-transform hover:scale-105 ${
+                        className={`px-3.5 py-2 rounded-xl text-xs font-bold text-white shadow-sm ${
                           isLiveNow ? "bg-rose-600 hover:bg-rose-700" : "bg-[#0055FF] hover:bg-blue-700"
                         }`}
                       >
-                        <span>🎥 Start / Join Live Room ↗</span>
+                        Start / Join Live Room
                       </a>
-
-                      {/* Status Toggle Buttons */}
                       <button
                         type="button"
                         onClick={() => setAttendanceSessionId(session.id)}
-                        className="px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
+                        className="px-3.5 py-2 rounded-xl text-xs font-bold border border-slate-200 bg-white text-slate-800 hover:bg-slate-50"
                       >
                         Mark attendance
                       </button>
                       <select
                         value={session.status}
                         onChange={(e) => updateSessionStatus(session.id, e.target.value as any)}
-                        className="px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-900"
+                        className="px-3 py-2 text-xs font-bold rounded-xl border border-slate-200 bg-white"
                       >
                         <option value="SCHEDULED">Scheduled</option>
-                        <option value="LIVE_NOW">🔴 Set Live Now</option>
+                        <option value="LIVE_NOW">Set Live Now</option>
                         <option value="COMPLETED">Completed</option>
                       </select>
-
-                      <button
-                        onClick={() => handleDeleteSession(session.id)}
-                        className="p-2 text-xs text-rose-500 hover:bg-rose-50 rounded-lg"
-                        title="Delete Session"
-                      >
-                        🗑️
-                      </button>
                     </div>
                   </div>
                 );

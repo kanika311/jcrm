@@ -116,60 +116,55 @@ export default function FacultyMessagesClient({ initialThreads }: { initialThrea
   };
 
   return (
-    <div className="pb-16">
-      <div className="mb-6">
-        <h1 className="text-3xl font-extrabold text-slate-900">Messages</h1>
-        <p className="text-sm font-medium text-slate-500 mt-1">
-          Reply to enrolled students and JCRM admin from one inbox.
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 min-h-[560px]">
-        <aside className="lg:col-span-4 bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
-          <div className="px-4 py-3 border-b border-slate-100 text-xs font-black uppercase tracking-wider text-slate-400">
+    <div className="h-full min-h-[540px] lg:min-h-0 flex flex-col">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-3">
+        <aside className="lg:w-[260px] xl:w-[280px] shrink-0 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col min-h-0 max-h-48 lg:max-h-none lg:h-full overflow-hidden">
+          <div className="px-3 py-2.5 border-b border-slate-100 text-[10px] font-black uppercase tracking-wider text-slate-400 shrink-0">
             Conversations
           </div>
-          {threads.map((thread) => {
-            const last = thread.messages[thread.messages.length - 1];
-            return (
-              <button
-                key={thread.id}
-                type="button"
-                onClick={() => setActiveId(thread.id)}
-                className={`w-full text-left px-4 py-3.5 flex items-center gap-3 border-b border-slate-50 ${
-                  activeId === thread.id ? "bg-blue-50" : "hover:bg-slate-50"
-                }`}
-              >
-                {thread.image ? (
-                  <img src={thread.image} alt="" className="w-10 h-10 rounded-full object-cover" />
-                ) : (
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-black ${
-                      thread.type === "admin" ? "bg-[#0055FF] text-white" : "bg-amber-100 text-amber-700"
-                    }`}
-                  >
-                    {thread.name[0]}
+          <div className="flex-1 overflow-y-auto overscroll-contain">
+            {threads.map((thread) => {
+              const last = thread.messages[thread.messages.length - 1];
+              return (
+                <button
+                  key={thread.id}
+                  type="button"
+                  onClick={() => setActiveId(thread.id)}
+                  className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 border-b border-slate-50 ${
+                    activeId === thread.id ? "bg-blue-50" : "hover:bg-slate-50"
+                  }`}
+                >
+                  {thread.image ? (
+                    <img src={thread.image} alt="" className="w-8 h-8 rounded-full object-cover shrink-0" />
+                  ) : (
+                    <div
+                      className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black shrink-0 ${
+                        thread.type === "admin" ? "bg-[#0055FF] text-white" : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {thread.name[0]}
+                    </div>
+                  )}
+                  <div className="min-w-0">
+                    <div className="text-xs font-bold text-slate-900 truncate">{thread.name}</div>
+                    <div className="text-[11px] text-slate-500 truncate">
+                      {chatPreview(last?.text || "", last?.attachments) || thread.subtitle}
+                    </div>
                   </div>
-                )}
-                <div className="min-w-0">
-                  <div className="text-sm font-bold text-slate-900 truncate">{thread.name}</div>
-                  <div className="text-xs text-slate-500 truncate">
-                    {chatPreview(last?.text || "", last?.attachments) || thread.subtitle}
-                  </div>
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </aside>
 
-        <section className="lg:col-span-8 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col min-h-[560px]">
-          {active && (
+        <section className="flex-1 min-w-0 min-h-0 bg-white border border-slate-200 rounded-2xl shadow-sm flex flex-col h-[58vh] lg:h-full overflow-hidden">
+          {active ? (
             <>
-              <div className="px-5 py-4 border-b border-slate-100">
-                <h2 className="font-extrabold text-slate-900">{active.name}</h2>
-                <p className="text-xs text-slate-500">{active.subtitle}</p>
+              <div className="px-4 py-3 border-b border-slate-100 shrink-0">
+                <h2 className="font-extrabold text-sm text-slate-900 truncate">{active.name}</h2>
+                <p className="text-[11px] text-slate-500 truncate">{active.subtitle}</p>
               </div>
-              <div className="flex-1 overflow-y-auto p-5 space-y-3">
+              <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 space-y-3">
                 {active.messages.length === 0 && (
                   <p className="text-sm text-slate-500 text-center py-12">
                     {active.type === "admin"
@@ -187,12 +182,16 @@ export default function FacultyMessagesClient({ initialThreads }: { initialThrea
                 ))}
                 <div ref={endRef} />
               </div>
-              <ChatComposer
-                placeholder={active.type === "admin" ? "Reply to JCRM admin..." : "Reply to student..."}
-                sending={sending}
-                onSend={send}
-              />
+              <div className="shrink-0">
+                <ChatComposer
+                  placeholder={active.type === "admin" ? "Reply to JCRM admin..." : "Reply to student..."}
+                  sending={sending}
+                  onSend={send}
+                />
+              </div>
             </>
+          ) : (
+            <p className="text-sm text-slate-500 text-center m-auto">Select a conversation to start chatting.</p>
           )}
         </section>
       </div>

@@ -54,6 +54,18 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     };
   }, []);
 
+  useEffect(() => {
+    const html = document.documentElement;
+    const prevHtml = html.style.overflow;
+    const prevBody = document.body.style.overflow;
+    html.style.overflow = "hidden";
+    document.body.style.overflow = "hidden";
+    return () => {
+      html.style.overflow = prevHtml;
+      document.body.style.overflow = prevBody;
+    };
+  }, []);
+
   const navLinks = [
     { name: "Dashboard", href: "/admin", icon: FiGrid },
     { name: "Users", href: "/admin/users", icon: FiUsers },
@@ -152,9 +164,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   );
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-slate-800 font-sans">
-      {/* Desktop Left Sidebar — fixed so it never scrolls with the page */}
-      <aside className="hidden lg:flex w-64 fixed inset-y-0 left-0 flex-col bg-[#0F172A] text-slate-300 border-r border-slate-800 z-40 select-none">
+    <div className="h-[100dvh] overflow-hidden flex bg-[#f8fafc] text-slate-800 font-sans">
+      {/* Desktop Left Sidebar — locked to viewport; only the right pane scrolls */}
+      <aside className="hidden lg:flex w-64 h-full shrink-0 flex-col bg-[#0F172A] text-slate-300 border-r border-slate-800 z-40 select-none">
         {/* Header / Logo */}
         <div className="p-4 flex items-center justify-between border-b border-slate-800/80 shrink-0">
           <Link href="/admin" className="flex items-center gap-3">
@@ -266,9 +278,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       )}
 
       {/* Main Content Area (Right of Sidebar) */}
-      <div className="lg:pl-64 min-w-0 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 min-h-0 flex flex-col h-full">
         {/* Top Header Bar */}
-        <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-8 py-3 flex items-center justify-between shadow-xs">
+        <header className="shrink-0 z-30 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-8 py-3 flex items-center justify-between shadow-xs">
           <div className="flex items-center gap-3">
             {/* Mobile Sidebar Hamburger Toggle */}
             <button
@@ -325,7 +337,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         </header>
 
         {/* Child Pages Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-[1700px] w-full mx-auto">
+        <main className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 sm:p-6 lg:p-8 max-w-[1700px] w-full mx-auto">
           {children}
         </main>
       </div>

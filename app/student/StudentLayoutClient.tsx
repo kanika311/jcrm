@@ -168,8 +168,8 @@ export default function StudentLayoutClient({
 
   return (
     <div className="pt-16 sm:pt-20 min-h-screen bg-slate-50/60 dark:bg-black/40">
-      <div className="lg:h-[calc(100dvh-5rem)] lg:overflow-hidden bg-slate-50/60 dark:bg-black/40">
-      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:h-full lg:min-h-0">
+      <div className="bg-slate-50/60 dark:bg-black/40">
+      <div className="max-w-[1500px] mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="lg:hidden mb-4">
           <button
             type="button"
@@ -202,12 +202,12 @@ export default function StudentLayoutClient({
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start lg:h-full lg:min-h-0">
-          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          <aside className="hidden lg:block lg:col-span-4 xl:col-span-3 lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100dvh-7rem)] lg:overflow-y-auto">
             {sidebarContent}
           </aside>
 
-          <main className="lg:col-span-8 xl:col-span-9 min-w-0 min-h-0 lg:h-full lg:overflow-y-scroll lg:overscroll-contain pb-24 lg:pb-16">
+          <main className="lg:col-span-8 xl:col-span-9 min-w-0 pb-16">
             {children}
           </main>
         </div>

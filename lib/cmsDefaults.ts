@@ -310,7 +310,7 @@ export const CMS_SCHEMAS: PageSchema[] = [
     category: "public",
     schema: {
       heroTitle: { type: "string", label: "Page heading", default: "Bridging Enterprise Technology with Next-Gen Engineering Talent" },
-      heroSubtitle: { type: "text", label: "Intro text", default: "We build ERP systems enterprises own, and train engineers on real production code." },
+      heroSubtitle: { type: "text", label: "Intro text", default: "" },
       story: { type: "text", label: "Our story", default: "We started with a simple idea: software you truly own, and training that ships real products." },
     }
   },
@@ -392,7 +392,7 @@ export const CMS_SCHEMAS: PageSchema[] = [
     name: "Contact Page",
     category: "public",
     schema: {
-      heading: { type: "string", label: "Page heading", default: "Contact & Consultation" },
+      heading: { type: "string", label: "Page heading", default: "" },
       subtitle: { type: "text", label: "Intro text", default: "Let's Build Something Smarter Together" },
       address: { type: "text", label: "Office address", default: "404, 1st Floor, 4th A Cross Rd, HRBR Layout 2nd Block, Kalyan Nagar, Bengaluru, Karnataka 560043" },
       email: { type: "string", label: "Email", default: "hr@jcrm.in" },

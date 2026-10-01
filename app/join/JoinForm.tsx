@@ -3,6 +3,48 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { createPortal } from "react-dom";
 
+const DEPARTMENT_GROUPS: { label: string; options: string[] }[] = [
+  {
+    label: "Technology",
+    options: [
+      "AI/ML Engineering",
+      "Full-Stack Web Development",
+      "Data Science & Analytics",
+      "Cyber Security & VAPT",
+      "Cloud DevOps Engineering",
+      "Mobile App Development",
+      "QA / Software Testing",
+      "ERP / Product Engineering",
+      "IT Support & Systems",
+    ],
+  },
+  {
+    label: "Design & Creative",
+    options: [
+      "UI/UX & Product Design",
+      "Graphic Design",
+      "Content Writing & Documentation",
+    ],
+  },
+  {
+    label: "Business & Non-Tech",
+    options: [
+      "Human Resources (HR)",
+      "Recruitment & Talent Acquisition",
+      "Finance & Accounts",
+      "Sales",
+      "Business Development",
+      "Digital Marketing",
+      "Social Media & Digital Marketing",
+      "Operations",
+      "Administration",
+      "Customer Support",
+      "Training & Placement",
+      "Legal & Compliance",
+    ],
+  },
+];
+
 export default function JoinForm() {
   const [formData, setFormData] = useState({
     fullName: "",
@@ -587,13 +629,15 @@ Candidate is requesting fast-track review for interview scheduling.`;
               value={formData.department}
               onChange={(e) => setFormData({ ...formData, department: e.target.value })}
             >
-              <option value="AI/ML Engineering">AI/ML Engineering</option>
-              <option value="Full-Stack Web Development">Full-Stack Web Development</option>
-              <option value="Data Science & Analytics">Data Science & Analytics</option>
-              <option value="Cyber Security & VAPT">Cyber Security & VAPT</option>
-              <option value="Cloud DevOps Engineering">Cloud DevOps Engineering</option>
-              <option value="UI/UX & Product Design">UI/UX & Product Design</option>
-              <option value="Social Media & Digital Marketing">Social Media & Digital Marketing</option>
+              {DEPARTMENT_GROUPS.map((group) => (
+                <optgroup key={group.label} label={group.label}>
+                  {group.options.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
             </select>
           </div>
 
