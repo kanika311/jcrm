@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { accessibleCourses } from "@/lib/courseAccess";
 
 export async function GET() {
   const session = await getServerSession(authOptions);
@@ -9,12 +10,8 @@ export async function GET() {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  const enrollments = await prisma.enrollment.findMany({
-    where: { studentId: session.user.id, paymentStatus: "COMPLETED" },
-    select: { courseId: true },
-  });
-
-  const courseIds = enrollments.map((e) => e.courseId);
+  const openCourses = await accessibleCourses(session.user.id);
+  const courseIds = openCourses.map((course) => course.id);
   if (courseIds.length === 0) {
     return NextResponse.json({ assignments: [] });
   }

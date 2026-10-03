@@ -16,7 +16,7 @@ export default async function AdminErpEditPage({
 }) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || session.user.role !== "ADMIN") {
-    redirect("/auth");
+    redirect("/jcrm-sushant");
   }
 
   const { id } = await params;

@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import ClassroomClient from "./ClassroomClient";
+import { accessibleCourses } from "@/lib/courseAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -39,19 +40,8 @@ export default async function StudentClassroomPage({
     enrolledCourses = facultyCourses;
   } else {
     // Student enrolled courses
-    const enrollments = await prisma.enrollment.findMany({
-      where: {
-        studentId: session.user.id,
-        paymentStatus: "COMPLETED",
-      },
-      include: {
-        course: {
-          select: { id: true, title: true }
-        }
-      },
-      orderBy: { enrolledAt: "desc" }
-    });
-    enrolledCourses = enrollments.map(e => e.course);
+    const courses = await accessibleCourses(session.user.id);
+    enrolledCourses = courses.map((course) => ({ id: course.id, title: course.title }));
   }
 
   return (

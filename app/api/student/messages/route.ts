@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { accessibleCourses } from "@/lib/courseAccess";
 import {
   createDirectMessage,
   findMessagesByThreads,
@@ -23,20 +24,8 @@ export async function GET() {
   }
 
   const studentId = session.user.id;
-  const enrollments = await prisma.enrollment.findMany({
-    where: { studentId, paymentStatus: "COMPLETED" },
-    include: {
-      course: {
-        select: {
-          id: true,
-          title: true,
-          instructor: true,
-          facultyId: true,
-          faculty: { select: { id: true, name: true, fullName: true, email: true, image: true } },
-        },
-      },
-    },
-  });
+  const openCourses = await accessibleCourses(studentId);
+  const enrollments = openCourses.map((course) => ({ course }));
 
   const instructors = new Map<
     string,

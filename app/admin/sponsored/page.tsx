@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export default async function AdminSponsoredPage() {
   const session = await getServerSession(authOptions);
   if (!session || !session.user || session.user.role !== "ADMIN") {
-    redirect("/auth");
+    redirect("/jcrm-sushant");
   }
 
   let ads: SponsoredAd[] = DEFAULT_SPONSORED_ADS;

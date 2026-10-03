@@ -3,6 +3,7 @@ import { getSiteContent } from "@/lib/cms";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { accessibleCourses } from "@/lib/courseAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -16,11 +17,8 @@ export default async function AssignmentsPage() {
 
   if (session?.user?.id) {
     try {
-      const enrollments = await prisma.enrollment.findMany({
-        where: { studentId: session.user.id, paymentStatus: "COMPLETED" },
-        select: { courseId: true },
-      });
-      const courseIds = enrollments.map((e) => e.courseId);
+      const openCourses = await accessibleCourses(session.user.id);
+      const courseIds = openCourses.map((course) => course.id);
 
       if (courseIds.length > 0) {
         const rows = await prisma.assignment.findMany({

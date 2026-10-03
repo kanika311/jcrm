@@ -12,6 +12,8 @@ interface EnrollButtonProps {
   price?: any;
   initialEnrolled?: boolean;
   isEnrolled?: boolean;
+  registrationFee?: number;
+  courseBlocked?: boolean;
 }
 
 declare global {
@@ -37,6 +39,8 @@ export default function EnrollButton({
   price,
   initialEnrolled = false,
   isEnrolled = false,
+  registrationFee = 499,
+  courseBlocked = false,
 }: EnrollButtonProps) {
   const router = useRouter();
   const { data: session } = useSession();
@@ -47,6 +51,8 @@ export default function EnrollButton({
   const enrolled = initialEnrolled || isEnrolled;
   const rawPrice = coursePrice !== undefined ? coursePrice : price;
   const numericPrice = parsePrice(rawPrice);
+  const feeLabel = registrationFee.toLocaleString("en-IN");
+  const courseFeeLabel = numericPrice > 0 ? numericPrice.toLocaleString("en-IN") : "the course fee";
 
   // Load checkout.js helper
   const loadRazorpayScript = (): Promise<boolean> => {
@@ -117,7 +123,7 @@ export default function EnrollButton({
         amount: orderData.amount,
         currency: orderData.currency || "INR",
         name: "JCRM Technologies",
-        description: `Enrollment: ${orderData.courseTitle || courseTitle}`,
+        description: `Registration fee ₹${feeLabel} — adjusted against ${orderData.courseTitle || courseTitle}`,
         image: "/logo - JCRM.jpeg",
         order_id: orderData.orderId,
         prefill: {
@@ -146,7 +152,7 @@ export default function EnrollButton({
             const verifyData = await verifyRes.json();
 
             if (verifyRes.ok && verifyData.success) {
-              alert("Payment Successful! Course has been added to My Courses.");
+              alert("Registration fee received. It will be deducted from your course fee, and every course is now open.");
               router.push(`/student/classroom?courseId=${courseId}`);
             } else {
               setErrorMessage(verifyData.error || "Payment verification failed. Please contact support.");
@@ -177,6 +183,19 @@ export default function EnrollButton({
     }
   };
 
+  if (courseBlocked) {
+    return (
+      <div className="w-full space-y-2">
+        <div className="w-full py-4 px-6 rounded-xl font-extrabold text-base bg-rose-50 text-rose-700 border border-rose-200 text-center">
+          Course access is blocked until the remaining fee is paid
+        </div>
+        <p className="text-center text-xs text-slate-500 font-semibold">
+          Admin has paused your courses. Contact JCRM to continue.
+        </p>
+      </div>
+    );
+  }
+
   if (enrolled) {
     return (
       <div className="w-full space-y-2">
@@ -184,10 +203,10 @@ export default function EnrollButton({
           href={`/student/classroom?courseId=${courseId}`}
           className="w-full py-4 px-6 rounded-xl font-extrabold text-base bg-emerald-600 text-white hover:bg-emerald-700 shadow-lg shadow-emerald-600/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.02]"
         >
-          <span>✓ Enrolled — Go to Classroom</span>
+          <span>✓ All courses open — Go to Classroom</span>
         </Link>
         <span className="text-center text-xs text-slate-400 block">
-          You have active access to this course
+          Your registration fee is active for every course
         </span>
       </div>
     );
@@ -215,18 +234,23 @@ export default function EnrollButton({
         ) : (
           <>
             <span>
-              🔒 Buy Course — ₹{numericPrice > 0 ? numericPrice.toLocaleString("en-IN") : "12,999"}
+              {registrationFee <= 0
+                ? "Start learning — registration fee ₹0"
+                : `Pay registration fee — ₹${feeLabel}`}
             </span>
           </>
         )}
       </button>
 
+      <p className="text-center text-xs text-slate-600 font-semibold leading-relaxed">
+        This ₹{feeLabel} registration fee will be deducted from the course fee of ₹{courseFeeLabel}. After payment, every course opens. The remaining fee is collected later — if it stays unpaid, admin can block access.
+      </p>
       <div className="flex items-center justify-center gap-4 text-[11px] text-slate-400 font-semibold">
-        <span>✓ Instant Access</span>
+        <span>✓ All courses</span>
         <span>•</span>
         <span>✓ Razorpay Secure</span>
         <span>•</span>
-        <span>✓ Lifetime Validity</span>
+        <span>✓ Adjusted in course fee</span>
       </div>
     </div>
   );

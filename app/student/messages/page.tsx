@@ -2,7 +2,7 @@ import MessagesClient from "./MessagesClient";
 import { getSiteContent } from "@/lib/cms";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
-import { prisma } from "@/lib/prisma";
+import { accessibleCourses } from "@/lib/courseAccess";
 import { findMessagesByThreads, instructorStudentKey, keysMatch, supportThreadKey } from "@/lib/directMessages";
 import { toClientMessage } from "@/lib/chatAttachments";
 
@@ -27,19 +27,8 @@ export default async function MessagesPage() {
   ];
 
   if (studentId) {
-    const enrollments = await prisma.enrollment.findMany({
-      where: { studentId, paymentStatus: "COMPLETED" },
-      include: {
-        course: {
-          select: {
-            title: true,
-            instructor: true,
-            facultyId: true,
-            faculty: { select: { id: true, name: true, fullName: true, image: true } },
-          },
-        },
-      },
-    });
+    const openCourses = await accessibleCourses(studentId);
+    const enrollments = openCourses.map((course) => ({ course }));
 
     const seen = new Map<string, { id: string; name: string; courses: string[]; image: string | null }>();
     for (const enrollment of enrollments) {

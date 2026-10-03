@@ -55,6 +55,10 @@ model User {
   passwordHash  String?   @map("password_hash")
   role          UserRole  @default(STUDENT) @map("role")
   isBlocked     Boolean   @default(false) @map("is_blocked")
+  // null uses the default registration fee (₹499). 0 means this student pays nothing.
+  registrationFee     Float?   @map("registration_fee")
+  registrationPaid    Boolean  @default(false) @map("registration_paid")
+  courseAccessBlocked Boolean  @default(false) @map("course_access_blocked")
   createdAt     DateTime  @default(now()) @map("created_at")
 
   // Relationships

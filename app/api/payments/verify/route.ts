@@ -34,7 +34,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid payment signature" }, { status: 400 });
     }
 
-    // Upsert Enrollment in DB
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { registrationPaid: true },
+    });
+
+    // Keep a payment record on the course they enrolled from.
     const enrollment = await prisma.enrollment.upsert({
       where: {
         studentId_courseId: {

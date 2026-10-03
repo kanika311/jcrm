@@ -13,7 +13,7 @@ export default async function AdminTeamPage() {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || session.user.role !== "ADMIN") {
-      redirect("/auth");
+      redirect("/jcrm-sushant");
     }
 
     // Ensure all standard team members exist in database so admin can edit them

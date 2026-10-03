@@ -7,6 +7,7 @@ import { signOut, useSession } from "next-auth/react";
 import {
   FiGrid,
   FiUsers,
+  FiUser,
   FiBookOpen,
   FiUserCheck,
   FiLayers,
@@ -68,7 +69,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const navLinks = [
     { name: "Dashboard", href: "/admin", icon: FiGrid },
-    { name: "Users", href: "/admin/users", icon: FiUsers },
+    { name: "Students", href: "/admin/students", icon: FiUsers },
+    { name: "Faculty", href: "/admin/faculty", icon: FiUser },
     { name: "Courses", href: "/admin/courses", icon: FiBookOpen },
     { name: "Our Team", href: "/admin/team", icon: FiUserCheck },
     { name: "ERP Solutions", href: "/admin/erp", icon: FiLayers },

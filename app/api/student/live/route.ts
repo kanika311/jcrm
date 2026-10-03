@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { accessibleCourses } from "@/lib/courseAccess";
 
 export async function GET() {
   try {
@@ -11,23 +12,17 @@ export async function GET() {
     }
 
     // Find all active enrollments for this student
-    const enrollments = await prisma.enrollment.findMany({
-      where: {
-        studentId: session.user.id,
-        paymentStatus: "COMPLETED",
+    const openCourses = await accessibleCourses(session.user.id);
+    const enrollments = openCourses.map((course) => ({
+      courseId: course.id,
+      course: {
+        id: course.id,
+        title: course.title,
+        instructor: course.instructor,
+        image: course.image,
+        curriculum: course.curriculum,
       },
-      include: {
-        course: {
-          select: {
-            id: true,
-            title: true,
-            instructor: true,
-            image: true,
-            curriculum: true,
-          }
-        }
-      }
-    });
+    }));
 
     const enrolledCourseIds = enrollments.map(e => e.courseId);
 

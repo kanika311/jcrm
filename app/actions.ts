@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { revalidatePath } from "next/cache";
+import { accessibleCourses } from "@/lib/courseAccess";
 
 // --- HELPERS ---
 async function getSession() {
@@ -44,13 +45,21 @@ export async function getStudentDashboard() {
   }
 
   try {
-    const enrollments = await prisma.enrollment.findMany({
+    const openCourses = await accessibleCourses(session.user.id);
+    const saved = await prisma.enrollment.findMany({
       where: { studentId: session.user.id },
-      include: {
-        course: {
-          include: { faculty: { select: { fullName: true } } }
-        }
-      }
+      select: { courseId: true, progressPercent: true, enrolledAt: true },
+    });
+    const savedByCourse = new Map(saved.map((row) => [row.courseId, row]));
+    const enrollments = openCourses.map((course) => {
+      const row = savedByCourse.get(course.id);
+      return {
+        id: row?.courseId || course.id,
+        course,
+        progressPercent: row?.progressPercent || 0,
+        enrolledAt: row?.enrolledAt || course.createdAt,
+        paymentStatus: "COMPLETED" as const,
+      };
     });
 
     return {

@@ -17,7 +17,7 @@ export default async function StudentDashboard() {
     try {
       const dbUser = await prisma.user.findUnique({ where: { id: session.user.id }, select: { name: true, fullName: true } });
       if (dbUser) {
-        userName = (dbUser.name || dbUser.fullName || "Student").split(" ")[0];
+        userName = (dbUser.fullName || dbUser.name || "Student").split(" ")[0];
       }
     } catch (error) {
       console.error("Failed to load student profile:", error);

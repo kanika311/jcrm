@@ -11,7 +11,7 @@ export default async function AdminErpPage() {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || session.user.role !== "ADMIN") {
-      redirect("/auth");
+      redirect("/jcrm-sushant");
     }
 
     let serializedSolutions: any[] = [];

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { getRegistrationState } from "@/lib/courseAccess";
 
 export async function GET(
   request: Request,
@@ -16,13 +17,7 @@ export async function GET(
     const { course_id } = await context.params;
 
     // Check if student is enrolled or if user is ADMIN / INSTRUCTOR of the course
-    const enrollment = await prisma.enrollment.findFirst({
-      where: {
-        studentId: session.user.id,
-        courseId: course_id,
-        paymentStatus: "COMPLETED",
-      }
-    });
+    const access = await getRegistrationState(session.user.id);
 
     const course = await prisma.course.findUnique({
       where: { id: course_id },
@@ -39,9 +34,15 @@ export async function GET(
 
     const isPrivileged = session.user.role === "ADMIN" || course.facultyId === session.user.id;
 
-    if (!enrollment && !isPrivileged) {
+    const allowed = isPrivileged || (access?.hasAccess && course.status === "PUBLISHED");
+    if (!allowed) {
       return NextResponse.json({ error: "You are not enrolled in this course" }, { status: 403 });
     }
+
+    const enrollment = await prisma.enrollment.findFirst({
+      where: { studentId: session.user.id, courseId: course.id },
+      select: { progressPercent: true, enrolledAt: true },
+    });
 
     return NextResponse.json({
       course: {

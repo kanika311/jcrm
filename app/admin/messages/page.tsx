@@ -10,7 +10,7 @@ export default async function AdminMessagesPage() {
   try {
     const session = await getServerSession(authOptions);
     if (!session || !session.user || session.user.role !== "ADMIN") {
-      redirect("/auth");
+      redirect("/jcrm-sushant");
     }
 
     const instructors = await prisma.user.findMany({

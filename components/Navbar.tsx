@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
-import { FiGrid, FiUser, FiLogOut, FiChevronDown, FiShield, FiBookOpen, FiSettings } from "react-icons/fi";
+import { FiGrid, FiLogOut, FiChevronDown, FiBookOpen, FiSettings } from "react-icons/fi";
 
 export default function Navbar({
   siteName,
@@ -100,11 +100,9 @@ export default function Navbar({
     dashboardHref = "/faculty";
     dashboardLabel = "Expert Dashboard";
     DashboardIcon = FiGrid;
-  } else if (userRole === "ADMIN") {
-    dashboardHref = "/admin";
-    dashboardLabel = "Admin Console";
-    DashboardIcon = FiShield;
   }
+
+  const showDashboardLink = userRole !== "ADMIN";
 
   const profileHref =
     userRole === "INSTRUCTOR" ? "/faculty/settings" : userRole === "ADMIN" ? "/admin/settings" : "/student/settings";
@@ -217,14 +215,17 @@ export default function Navbar({
                         <div className="min-w-0">
                           <p className="font-bold text-sm truncate">{userFullName}</p>
                           <p className="text-xs text-blue-200 truncate">{userEmail}</p>
-                          <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 mt-1">
-                            {userRole}
-                          </span>
+                          {userRole !== "ADMIN" && (
+                            <span className="inline-block text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 mt-1">
+                              {userRole}
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
 
                     {/* Single Relevant Dashboard Item + Settings */}
+                    {showDashboardLink && (
                     <div className="p-2 space-y-1">
                       <Link
                         href={dashboardHref}
@@ -248,6 +249,7 @@ export default function Navbar({
                         <span>Profile & Settings</span>
                       </Link>
                     </div>
+                    )}
 
                     {/* Sign Out Button */}
                     <div className="p-2 border-t border-slate-100 dark:border-gray-800 bg-slate-50 dark:bg-gray-950">
@@ -266,24 +268,37 @@ export default function Navbar({
                 )}
               </div>
             ) : (
-              <Link
-                href="/auth"
-                className="px-6 py-3 text-sm md:text-base font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md hover:shadow-blue-500/25 hover:scale-105 transition-all flex items-center justify-center cursor-pointer"
-              >
-                Get Started
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link
+                  href="/auth?role=student&mode=login"
+                  className="px-4 py-2.5 text-sm font-extrabold rounded-xl text-[#0055FF] bg-white border-2 border-[#0055FF] hover:bg-blue-50 transition-all"
+                >
+                  Student Login
+                </Link>
+                <Link
+                  href="/auth?role=teacher&mode=login"
+                  className="px-4 py-2.5 text-sm font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md transition-all"
+                >
+                  Teacher Login
+                </Link>
+              </div>
             )}
           </div>
 
           {/* Mobile Hamburger Toggle */}
           <div className="lg:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {user && (
+            {user && showDashboardLink && (
               <Link
                 href={dashboardHref}
                 className="w-8 h-8 rounded-full bg-[#0055FF] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs"
               >
                 {userFirstName[0]?.toUpperCase()}
               </Link>
+            )}
+            {user && !showDashboardLink && (
+              <div className="w-8 h-8 rounded-full bg-[#0055FF] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
+                {userFirstName[0]?.toUpperCase()}
+              </div>
             )}
 
             <button
@@ -314,13 +329,15 @@ export default function Navbar({
                 <p className="font-bold text-sm text-slate-900 dark:text-white">{userFullName}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
                 <div className="flex gap-2 mt-2">
-                  <Link
-                    href={dashboardHref}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="flex-1 py-1.5 rounded-lg text-center text-xs font-bold bg-[#0055FF] text-white"
-                  >
-                    {dashboardLabel}
-                  </Link>
+                  {showDashboardLink && (
+                    <Link
+                      href={dashboardHref}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="flex-1 py-1.5 rounded-lg text-center text-xs font-bold bg-[#0055FF] text-white"
+                    >
+                      {dashboardLabel}
+                    </Link>
+                  )}
                   <button
                     onClick={() => signOut({ callbackUrl: "/" })}
                     className="px-3 py-1.5 rounded-lg text-xs font-bold bg-rose-50 text-rose-600"
@@ -354,13 +371,20 @@ export default function Navbar({
             })}
 
             {!user && (
-              <div className="pt-3 px-1">
+              <div className="pt-3 px-1 grid grid-cols-1 gap-2">
                 <Link
-                  href="/auth"
+                  href="/auth?role=student&mode=login"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="w-full text-center px-6 py-3.5 text-base font-extrabold rounded-xl text-[#0055FF] bg-white border-2 border-[#0055FF] block"
+                >
+                  Student Login
+                </Link>
+                <Link
+                  href="/auth?role=teacher&mode=login"
                   onClick={() => setMobileMenuOpen(false)}
                   className="w-full text-center px-6 py-3.5 text-base font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md block"
                 >
-                  Get Started
+                  Teacher Login
                 </Link>
               </div>
             )}

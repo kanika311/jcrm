@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { getRegistrationState } from "@/lib/courseAccess";
 
 export async function POST(
   req: Request,
@@ -24,14 +25,12 @@ export async function POST(
     return NextResponse.json({ message: "Assignment not found" }, { status: 404 });
   }
 
-  const enrolled = await prisma.enrollment.findFirst({
-    where: {
-      studentId: session.user.id,
-      courseId: assignment.courseId,
-      paymentStatus: "COMPLETED",
-    },
+  const access = await getRegistrationState(session.user.id);
+  const course = await prisma.course.findUnique({
+    where: { id: assignment.courseId },
+    select: { status: true },
   });
-  if (!enrolled) {
+  if (!access?.hasAccess || course?.status !== "PUBLISHED") {
     return NextResponse.json({ message: "You are not enrolled in this course" }, { status: 403 });
   }
 

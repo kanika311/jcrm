@@ -100,7 +100,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
             </div>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 sm:gap-8 flex-1 min-w-0">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 flex-1 min-w-0">
             <div>
               <h4 className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
                 COMPANY
@@ -123,6 +123,18 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
                 <li><Link href="/erp-solutions" className="hover:text-[#0055FF] transition-colors">Automation</Link></li>
                 <li><Link href="/erp-solutions" className="hover:text-[#0055FF] transition-colors">Cloud Services</Link></li>
                 <li><Link href="/workshop" className="hover:text-[#0055FF] transition-colors">Workshop</Link></li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
+                LOGIN
+              </h4>
+              <ul className="space-y-1.5 text-xs sm:text-sm font-semibold text-slate-600">
+                <li><Link href="/auth?role=student&mode=login" className="hover:text-[#0055FF] transition-colors">Student Login</Link></li>
+                <li><Link href="/auth?role=student&mode=register" className="hover:text-[#0055FF] transition-colors">Student Register</Link></li>
+                <li><Link href="/auth?role=teacher&mode=login" className="hover:text-[#0055FF] transition-colors">Teacher Login</Link></li>
+                <li><Link href="/auth?role=teacher&mode=register" className="hover:text-[#0055FF] transition-colors">Teacher Register</Link></li>
               </ul>
             </div>
 

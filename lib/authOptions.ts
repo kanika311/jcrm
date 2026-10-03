@@ -4,12 +4,31 @@ import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import type { Adapter } from "next-auth/adapters";
+import type { Adapter, AdapterAccount } from "next-auth/adapters";
 import { cookies } from "next/headers";
+
+const prismaAdapter = PrismaAdapter(prisma) as Adapter;
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
-  adapter: PrismaAdapter(prisma) as Adapter,
+  adapter: {
+    ...prismaAdapter,
+    linkAccount: (account: AdapterAccount) =>
+      prismaAdapter.linkAccount!({
+        userId: account.userId,
+        type: account.type,
+        provider: account.provider,
+        providerAccountId: account.providerAccountId,
+        refresh_token: account.refresh_token,
+        access_token: account.access_token,
+        expires_at: account.expires_at,
+        token_type: account.token_type,
+        scope: account.scope,
+        id_token: account.id_token,
+        session_state:
+          account.session_state == null ? undefined : String(account.session_state),
+      }),
+  },
   session: {
     strategy: "jwt",
   },
@@ -23,12 +42,21 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       allowDangerousEmailAccountLinking: true,
       async profile(profile) {
+        let role: "STUDENT" | "INSTRUCTOR" = "STUDENT";
+        try {
+          const jar = await cookies();
+          if (jar.get("oauth_role")?.value === "INSTRUCTOR") role = "INSTRUCTOR";
+        } catch {
+          role = "STUDENT";
+        }
         return {
           id: profile.sub,
           name: profile.name,
+          fullName: profile.name,
           email: profile.email,
-          role: "STUDENT", 
-        }
+          image: profile.picture,
+          role,
+        };
       }
     }),
     CredentialsProvider({
@@ -187,6 +215,17 @@ export const authOptions: NextAuthOptions = {
         if (dbUser?.isBlocked) {
           throw new Error("Your account has been blocked by the admin.");
         }
+        const googleName = user.name?.trim();
+        if (dbUser && googleName && (!dbUser.fullName || !dbUser.name)) {
+          await prisma.user.update({
+            where: { id: dbUser.id },
+            data: {
+              name: dbUser.name || googleName,
+              fullName: dbUser.fullName || googleName,
+              image: dbUser.image || user.image || undefined,
+            },
+          });
+        }
       }
       return true;
     },
@@ -201,7 +240,10 @@ export const authOptions: NextAuthOptions = {
         token.role = user.role;
         token.id = user.id;
         token.email = user.email;
-        
+        const signedInName = user.name || (user as { fullName?: string }).fullName;
+        if (signedInName) token.name = signedInName;
+        if (user.image) token.picture = user.image;
+
         // Check if user has completed onboarding (admins are always onboarded)
         if (user.role === "ADMIN" || token.email === "jcrm technology97@gmail.com") {
            token.onboarded = true;
@@ -210,9 +252,35 @@ export const authOptions: NextAuthOptions = {
            token.onboarded = !!profile;
         }
       }
-      
-      const superAdminEmail = "jcrm technology97@gmail.com"; 
-      if (token.email === superAdminEmail || token.role === "ADMIN") {
+
+      // Role is stored in the JWT at sign-in. Refresh it from the database so
+      // an admin promoted after login is not bounced to the public login page.
+      if (token.id || token.email) {
+        try {
+          const dbUser = await prisma.user.findFirst({
+            where: token.id
+              ? { id: token.id as string }
+              : { email: token.email as string },
+            select: { id: true, email: true, role: true, name: true, fullName: true, image: true },
+          });
+          if (dbUser) {
+            token.id = dbUser.id;
+            token.email = dbUser.email;
+            token.role = dbUser.role;
+            const displayName = dbUser.fullName || dbUser.name;
+            if (displayName) token.name = displayName;
+            if (dbUser.image) token.picture = dbUser.image;
+          }
+        } catch (err) {
+          console.error("Failed to refresh session role:", err);
+        }
+      }
+
+      const superAdminEmails = new Set([
+        "jcrm technology97@gmail.com",
+        "pandey.ashutosh699@gmail.com",
+      ]);
+      if (superAdminEmails.has(String(token.email || "")) || token.role === "ADMIN") {
         token.role = "ADMIN";
         token.onboarded = true;
       }
@@ -224,6 +292,8 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string;
         session.user.id = token.id as string;
         session.user.onboarded = token.onboarded as boolean;
+        if (token.name) session.user.name = token.name;
+        if (token.picture) session.user.image = token.picture as string;
       }
       return session;
     },

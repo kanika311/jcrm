@@ -3,6 +3,7 @@ import { getSiteContent } from "@/lib/cms";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { accessibleCourses } from "@/lib/courseAccess";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -16,17 +17,20 @@ export default async function MyCoursesPage() {
   const cmsData = await getSiteContent("student-courses");
 
   // Fetch only courses this student has actually enrolled in / purchased
-  const enrollments = await prisma.enrollment.findMany({
-    where: {
-      studentId: session.user.id,
-      paymentStatus: "COMPLETED",
-    },
-    include: {
-      course: true,
-    },
-    orderBy: {
-      enrolledAt: "desc",
-    },
+  const openCourses = await accessibleCourses(session.user.id);
+  const saved = await prisma.enrollment.findMany({
+    where: { studentId: session.user.id },
+    select: { courseId: true, progressPercent: true, enrolledAt: true },
+  });
+  const savedByCourse = new Map(saved.map((row) => [row.courseId, row]));
+  const enrollments = openCourses.map((course) => {
+    const row = savedByCourse.get(course.id);
+    return {
+      id: course.id,
+      course,
+      progressPercent: row?.progressPercent || 0,
+      enrolledAt: row?.enrolledAt || course.createdAt,
+    };
   });
 
   return (

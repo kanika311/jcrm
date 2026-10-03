@@ -3,6 +3,7 @@ import { getSiteContent } from "@/lib/cms";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { accessibleCourses } from "@/lib/courseAccess";
 
 export const dynamic = "force-dynamic";
 
@@ -15,14 +16,16 @@ export default async function CalendarPage() {
   const events: CalendarEvent[] = [];
 
   if (session?.user?.id) {
-    const enrollments = await prisma.enrollment.findMany({
-      where: { studentId: session.user.id, paymentStatus: "COMPLETED" },
-      include: {
-        course: {
-          select: { id: true, title: true, instructor: true, curriculum: true },
-        },
+    const openCourses = await accessibleCourses(session.user.id);
+    const enrollments = openCourses.map((course) => ({
+      courseId: course.id,
+      course: {
+        id: course.id,
+        title: course.title,
+        instructor: course.instructor,
+        curriculum: course.curriculum,
       },
-    });
+    }));
 
     const courseIds = enrollments.map((e) => e.courseId);
 

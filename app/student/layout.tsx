@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { getRegistrationState } from "@/lib/courseAccess";
 
 export default async function StudentLayout({ children }: { children: React.ReactNode }) {
   const session = await getServerSession(authOptions);
@@ -12,14 +13,17 @@ export default async function StudentLayout({ children }: { children: React.Reac
     redirect("/auth?callbackUrl=/student");
   }
 
-  const enrollmentCount = await prisma.enrollment
-    .count({
-      where: {
-        studentId: session.user.id,
-        paymentStatus: "COMPLETED",
-      },
-    })
-    .catch(() => 0);
+  const access = await getRegistrationState(session.user.id).catch(() => null);
+  const enrollmentCount = access?.hasAccess
+    ? 1
+    : await prisma.enrollment
+        .count({
+          where: {
+            studentId: session.user.id,
+            paymentStatus: "COMPLETED",
+          },
+        })
+        .catch(() => 0);
 
   // Admins/instructors who just bought a course must reach the classroom.
   // Only bounce them to their own dashboard when they have no enrollment.

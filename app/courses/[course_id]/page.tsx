@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import EnrollButton from "./EnrollButton";
+import { DEFAULT_REGISTRATION_FEE, getRegistrationState } from "@/lib/courseAccess";
 
 export const dynamicParams = true;
 
@@ -877,16 +878,16 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
 
   const targetCourseId = dbCourse?.id || course.id || course_id;
   let isEnrolled = false;
-  if (session?.user?.id && targetCourseId) {
+  let registrationFee = DEFAULT_REGISTRATION_FEE;
+  let courseBlocked = false;
+  if (session?.user?.id) {
     try {
-      const existingEnrollment = await prisma.enrollment.findFirst({
-        where: {
-          studentId: session.user.id,
-          courseId: targetCourseId,
-          paymentStatus: "COMPLETED",
-        },
-      });
-      isEnrolled = !!existingEnrollment;
+      const access = await getRegistrationState(session.user.id);
+      if (access) {
+        isEnrolled = access.hasAccess;
+        registrationFee = access.fee;
+        courseBlocked = access.courseAccessBlocked;
+      }
     } catch {}
   }
 
@@ -971,6 +972,8 @@ export default async function CourseDetailPage({ params }: { params: Promise<{ c
                   courseId={targetCourseId}
                   coursePrice={course.price}
                   initialEnrolled={isEnrolled}
+                  registrationFee={registrationFee}
+                  courseBlocked={courseBlocked}
                 />
 
                 <Link
