@@ -61,6 +61,7 @@ export default function Navbar({
   const defaultLinks = [
     { name: "Home", href: "/", isActive: true },
     { name: "Courses", href: "/courses", isActive: true },
+    { name: "Services", href: "/services", isActive: true },
     { name: "ERP Solutions", href: "/erp-solutions", isActive: true },
     { name: "Our Team", href: "/ourteam", isActive: true },
     { name: "Workshop", href: "/workshop", isActive: true },
@@ -77,10 +78,21 @@ export default function Navbar({
     if (href === "/joinus") {
       return pathname === "/joinus" || pathname === "/join" || pathname === "/join-us";
     }
+    if (href === "/services") {
+      return pathname === "/services" || pathname?.startsWith("/services");
+    }
     return pathname === href || (href !== "/" && pathname?.startsWith(href));
   };
 
-  const rawLinks = links && links.length > 0 ? links : defaultLinks;
+  const rawLinks = links && links.length > 0 ? [...links] : [...defaultLinks];
+  if (!rawLinks.some((l: any) => l.href === "/services")) {
+    const cIdx = rawLinks.findIndex((l: any) => l.href === "/courses");
+    if (cIdx !== -1) {
+      rawLinks.splice(cIdx + 1, 0, { name: "Services", href: "/services", isActive: true });
+    } else {
+      rawLinks.push({ name: "Services", href: "/services", isActive: true });
+    }
+  }
   const activeLinks = rawLinks.filter((link: any) => link.isActive !== false);
 
   const displayLogoUrl = "/logo - JCRM.jpeg";
@@ -106,6 +118,8 @@ export default function Navbar({
 
   const profileHref =
     userRole === "INSTRUCTOR" ? "/faculty/settings" : userRole === "ADMIN" ? "/admin/settings" : "/student/settings";
+
+  const [servicesDropdownOpen, setServicesDropdownOpen] = useState(false);
 
   return (
     <nav
@@ -140,6 +154,77 @@ export default function Navbar({
           <div className="hidden lg:flex items-center gap-1 xl:gap-2">
             {activeLinks.map((link: any) => {
               const isActive = isLinkActive(link.href);
+
+              if (link.href === "/services") {
+                return (
+                  <div
+                    key={link.name}
+                    className="relative group"
+                    onMouseEnter={() => setServicesDropdownOpen(true)}
+                    onMouseLeave={() => setServicesDropdownOpen(false)}
+                  >
+                    <Link
+                      href="/services/seo"
+                      className={`relative px-3.5 py-2 text-sm xl:text-base font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                        isActive
+                          ? "text-[#0055FF] bg-blue-50/80 dark:bg-blue-900/30"
+                          : "text-slate-700 dark:text-slate-200 hover:text-[#0055FF] hover:bg-slate-50 dark:hover:bg-gray-800"
+                      }`}
+                    >
+                      <span>{link.name}</span>
+                      <FiChevronDown className="w-3.5 h-3.5 transition-transform group-hover:rotate-180" />
+                      {isActive && (
+                        <span className="absolute -bottom-2.5 left-0 right-0 h-1 rounded-full bg-[#0055FF] shadow-[0_0_10px_#0055FF]"></span>
+                      )}
+                    </Link>
+
+                    {/* Services Dropdown Card */}
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-80 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto z-50">
+                      <div className="rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-blue-100 dark:border-slate-800 p-2.5 space-y-1">
+                        <Link
+                          href="/services/seo"
+                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-[#0055FF] flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
+                            SEO
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-slate-900 dark:text-white group-hover/item:text-[#0055FF] transition-colors">
+                              AI-Powered SEO Packages
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
+                              Rank higher on Google, ChatGPT & Gemini
+                            </p>
+                            <span className="text-[10px] font-extrabold text-blue-600">
+                              From ₹8,999/mo + GST
+                            </span>
+                          </div>
+                        </Link>
+
+                        <Link
+                          href="/services/social-media"
+                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
+                        >
+                          <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
+                            SMM
+                          </div>
+                          <div>
+                            <p className="text-xs font-black text-slate-900 dark:text-white group-hover/item:text-[#0055FF] transition-colors">
+                              Social Media Management
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
+                              Facebook, LinkedIn, Instagram & YouTube
+                            </p>
+                            <span className="text-[10px] font-extrabold text-indigo-600">
+                              From ₹8,999/mo + GST
+                            </span>
+                          </div>
+                        </Link>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }
 
               return (
                 <Link
@@ -350,6 +435,43 @@ export default function Navbar({
 
             {activeLinks.map((link: any) => {
               const isActive = isLinkActive(link.href);
+
+              if (link.href === "/services") {
+                return (
+                  <div key={link.name} className="space-y-1">
+                    <Link
+                      href={link.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center justify-between px-4 py-3.5 text-base font-extrabold rounded-xl transition-all ${
+                        isActive
+                          ? "text-[#0055FF] bg-blue-50/90 border-l-4 border-[#0055FF]"
+                          : "text-slate-700 dark:text-slate-300 hover:text-[#0055FF] hover:bg-slate-50"
+                      }`}
+                    >
+                      <span>{link.name}</span>
+                      {isActive && (
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#0055FF]"></span>
+                      )}
+                    </Link>
+                    <div className="pl-6 pr-2 py-1 space-y-1 border-l-2 border-blue-100 dark:border-blue-900/40 ml-4">
+                      <Link
+                        href="/services/seo"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-[#0055FF]"
+                      >
+                        ⚡ AI-Powered SEO Packages
+                      </Link>
+                      <Link
+                        href="/services/social-media"
+                        onClick={() => setMobileMenuOpen(false)}
+                        className="block px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-[#0055FF]"
+                      >
+                        🚀 Social Media Management
+                      </Link>
+                    </div>
+                  </div>
+                );
+              }
 
               return (
                 <Link

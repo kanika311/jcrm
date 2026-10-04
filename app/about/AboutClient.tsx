@@ -96,17 +96,9 @@ export default function AboutClient({ cmsData }: { cmsData?: any }) {
         </div>
 
         {/* 2. Dual Target Value Switcher (Business Clients vs Students) */}
-        <div className="p-8 sm:p-12 rounded-[36px] bg-white/85 backdrop-blur-2xl border border-white/90 shadow-[0_12px_45px_rgba(0,85,255,0.12)] space-y-8">
+        <div className="p-8 sm:p-12 rounded-[36px] bg-white/85 backdrop-blur-2xl border border-white/90 shadow-[0_12px_45px_rgba(0,85,255,0.12)] space-y-6">
           <div className="text-center max-w-2xl mx-auto">
-            <span className="text-xs font-extrabold uppercase tracking-widest text-[#0055FF]">
-              OUR DUAL CORE PURPOSE
-            </span>
-            <h2 className="heading-font text-3xl sm:text-4xl font-extrabold text-slate-900 mt-1">
-              Engineered for Businesses & Talent
-            </h2>
-            <p className="text-xs sm:text-sm font-semibold text-slate-500 mt-2">
-              Toggle between our business solution offerings and career incubator benefits.
-            </p>
+          
 
             {/* Toggle Switch Tabs */}
             <div className="inline-flex p-1.5 rounded-2xl bg-blue-50 border border-blue-100 mt-6 gap-2">

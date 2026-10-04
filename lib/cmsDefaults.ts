@@ -20,6 +20,7 @@ export const CMS_EDITOR_PAGES: { id: string; name: string; path: string; descrip
   { id: "public-contact", name: "Contact Page", path: "/contact", description: "Contact heading, email, phone, and address" },
   { id: "public-privacy", name: "Privacy Policy", path: "/legal/privacy", description: "Privacy policy text and clauses" },
   { id: "public-terms", name: "Terms & Conditions", path: "/legal/terms", description: "Terms and conditions text" },
+  { id: "public-services", name: "Growth Services CMS", path: "/admin/services", description: "Full CMS for SEO, Social Media & Digital Services" },
   { id: "global-footer", name: "Footer", path: "/", description: "Footer text, contact details, and copyright" },
 ];
 
@@ -311,7 +312,7 @@ export const CMS_SCHEMAS: PageSchema[] = [
     schema: {
       heroTitle: { type: "string", label: "Page heading", default: "Bridging Enterprise Technology with Next-Gen Engineering Talent" },
       heroSubtitle: { type: "text", label: "Intro text", default: "" },
-      story: { type: "text", label: "Our story", default: "We started with a simple idea: software you truly own, and training that ships real products." },
+      story: { type: "text", label: "Our story", default: "" },
     }
   },
   // --- ADDITIONAL PUBLIC PAGES ---

@@ -24,6 +24,7 @@ import {
   FiCheck,
   FiGlobe,
   FiAward,
+  FiBriefcase,
 } from "react-icons/fi";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -74,6 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Courses", href: "/admin/courses", icon: FiBookOpen },
     { name: "Our Team", href: "/admin/team", icon: FiUserCheck },
     { name: "ERP Solutions", href: "/admin/erp", icon: FiLayers },
+    { name: "Services", href: "/admin/services", icon: FiBriefcase },
     { name: "Sponsored", href: "/admin/sponsored", icon: FiAward },
     { name: "CMS", href: "/admin/cms", icon: FiEdit3 },
     { name: "Messages", href: "/admin/messages", icon: FiMail },

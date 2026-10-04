@@ -116,12 +116,12 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
 
             <div>
               <h4 className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
-                SOLUTIONS
+                SOLUTIONS & SERVICES
               </h4>
               <ul className="space-y-1.5 text-xs sm:text-sm font-semibold text-slate-600">
+                <li><Link href="/services/seo" className="hover:text-[#0055FF] transition-colors">AI-Powered SEO Packages</Link></li>
+                <li><Link href="/services/social-media" className="hover:text-[#0055FF] transition-colors">Social Media Management</Link></li>
                 <li><Link href="/erp-solutions" className="hover:text-[#0055FF] transition-colors">ERP Software</Link></li>
-                <li><Link href="/erp-solutions" className="hover:text-[#0055FF] transition-colors">Automation</Link></li>
-                <li><Link href="/erp-solutions" className="hover:text-[#0055FF] transition-colors">Cloud Services</Link></li>
                 <li><Link href="/workshop" className="hover:text-[#0055FF] transition-colors">Workshop</Link></li>
               </ul>
             </div>
