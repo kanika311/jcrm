@@ -129,11 +129,11 @@ export default function Navbar({
           : "shadow-xs"
       }`}
     >
-      <div className="w-full max-w-[1500px] mx-auto px-3 sm:px-8 lg:px-10">
-        <div className="flex justify-between items-center h-16 sm:h-20">
+      <div className="w-full max-w-[1600px] mx-auto px-2 sm:px-4 lg:px-5 xl:px-6">
+        <div className="flex justify-between items-center h-16 sm:h-20 gap-2">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 sm:gap-3.5 group shrink-0 cursor-pointer max-w-[70%] sm:max-w-none">
-            <div className="relative w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden border-2 border-white/90 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
+          <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 cursor-pointer">
+            <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-white/90 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
               <img
                 src={displayLogoUrl}
                 alt={siteName || "JCRM Logo"}
@@ -141,17 +141,17 @@ export default function Navbar({
               />
             </div>
             <div className="flex flex-col min-w-0">
-              <span className="heading-font text-base sm:text-xl md:text-2xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-[#0055FF] transition-colors truncate">
+              <span className="heading-font text-sm sm:text-base lg:text-lg xl:text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-[#0055FF] transition-colors whitespace-nowrap">
                 {siteName || "JCRM Technologies"}
               </span>
-              <span className="hidden sm:block text-[10px] font-extrabold text-[#0055FF] tracking-wider uppercase -mt-1 truncate">
+              <span className="hidden sm:block text-[9px] font-extrabold text-[#0055FF] tracking-wider uppercase -mt-0.5 whitespace-nowrap">
                 Innovate &bull; Build &bull; Scale
               </span>
             </div>
           </Link>
 
           {/* Desktop Nav Links */}
-          <div className="hidden lg:flex items-center gap-1 xl:gap-2">
+          <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 2xl:gap-1.5 shrink min-w-0">
             {activeLinks.map((link: any) => {
               const isActive = isLinkActive(link.href);
 
@@ -159,13 +159,13 @@ export default function Navbar({
                 return (
                   <div
                     key={link.name}
-                    className="relative group"
+                    className="relative group shrink-0"
                     onMouseEnter={() => setServicesDropdownOpen(true)}
                     onMouseLeave={() => setServicesDropdownOpen(false)}
                   >
                     <Link
                       href="/services/seo"
-                      className={`relative px-3.5 py-2 text-sm xl:text-base font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1.5 ${
+                      className={`relative px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs xl:text-[13px] 2xl:text-sm font-bold rounded-xl transition-all cursor-pointer flex items-center gap-1 whitespace-nowrap ${
                         isActive
                           ? "text-[#0055FF] bg-blue-50/80 dark:bg-blue-900/30"
                           : "text-slate-700 dark:text-slate-200 hover:text-[#0055FF] hover:bg-slate-50 dark:hover:bg-gray-800"
@@ -196,7 +196,7 @@ export default function Navbar({
                               Rank higher on Google, ChatGPT & Gemini
                             </p>
                             <span className="text-[10px] font-extrabold text-blue-600">
-                              From ₹8,999/mo + GST
+                              From ₹8,999/mo
                             </span>
                           </div>
                         </Link>
@@ -216,7 +216,7 @@ export default function Navbar({
                               Facebook, LinkedIn, Instagram & YouTube
                             </p>
                             <span className="text-[10px] font-extrabold text-indigo-600">
-                              From ₹8,999/mo + GST
+                              From ₹8,999/mo
                             </span>
                           </div>
                         </Link>
@@ -230,7 +230,7 @@ export default function Navbar({
                 <Link
                   key={link.name}
                   href={link.href}
-                  className={`relative px-3.5 py-2 text-sm xl:text-base font-bold rounded-xl transition-all cursor-pointer ${
+                  className={`relative px-2 xl:px-2.5 2xl:px-3 py-1.5 text-xs xl:text-[13px] 2xl:text-sm font-bold rounded-xl transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isActive
                       ? "text-[#0055FF] bg-blue-50/80 dark:bg-blue-900/30"
                       : "text-slate-700 dark:text-slate-200 hover:text-[#0055FF] hover:bg-slate-50 dark:hover:bg-gray-800"
@@ -353,16 +353,16 @@ export default function Navbar({
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 xl:gap-2 shrink-0">
                 <Link
                   href="/auth?role=student&mode=login"
-                  className="px-4 py-2.5 text-sm font-extrabold rounded-xl text-[#0055FF] bg-white border-2 border-[#0055FF] hover:bg-blue-50 transition-all"
+                  className="px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-xs xl:text-sm font-extrabold rounded-xl text-[#0055FF] bg-white border-2 border-[#0055FF] hover:bg-blue-50 transition-all whitespace-nowrap shrink-0"
                 >
                   Student Login
                 </Link>
                 <Link
                   href="/auth?role=teacher&mode=login"
-                  className="px-4 py-2.5 text-sm font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md transition-all"
+                  className="px-2.5 xl:px-3.5 py-1.5 xl:py-2 text-xs xl:text-sm font-extrabold rounded-xl text-white bg-[#0055FF] hover:bg-blue-600 shadow-md transition-all whitespace-nowrap shrink-0"
                 >
                   Teacher Login
                 </Link>
