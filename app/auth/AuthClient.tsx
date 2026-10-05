@@ -92,7 +92,7 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
       // STRICT CHECK: Admin is NEVER allowed to log in from the public /auth portal
       if (role === "ADMIN") {
         await import("next-auth/react").then(m => m.signOut({ redirect: false }));
-        setErrorMsg("Access Denied: Administrators must sign in through the Admin Console (/jcrm-sushant).");
+        setErrorMsg("Access Denied: Administrators must sign in through the Admin Console.");
         setIsLoading(false);
         return;
       }
