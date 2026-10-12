@@ -3,6 +3,8 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 
+import { convertImageToWebP } from "@/lib/imageWebp";
+
 interface ImageUploadProps {
   currentImage?: string;
   onUploadSuccess: (url: string) => void;
@@ -18,8 +20,8 @@ export default function ImageUpload({ currentImage, onUploadSuccess }: ImageUplo
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      setErrorMsg("File size must be less than 2MB");
+    if (file.size > 15 * 1024 * 1024) {
+      setErrorMsg("File size must be less than 15MB");
       return;
     }
 
@@ -31,18 +33,25 @@ export default function ImageUpload({ currentImage, onUploadSuccess }: ImageUplo
     setErrorMsg("");
     setIsUploading(true);
 
-    const formData = new FormData();
-    formData.append("file", file);
-
     try {
+      // Auto convert to WebP
+      const webpFile = await convertImageToWebP(file, {
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 0.88,
+      });
+
+      const formData = new FormData();
+      formData.append("file", webpFile);
+
       const res = await fetch("/api/upload", {
         method: "POST",
         body: formData,
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.message || "Upload failed");
+        const data = await res.json().catch(() => null);
+        throw new Error(data?.message || "Upload failed");
       }
 
       const data = await res.json();

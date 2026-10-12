@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback } from "react";
+import { convertImageToWebP } from "@/lib/imageWebp";
 
 interface ImageUploaderProps {
   value: string;
@@ -19,25 +20,31 @@ export default function ImageUploader({ value, onChange, label }: ImageUploaderP
       setError("Only image files are supported.");
       return;
     }
-    if (file.size > 2 * 1024 * 1024) {
-      setError("Image must be under 2MB.");
+    if (file.size > 20 * 1024 * 1024) {
+      setError("Image must be under 20MB.");
       return;
     }
     setIsUploading(true);
     setError("");
     try {
+      const webpFile = await convertImageToWebP(file, {
+        maxWidth: 1920,
+        maxHeight: 1080,
+        quality: 0.88,
+      });
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", webpFile);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.message || "Upload failed.");
+        const data = await res.json().catch(() => null);
+        setError(data?.message || "Upload failed.");
         return;
       }
       const { url } = await res.json();
       onChange(url);
-    } catch {
-      setError("Upload failed. Please try again.");
+    } catch (err: any) {
+      setError(err?.message || "Upload failed. Please try again.");
     } finally {
       setIsUploading(false);
     }

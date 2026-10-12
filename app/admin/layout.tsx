@@ -75,6 +75,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Courses", href: "/admin/courses", icon: FiBookOpen },
     { name: "Our Team", href: "/admin/team", icon: FiUserCheck },
     { name: "ERP Solutions", href: "/admin/erp", icon: FiLayers },
+    { name: "Clients & Projects", href: "/admin/clients-projects", icon: FiGlobe },
     { name: "Services", href: "/admin/services", icon: FiBriefcase },
     { name: "Sponsored", href: "/admin/sponsored", icon: FiAward },
     { name: "CMS", href: "/admin/cms", icon: FiEdit3 },

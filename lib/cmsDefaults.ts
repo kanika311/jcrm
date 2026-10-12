@@ -21,6 +21,7 @@ export const CMS_EDITOR_PAGES: { id: string; name: string; path: string; descrip
   { id: "public-privacy", name: "Privacy Policy", path: "/legal/privacy", description: "Privacy policy text and clauses" },
   { id: "public-terms", name: "Terms & Conditions", path: "/legal/terms", description: "Terms and conditions text" },
   { id: "public-services", name: "Growth Services CMS", path: "/admin/services", description: "Full CMS for SEO, Social Media & Digital Services" },
+  { id: "clients-projects", name: "Clients & Projects CMS", path: "/admin/clients-projects", description: "Full CMS for Homepage Clients & Showcase Projects" },
   { id: "global-footer", name: "Footer", path: "/", description: "Footer text, contact details, and copyright" },
 ];
 

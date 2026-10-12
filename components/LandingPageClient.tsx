@@ -4,13 +4,16 @@ import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef, useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import NameAvatar from "@/components/NameAvatar";
+import ClientsProjectsSection from "@/components/ClientsProjectsSection";
 
 export default function LandingPageClient({
   initialData = {},
   initialPlacedCandidates,
+  initialClientsProjects,
 }: {
   initialData?: any;
   initialPlacedCandidates?: any[];
+  initialClientsProjects?: any[];
 }) {
   const { scrollY } = useScroll();
   const heroY = useTransform(scrollY, [0, 500], [0, 150]);
@@ -819,6 +822,9 @@ export default function LandingPageClient({
           </div>
         </div>
       </section>
+
+      {/* 5.8b Our Clients & Projects Scrollbar Showcase Section */}
+      <ClientsProjectsSection initialProjects={initialClientsProjects} />
 
       {/* 5.9 Join Our Talent Network & Client Feedback Section */}
       <section className="py-10 sm:py-20 md:py-24 relative z-10">

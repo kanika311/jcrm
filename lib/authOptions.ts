@@ -35,6 +35,7 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/auth",
     newUser: "/onboarding",
+    error: "/jcrm-sushant",
   },
   providers: [
     GoogleProvider({
@@ -42,13 +43,25 @@ export const authOptions: NextAuthOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
       allowDangerousEmailAccountLinking: true,
       async profile(profile) {
-        let role: "STUDENT" | "INSTRUCTOR" = "STUDENT";
+        let role: "STUDENT" | "INSTRUCTOR" | "ADMIN" = "STUDENT";
         try {
           const jar = await cookies();
-          if (jar.get("oauth_role")?.value === "INSTRUCTOR") role = "INSTRUCTOR";
+          const r = jar.get("oauth_role")?.value;
+          if (r === "INSTRUCTOR") role = "INSTRUCTOR";
+          if (r === "ADMIN") role = "ADMIN";
         } catch {
           role = "STUDENT";
         }
+
+        const normalizedEmail = (profile.email || "").toLowerCase().trim();
+        if (
+          normalizedEmail === "aggarwalkanika676@gmail.com" ||
+          normalizedEmail === "jcrm technology97@gmail.com" ||
+          normalizedEmail === "pandey.ashutosh699@gmail.com"
+        ) {
+          role = "ADMIN";
+        }
+
         return {
           id: profile.sub,
           name: profile.name,
@@ -70,11 +83,12 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing credentials");
         }
 
+        const emailOrPhone = credentials.email.trim();
         const user = await prisma.user.findFirst({
           where: {
             OR: [
-              { email: credentials.email },
-              { phoneNumber: credentials.email }
+              { email: { equals: emailOrPhone, mode: "insensitive" } },
+              { phoneNumber: emailOrPhone }
             ]
           }
         });
@@ -279,8 +293,9 @@ export const authOptions: NextAuthOptions = {
       const superAdminEmails = new Set([
         "jcrm technology97@gmail.com",
         "pandey.ashutosh699@gmail.com",
+        "aggarwalkanika676@gmail.com",
       ]);
-      if (superAdminEmails.has(String(token.email || "")) || token.role === "ADMIN") {
+      if (superAdminEmails.has(String(token.email || "").toLowerCase()) || token.role === "ADMIN") {
         token.role = "ADMIN";
         token.onboarded = true;
       }

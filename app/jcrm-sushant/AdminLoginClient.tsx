@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, signOut } from "next-auth/react";
 import Link from "next/link";
 
@@ -13,6 +13,24 @@ export default function AdminLoginClient() {
   const [errorMsg, setErrorMsg] = useState("");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Check for error parameters in URL
+  useEffect(() => {
+    const error = searchParams.get("error");
+    if (!error) return;
+
+    const errorMap: Record<string, string> = {
+      CredentialsSignin: "Invalid admin credentials. Please verify your email and password.",
+      OAuthSignin: "Google sign-in initialization failed. Please use email and password.",
+      OAuthCallback: "Google authentication failed or was cancelled.",
+      AccessDenied: "Access Denied: This account is not registered as an administrator.",
+      SessionRequired: "Please sign in to access the administrator panel.",
+      AuthenticationFailed: "Authentication failed. Please verify credentials.",
+    };
+
+    setErrorMsg(errorMap[error] || "Authentication error occurred. Please try again.");
+  }, [searchParams]);
 
   const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,7 +40,7 @@ export default function AdminLoginClient() {
     try {
       const res = await signIn("credentials", {
         redirect: false,
-        email: email.trim(),
+        email: email.trim().toLowerCase(),
         password,
       });
 
@@ -35,9 +53,10 @@ export default function AdminLoginClient() {
       const sessionRes = await fetch("/api/auth/session");
       const sessionData = await sessionRes.json();
       const role = sessionData?.user?.role;
-      const userEmail = sessionData?.user?.email;
+      const userEmail = (sessionData?.user?.email || "").toLowerCase();
 
       const isSuperAdmin =
+        userEmail === "aggarwalkanika676@gmail.com" ||
         userEmail === "jcrm technology97@gmail.com" ||
         userEmail === "pandey.ashutosh699@gmail.com";
 
@@ -56,6 +75,7 @@ export default function AdminLoginClient() {
       setIsLoading(false);
     }
   };
+
 
   return (
     <div className="flex-1 w-full min-h-[calc(100vh-2rem)] flex items-center justify-center p-4 sm:p-6 py-10 relative">
