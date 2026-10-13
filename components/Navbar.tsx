@@ -63,6 +63,7 @@ export default function Navbar({
     { name: "Courses", href: "/courses", isActive: true },
     { name: "Services", href: "/services", isActive: true },
     { name: "ERP Solutions", href: "/erp-solutions", isActive: true },
+    { name: "Key Clients", href: "/key-clients", isActive: true },
     { name: "Our Team", href: "/ourteam", isActive: true },
     { name: "Workshop", href: "/workshop", isActive: true },
     { name: "Join Us", href: "/joinus", isActive: true },
@@ -81,6 +82,9 @@ export default function Navbar({
     if (href === "/services") {
       return pathname === "/services" || pathname?.startsWith("/services");
     }
+    if (href === "/key-clients") {
+      return pathname === "/key-clients" || pathname === "/placements" || pathname?.startsWith("/key-clients");
+    }
     return pathname === href || (href !== "/" && pathname?.startsWith(href));
   };
 
@@ -91,6 +95,14 @@ export default function Navbar({
       rawLinks.splice(cIdx + 1, 0, { name: "Services", href: "/services", isActive: true });
     } else {
       rawLinks.push({ name: "Services", href: "/services", isActive: true });
+    }
+  }
+  if (!rawLinks.some((l: any) => l.href === "/key-clients" || l.href === "/placements")) {
+    const erpIdx = rawLinks.findIndex((l: any) => l.href === "/erp-solutions" || l.href === "/services");
+    if (erpIdx !== -1) {
+      rawLinks.splice(erpIdx + 1, 0, { name: "Key Clients", href: "/key-clients", isActive: true });
+    } else {
+      rawLinks.push({ name: "Key Clients", href: "/key-clients", isActive: true });
     }
   }
   const activeLinks = rawLinks.filter((link: any) => link.isActive !== false);

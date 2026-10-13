@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { getOptimizedImageUrl } from "@/lib/imageOptimize";
 
 function initialsFromName(name?: string) {
   const parts = (name || "").trim().split(/\s+/).filter(Boolean);
@@ -22,6 +23,7 @@ export default function NameAvatar({
   className = "",
   textClassName = "",
   showName = false,
+  size = 320,
 }: {
   name?: string;
   src?: string | null;
@@ -29,20 +31,48 @@ export default function NameAvatar({
   className?: string;
   textClassName?: string;
   showName?: boolean;
+  size?: number;
 }) {
-  const [failed, setFailed] = useState(false);
   const trimmed = (src || "").trim();
-  const showImage = Boolean(trimmed) && !failed;
+  const [currentSrc, setCurrentSrc] = useState<string>("");
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+    if (trimmed) {
+      // Generate WebP compressed URL
+      const optimized = getOptimizedImageUrl(trimmed, {
+        width: size,
+        height: size,
+        quality: 80,
+        fit: "cover",
+      });
+      setCurrentSrc(optimized);
+    } else {
+      setCurrentSrc("");
+    }
+  }, [trimmed, size]);
+
+  const showImage = Boolean(currentSrc) && !failed;
   const initials = initialsFromName(name);
   const hue = hueFromName(name);
 
   if (showImage) {
     return (
       <img
-        src={trimmed}
+        src={currentSrc}
         alt={alt || name || "Profile"}
         className={className}
-        onError={() => setFailed(true)}
+        loading="lazy"
+        decoding="async"
+        onError={() => {
+          // If the optimized URL failed, fallback to original once before giving up
+          if (currentSrc !== trimmed && trimmed) {
+            setCurrentSrc(trimmed);
+          } else {
+            setFailed(true);
+          }
+        }}
       />
     );
   }

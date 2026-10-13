@@ -270,6 +270,17 @@ export default function ClientsProjectsSection({
             );
           })}
         </div>
+
+        {/* View All Tie-Ups Banner */}
+        <div className="mt-8 text-center">
+          <Link
+            href="/key-clients"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-blue-50 text-[#0055FF] border border-blue-200 text-xs sm:text-sm font-extrabold shadow-xs hover:shadow-md transition-all"
+          >
+            <span>Explore All 150+ Key Clients & Job Tie-Up Companies</span>
+            <FiChevronRight className="w-4 h-4" />
+          </Link>
+        </div>
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
 import SponsoredAdModal from "@/components/SponsoredAdModal";
 import { normalizeTeamStatus, TEAM_STATUSES, TEAM_STATUS_LABELS, type TeamStatus } from "@/lib/teamStatus";
 import NameAvatar from "@/components/NameAvatar";
+import { convertImageToWebP } from "@/lib/imageWebp";
 
 export interface TeamMemberItem {
   id: string;
@@ -96,22 +97,29 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
     }
   }, [isAddModalOpen]);
 
-  // Handle Image File Upload
+  // Handle Image File Upload with WebP Compression
   const handleImageFileUpload = async (file: File, target: "add" | "edit") => {
     if (!file) return;
     if (!file.type.startsWith("image/")) {
       alert("Please select a valid image file (PNG, JPG, WEBP, etc.)");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be under 5MB.");
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Image size should be under 15MB.");
       return;
     }
 
     setIsUploadingImage(true);
     try {
+      // Auto convert to optimized WebP on device
+      const webpFile = await convertImageToWebP(file, {
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 0.85,
+      }).catch(() => file);
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", webpFile);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       if (res.ok) {
         const data = await res.json();
@@ -120,19 +128,9 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
           return;
         }
       }
-      const reader = new FileReader();
-      reader.onload = e => {
-        const url = e.target?.result as string;
-        if (target === "add") setNewImage(url);
-      };
-      reader.readAsDataURL(file);
-    } catch {
-      const reader = new FileReader();
-      reader.onload = e => {
-        const url = e.target?.result as string;
-        if (target === "add") setNewImage(url);
-      };
-      reader.readAsDataURL(file);
+      alert("Failed to upload image. Please try again.");
+    } catch (err: any) {
+      alert(err.message || "Failed to upload image.");
     } finally {
       setIsUploadingImage(false);
     }

@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { TeamMemberItem } from "../TeamManagementClient";
+import { convertImageToWebP } from "@/lib/imageWebp";
 
 const labelClass = "block text-sm font-semibold text-slate-700 mb-1.5 tracking-normal";
 const inputClass =
@@ -27,15 +28,21 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
       alert("Please select a valid image file (PNG, JPG, WEBP).");
       return;
     }
-    if (file.size > 5 * 1024 * 1024) {
-      alert("Image size should be under 5MB.");
+    if (file.size > 15 * 1024 * 1024) {
+      alert("Image size should be under 15MB.");
       return;
     }
 
     setIsUploadingImage(true);
     try {
+      const webpFile = await convertImageToWebP(file, {
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 0.85,
+      }).catch(() => file);
+
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", webpFile);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       if (res.ok) {
         const data = await res.json();
@@ -44,13 +51,9 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
           return;
         }
       }
-      const reader = new FileReader();
-      reader.onload = (e) => update("image", e.target?.result as string);
-      reader.readAsDataURL(file);
-    } catch {
-      const reader = new FileReader();
-      reader.onload = (e) => update("image", e.target?.result as string);
-      reader.readAsDataURL(file);
+      alert("Failed to upload image. Please try again.");
+    } catch (err: any) {
+      alert(err.message || "Failed to upload image.");
     } finally {
       setIsUploadingImage(false);
     }

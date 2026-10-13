@@ -108,6 +108,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
               <ul className="space-y-1.5 text-xs sm:text-sm font-semibold text-slate-600">
                 <li><Link href="/about" className="hover:text-[#0055FF] transition-colors">About Us</Link></li>
                 <li><Link href="/courses" className="hover:text-[#0055FF] transition-colors">Courses</Link></li>
+                <li><Link href="/key-clients" className="hover:text-[#0055FF] transition-colors">Key Clients & Tie-ups</Link></li>
                 <li><Link href="/ourteam" className="hover:text-[#0055FF] transition-colors">Our Team</Link></li>
                 <li><Link href="/joinus" className="hover:text-[#0055FF] transition-colors">Join Us</Link></li>
                 <li><Link href="/contact" className="hover:text-[#0055FF] transition-colors">Contact</Link></li>

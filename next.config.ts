@@ -39,10 +39,23 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma"],
   images: {
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+      },
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: '**',
       },
     ],
   },
