@@ -16,6 +16,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@next-auth/prisma-adapter": "^1.0.7",
+    "@next/third-parties": "^16.4.0",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
     "country-state-city": "^3.2.1",
@@ -43,5 +44,12 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.0",
     "typescript": "^5"
-  }
+  },
+  "browserslist": [
+    "> 0.5%",
+    "last 2 versions",
+    "Firefox ESR",
+    "not dead",
+    "not IE 11"
+  ]
 }

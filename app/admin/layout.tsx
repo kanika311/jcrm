@@ -177,7 +177,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin" className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-white p-1 flex items-center justify-center shadow-sm shrink-0 border border-slate-700">
               <img
-                src="/logo - JCRM.jpeg"
+                src="/logo-jcrm.webp"
                 alt="JCRM Logo"
                 className="w-full h-full object-contain rounded-lg"
               />
@@ -236,7 +236,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-xl bg-white p-1 flex items-center justify-center shrink-0">
                   <img
-                    src="/logo - JCRM.jpeg"
+                    src="/logo-jcrm.webp"
                     alt="JCRM Logo"
                     className="w-full h-full object-contain rounded-lg"
                   />

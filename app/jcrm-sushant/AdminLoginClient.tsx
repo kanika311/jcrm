@@ -100,7 +100,7 @@ export default function AdminLoginClient() {
 
         <div className="text-center mb-6">
           <img
-            src="/logo - JCRM.jpeg"
+            src="/logo-jcrm.webp"
             alt="JCRM Technologies"
             className="mx-auto mb-3 h-20 w-20 rounded-full object-contain bg-white shadow-[0_8px_24px_rgba(0,85,255,0.25)]"
           />

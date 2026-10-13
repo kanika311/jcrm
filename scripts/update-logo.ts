@@ -8,7 +8,7 @@ async function main() {
   if (globalSettings && globalSettings.content) {
     const content = globalSettings.content as any;
     content.siteName = "JCRM Technologies";
-    content.logoUrl = "/logo - JCRM.jpeg";
+    content.logoUrl = "/logo-jcrm.webp";
 
     await prisma.siteContent.update({
       where: { pageId: 'global-settings' },

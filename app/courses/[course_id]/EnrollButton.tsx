@@ -124,7 +124,7 @@ export default function EnrollButton({
         currency: orderData.currency || "INR",
         name: "JCRM Technologies",
         description: `Registration fee ₹${feeLabel} — adjusted against ${orderData.courseTitle || courseTitle}`,
-        image: "/logo - JCRM.jpeg",
+        image: "/logo-jcrm.webp",
         order_id: orderData.orderId,
         prefill: {
           name: orderData.user?.name || "",

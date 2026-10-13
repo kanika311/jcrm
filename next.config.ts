@@ -38,8 +38,20 @@ const securityHeaders = [
 
 const nextConfig: NextConfig = {
   serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma"],
+  experimental: {
+    optimizePackageImports: ["react-icons", "framer-motion"],
+  },
   images: {
     formats: ['image/avif', 'image/webp'],
+    localPatterns: [
+      {
+        pathname: '/api/image-optimize',
+        search: '?**',
+      },
+      {
+        pathname: '/**',
+      },
+    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -66,12 +78,12 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
-        // Prevent caching on the landing page so users always see it fresh
+        // Edge caching with stale-while-revalidate for super fast TTFB
         source: '/',
         headers: [
           {
             key: 'Cache-Control',
-            value: 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            value: 'public, s-maxage=3600, stale-while-revalidate=86400',
           },
         ],
       },
@@ -89,6 +101,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: '/about-us',
+        destination: '/about',
+        permanent: true,
+      },
       {
         source: '/join',
         destination: '/joinus',

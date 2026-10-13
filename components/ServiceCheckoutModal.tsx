@@ -108,7 +108,7 @@ export default function ServiceCheckoutModal({
         currency: data.currency || "INR",
         name: "JCRM Technologies",
         description: `${service.title} - ${plan.name} Plan`,
-        image: "/logo - JCRM.jpeg",
+        image: "/logo-jcrm.webp",
         order_id: data.orderId,
         prefill: {
           name: customerName,

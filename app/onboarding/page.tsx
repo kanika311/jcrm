@@ -109,7 +109,7 @@ export default function OnboardingPage() {
       <header className="p-6 flex justify-between items-center absolute top-0 w-full">
         <div className="flex items-center gap-3">
           <img
-            src="/logo - JCRM.jpeg"
+            src="/logo-jcrm.webp"
             alt="JCRM Technologies"
             className="w-10 h-10 rounded-full object-contain bg-white shrink-0"
           />

@@ -1,5 +1,8 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import AdminLoginClient from "./AdminLoginClient";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "JCRM Admin Console — Authorized Access Only",
@@ -11,5 +14,9 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLoginPage() {
-  return <AdminLoginClient />;
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#0A0D14]" />}>
+      <AdminLoginClient />
+    </Suspense>
+  );
 }

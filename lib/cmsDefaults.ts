@@ -128,7 +128,7 @@ export const CMS_SCHEMAS: PageSchema[] = [
     category: "global",
     schema: {
       siteName: { type: "string", label: "Website Name", default: "JCRM Technologies" },
-      logoUrl: { type: "image", label: "Brand Logo (Upload image or choose file)", default: "/logo - JCRM.jpeg" },
+      logoUrl: { type: "image", label: "Brand Logo (Upload image or choose file)", default: "/logo-jcrm.webp" },
       faviconUrl: { type: "image", label: "Website Favicon (Upload icon)", default: "/favicon.ico" },
       tagline: { type: "string", label: "Hero / Brand Tagline", default: "Building high-performance software engineering talents and enterprise ERP solutions." },
       primaryColor: { type: "string", label: "Primary Brand Color (Hex)", default: "#0055FF" },

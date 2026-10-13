@@ -1,0 +1,79 @@
+# JCRM Technologies (Jain CRM)
+
+> JCRM Technologies (widely searched as Jain CRM) is an Indian engineering education, enterprise ERP software, and placement assistance company dedicated to empowering developers, institutions, and businesses with production-grade technology solutions.
+
+Website: https://www.jcrm.in
+Canonical URL: https://www.jcrm.in/
+Headquarters: Chak Goraiya, Sikhar, Uttar Pradesh 231306, India
+Contact Email: hr@jcrm.in
+Contact Phone: +91 8310531309
+
+---
+
+## About JCRM Technologies
+JCRM Technologies bridges the gap between academic theory and enterprise engineering. We operate dual divisions:
+1. **Engineering Education & Placement**: Project-based training and 100% placement assistance programs designed and mentored by top 1% industry professionals.
+2. **Enterprise ERP Solutions**: Robust, scalable cloud ERP platforms tailored for educational institutes, healthcare organizations, coaching centers, and commercial enterprises.
+
+---
+
+## Core Offerings
+
+### 1. Job-Oriented Engineering Training & Internship Programs
+- **Frontend Development**: Next.js, React, TypeScript, Tailwind CSS, high-performance UI engineering.
+- **Backend Development**: Java Spring Boot, Node.js, Microservices, PostgreSQL, Apache Kafka.
+- **AI & Machine Learning**: Neural Networks, PyTorch, Large Language Models (LLMs), RAG pipelines, MLOps.
+- **Data Science**: Python, Pandas, SQL, Tableau, Power BI, predictive modeling & warehousing.
+- **Cyber Security**: Ethical hacking, VAPT, SOC operations, network penetration testing, SIEM.
+- **Forensic Science**: Digital forensics, disk & memory analysis, cyber incident investigation.
+- **Cloud & DevOps**: AWS, Docker, Kubernetes orchestration, Terraform IaC, CI/CD deployment pipelines.
+- **QA Automation**: Playwright, Cypress, Selenium, REST API test automation.
+- **Digital Marketing**: AI-driven performance marketing, SEO, Meta & Google Ads.
+- **Zen AI**: Autonomous AI agents, prompt engineering, multi-agent enterprise workflows.
+
+**Placement Highlights:**
+- 100% Placement Support with resume building, mock interviews, and direct HR referrals.
+- Trainees placed at top tech leaders including Tech Mahindra, Deloitte, Cognizant, TCS, Infosys, Wipro, LTI Mindtree, HDFC Bank, Cisco, and Apexon.
+
+### 2. Enterprise Cloud ERP Products
+- **Institute & Academy LMS ERP**: End-to-end management covering student admissions, fee automation with GST billing, live virtual classes, parent portal, and automated WhatsApp notifications.
+- **Coaching & Test-Prep Academy ERP**: Online mock exam engine, batch scheduling, installment tracker, digital study material distribution, and performance analytics.
+- **Healthcare & Hospital ERP**: NABH-compliant hospital software for OPD/IPD queues, Electronic Health Records (EHR), pharmacy batch inventory, and diagnostic lab LIMS.
+- **Polyclinic & Pharmacy Chain ERP**: Multi-doctor queue management, e-prescriptions, expiry alerts, and GST billing.
+- **Specialized Business ERP Modules**: HR & Payroll Management, Gym Management, Cab Booking Dispatch, E-Commerce Portals, and AI Chatbot integrations.
+
+### 3. Digital Growth & SEO Services
+- **AI-Powered SEO Packages**: Structured data, LLM crawler optimization (GPTBot, ClaudeBot, PerplexityBot), technical audit remediation, and localized search visibility.
+- **Social Media Management**: Strategic multi-channel presence on LinkedIn, Instagram, Facebook, and YouTube.
+
+---
+
+## Key Page Links
+- **Official Website**: https://www.jcrm.in/
+- **Course Catalog**: https://www.jcrm.in/courses
+- **Enterprise ERP Solutions**: https://www.jcrm.in/erp-solutions
+- **AI SEO Packages**: https://www.jcrm.in/services/seo
+- **Social Media Management**: https://www.jcrm.in/services/social-media
+- **Key Clients & Academic Tie-ups**: https://www.jcrm.in/key-clients
+- **Placed Candidates & Reviews**: https://www.jcrm.in/testimonials
+- **Company Leadership & Team**: https://www.jcrm.in/ourteam
+- **About JCRM Technologies**: https://www.jcrm.in/about
+- **Join Us (Student & Instructor Registration)**: https://www.jcrm.in/joinus
+- **Contact & Demo Booking**: https://www.jcrm.in/contact
+- **Privacy Policy**: https://www.jcrm.in/legal/privacy
+- **Terms & Conditions**: https://www.jcrm.in/legal/terms
+- **Refund & Disclaimer**: https://www.jcrm.in/legal/refund
+
+---
+
+## Contact Information
+- **Company**: JCRM Technologies (Jain CRM)
+- **Email**: hr@jcrm.in
+- **Phone**: +91 8310531309
+- **Address**: Chak Goraiya, Sikhar, Uttar Pradesh 231306, India
+- **Social Profiles**:
+  - LinkedIn: https://www.linkedin.com/company/jcrm-technologies
+  - X / Twitter: https://x.com/jcrm_tech
+  - Instagram: https://www.instagram.com/jcrm_tech
+  - Facebook: https://www.facebook.com/jcrmtech
+  - YouTube: https://www.youtube.com/@jcrmtechnologies

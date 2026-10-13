@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useRef } from "react";
 import { useSession, signOut } from "next-auth/react";
@@ -107,7 +108,7 @@ export default function Navbar({
   }
   const activeLinks = rawLinks.filter((link: any) => link.isActive !== false);
 
-  const displayLogoUrl = "/logo - JCRM.jpeg";
+  const displayLogoUrl = "/logo-jcrm.webp";
 
   const user = session?.user;
   const userFullName = user?.name || (user as any)?.fullName || "User";
@@ -146,10 +147,13 @@ export default function Navbar({
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2 sm:gap-3 group shrink-0 cursor-pointer">
             <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-full overflow-hidden border-2 border-white/90 shadow-sm bg-white p-0.5 group-hover:scale-105 transition-transform shrink-0">
-              <img
+              <Image
                 src={displayLogoUrl}
-                alt={siteName || "JCRM Logo"}
-                className="w-full h-full object-contain"
+                alt={siteName || "JCRM Technologies Logo"}
+                width={40}
+                height={40}
+                priority
+                className="w-full h-full object-contain rounded-full"
               />
             </div>
             <div className="flex flex-col min-w-0">

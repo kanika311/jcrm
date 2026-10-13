@@ -251,7 +251,7 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
         {/* Top Logo */}
         <Link href="/" className="relative z-10 flex items-center gap-3 group w-max">
           <img
-            src="/logo - JCRM.jpeg"
+            src="/logo-jcrm.webp"
             alt="JCRM Technologies"
             className="w-11 h-11 rounded-full object-contain bg-white shrink-0 shadow-lg shadow-blue-500/25"
           />
@@ -321,7 +321,7 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
         {/* Mobile Header Logo */}
         <Link href="/" className="lg:hidden absolute top-6 left-6 flex items-center gap-2">
           <img
-            src="/logo - JCRM.jpeg"
+            src="/logo-jcrm.webp"
             alt="JCRM Technologies"
             className="w-9 h-9 rounded-full object-contain bg-white shrink-0"
           />

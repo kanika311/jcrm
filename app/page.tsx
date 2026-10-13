@@ -1,11 +1,23 @@
-import LandingPageClient from "@/components/LandingPageClient";
 import { getSiteContent } from "@/lib/cms";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_PLACED_CANDIDATES } from "@/app/api/admin/team/placement/route";
 import { DEFAULT_CLIENTS_PROJECTS } from "@/lib/clientsProjectsData";
 import { sanitizeCandidateImage } from "@/lib/imageCleanServer";
+import HeroSection from "@/components/home/HeroSection";
+import StatsStrip from "@/components/home/StatsStrip";
+import MarqueeSection from "@/components/home/MarqueeSection";
+import ErpProductsSection from "@/components/home/ErpProductsSection";
+import CtaBanner from "@/components/home/CtaBanner";
+import WhyChooseSection from "@/components/home/WhyChooseSection";
+import TrainingPlacementSection from "@/components/home/TrainingPlacementSection";
+import PlacedCandidatesSection from "@/components/home/PlacedCandidatesSection";
+import ClientsProjectsSection from "@/components/ClientsProjectsSection";
+import TalentNetworkSection from "@/components/home/TalentNetworkSection";
+import TestimonialsSection from "@/components/home/TestimonialsSection";
+import TrustAuthoritySection from "@/components/home/TrustAuthoritySection";
+import FaqSection, { FAQS } from "@/components/home/FaqSection";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function Home() {
   const [cmsData, placedData, homepageMembers, clientsProjectsData] = await Promise.all([
@@ -52,11 +64,154 @@ export default async function Home() {
     : DEFAULT_CLIENTS_PROJECTS;
   const clientsProjects = rawProjects.length > 0 ? rawProjects : DEFAULT_CLIENTS_PROJECTS;
 
+  // 1. FAQPage JSON-LD Schema
+  const faqSchema = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.question,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: f.answer,
+      },
+    })),
+  };
+
+  // 2. Course ItemList JSON-LD Schema
+  const courseSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: "Engineering Courses & Training at JCRM Technologies",
+    description: "Industry-aligned engineering training programs with 100% placement assistance by JCRM Technologies (Jain CRM).",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        item: {
+          "@type": "Course",
+          name: "Frontend Development",
+          description: "Master modern responsive web apps, state management, and Next.js frontend architecture.",
+          provider: {
+            "@type": "Organization",
+            name: "JCRM Technologies",
+            sameAs: "https://www.jcrm.in",
+          },
+          url: "https://www.jcrm.in/courses/frontend-development",
+        },
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        item: {
+          "@type": "Course",
+          name: "Backend Development",
+          description: "Build high-scale microservices, REST APIs, Kafka streaming, and robust backend architectures with Java Spring Boot and PostgreSQL.",
+          provider: {
+            "@type": "Organization",
+            name: "JCRM Technologies",
+            sameAs: "https://www.jcrm.in",
+          },
+          url: "https://www.jcrm.in/courses/backend-development",
+        },
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        item: {
+          "@type": "Course",
+          name: "AI & Machine Learning",
+          description: "Build Neural Networks, Generative AI models, Retrieval-Augmented Generation (RAG), and autonomous AI agents.",
+          provider: {
+            "@type": "Organization",
+            name: "JCRM Technologies",
+            sameAs: "https://www.jcrm.in",
+          },
+          url: "https://www.jcrm.in/courses/ai-machine-learning",
+        },
+      },
+      {
+        "@type": "ListItem",
+        position: 4,
+        item: {
+          "@type": "Course",
+          name: "Data Science",
+          description: "Master statistical modeling, data visualization, predictive analytics, and enterprise data warehousing with Python and SQL.",
+          provider: {
+            "@type": "Organization",
+            name: "JCRM Technologies",
+            sameAs: "https://www.jcrm.in",
+          },
+          url: "https://www.jcrm.in/courses/data-science",
+        },
+      },
+      {
+        "@type": "ListItem",
+        position: 5,
+        item: {
+          "@type": "Course",
+          name: "Cloud & DevOps",
+          description: "Automate cloud deployment pipelines, container orchestration with Kubernetes, and IaC with Terraform on AWS.",
+          provider: {
+            "@type": "Organization",
+            name: "JCRM Technologies",
+            sameAs: "https://www.jcrm.in",
+          },
+          url: "https://www.jcrm.in/courses/cloud-devops",
+        },
+      },
+      {
+        "@type": "ListItem",
+        position: 6,
+        item: {
+          "@type": "Course",
+          name: "Cyber Security",
+          description: "Master network penetration testing, SOC monitoring, incident response, and ethical hacking protocols.",
+          provider: {
+            "@type": "Organization",
+            name: "JCRM Technologies",
+            sameAs: "https://www.jcrm.in",
+          },
+          url: "https://www.jcrm.in/courses/cyber-security",
+        },
+      },
+    ],
+  };
+
   return (
-    <LandingPageClient
-      initialData={cmsData}
-      initialPlacedCandidates={placedCandidates}
-      initialClientsProjects={clientsProjects}
-    />
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(courseSchema) }}
+      />
+
+      <div className="min-h-screen pt-16 sm:pt-20">
+        <HeroSection
+          title={cmsData?.heroTitle}
+          highlight={cmsData?.heroHighlight}
+          subtitle={cmsData?.heroSubtitle}
+        />
+        <StatsStrip stats={cmsData?.stats} />
+        <MarqueeSection
+          companies={cmsData?.marquee}
+          techStackHeading={cmsData?.techStackHeading}
+          techStack={cmsData?.techStackMarquee}
+        />
+        <ErpProductsSection />
+        <CtaBanner />
+        <WhyChooseSection />
+        <TrainingPlacementSection />
+        <PlacedCandidatesSection candidates={placedCandidates} />
+        <ClientsProjectsSection initialProjects={clientsProjects} />
+        <TalentNetworkSection />
+        <TestimonialsSection />
+        <TrustAuthoritySection />
+        <FaqSection />
+      </div>
+    </>
   );
 }

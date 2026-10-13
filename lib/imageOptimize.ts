@@ -55,6 +55,11 @@ export function getOptimizedImageUrl(
     return trimmed;
   }
 
+  // 3.5 If already a WebP in /uploads/, return as direct static file
+  if (trimmed.startsWith("/uploads/") && trimmed.endsWith(".webp")) {
+    return trimmed;
+  }
+
   // 4. For local uploads (/uploads/...) or any external photo or base64 image:
   // Route through /api/image-optimize for sharp-powered WebP conversion and compression
   const params = new URLSearchParams();

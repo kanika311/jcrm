@@ -42,7 +42,7 @@ export default function DashboardShell({
         <div className="pt-8 pb-6 px-6 border-b border-bdr-soft">
           <Link href="/" className="flex items-center gap-3 mb-6 group">
             <img
-              src="/logo - JCRM.jpeg"
+              src="/logo-jcrm.webp"
               alt="JCRM Technologies"
               className="w-9 h-9 rounded-full object-contain bg-white shrink-0 group-hover:scale-105 transition-transform"
             />
