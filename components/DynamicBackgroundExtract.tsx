@@ -229,31 +229,11 @@ export default function DynamicBackgroundExtract({
       {/* Dynamic Floating Canvas Layer */}
       <canvas
         ref={canvasRef}
-        style={{
-          position: 'fixed',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: -2,
-          transition: 'all 0.5s ease',
-          backgroundColor: 'var(--bg-base, ' + baseBg + ')',
-        }}
+        className="dyn-bg-canvas"
       />
       {/* Color Gradient Radial Filter Overlay Layer */}
       <div
-        style={{
-          position: 'fixed',
-          inset: 0,
-          width: '100%',
-          height: '100%',
-          pointerEvents: 'none',
-          zIndex: -1,
-          transition: 'all 0.5s ease',
-          background: isDark
-            ? 'radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.2) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(88, 230, 217, 0.12) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%)'
-            : 'radial-gradient(circle at 80% 20%, rgba(217, 119, 6, 0.08) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 60%)',
-        }}
+        className={`dyn-bg-overlay ${isDark ? 'dyn-bg-overlay-dark' : 'dyn-bg-overlay-light'}`}
       />
     </>
   );

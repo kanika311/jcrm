@@ -40,14 +40,17 @@ export default function MarqueeSection({
         <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-32 z-10 pointer-events-none bg-gradient-to-l from-white/90 to-transparent" />
 
         {/* Company Marquee */}
-        <div className="flex animate-marquee whitespace-nowrap opacity-80 transition-all duration-500 hover:opacity-100">
-          {Array.from({ length: 12 }).map((_, group) => (
-            <div key={group} className="flex items-center gap-8 sm:gap-16 px-4 sm:px-8 text-base sm:text-2xl font-bold font-mono shrink-0 text-slate-700">
-              {activeCompanies.map((name: string, idx: number) => (
-                <span key={`${group}-${idx}`}>{name}</span>
-              ))}
-            </div>
-          ))}
+        <div className="flex animate-marquee whitespace-nowrap opacity-80 transition-all duration-500 hover:opacity-100" aria-label="Companies hiring JCRM graduates">
+          <div className="flex items-center gap-8 sm:gap-16 px-4 sm:px-8 text-base sm:text-2xl font-bold font-mono shrink-0 text-slate-700">
+            {activeCompanies.map((name: string, idx: number) => (
+              <span key={`comp-1-${idx}`}>{name}</span>
+            ))}
+          </div>
+          <div className="flex items-center gap-8 sm:gap-16 px-4 sm:px-8 text-base sm:text-2xl font-bold font-mono shrink-0 text-slate-700" aria-hidden="true">
+            {activeCompanies.map((name: string, idx: number) => (
+              <span key={`comp-2-${idx}`}>{name}</span>
+            ))}
+          </div>
         </div>
 
         <div className="text-center mt-8 sm:mt-16 mb-4 sm:mb-10 relative z-20">
@@ -57,14 +60,17 @@ export default function MarqueeSection({
         </div>
 
         {/* Tech Stack Marquee */}
-        <div className="flex animate-marquee whitespace-nowrap opacity-70" style={{ animationDirection: "reverse", animationDuration: "40s" }}>
-          {Array.from({ length: 12 }).map((_, group) => (
-            <div key={group} className="flex items-center gap-8 sm:gap-16 px-4 sm:px-8 text-sm sm:text-xl font-bold font-mono text-transparent bg-clip-text shrink-0 bg-gradient-to-r from-[#0055FF] to-sky-500">
-              {activeTech.map((tech: string, idx: number) => (
-                <span key={`${group}-${idx}`}>{tech}</span>
-              ))}
-            </div>
-          ))}
+        <div className="flex animate-marquee whitespace-nowrap opacity-70" style={{ animationDirection: "reverse", animationDuration: "40s" }} aria-label="Technologies taught at JCRM">
+          <div className="flex items-center gap-8 sm:gap-16 px-4 sm:px-8 text-sm sm:text-xl font-bold font-mono text-transparent bg-clip-text shrink-0 bg-gradient-to-r from-[#0055FF] to-sky-500">
+            {activeTech.map((tech: string, idx: number) => (
+              <span key={`tech-1-${idx}`}>{tech}</span>
+            ))}
+          </div>
+          <div className="flex items-center gap-8 sm:gap-16 px-4 sm:px-8 text-sm sm:text-xl font-bold font-mono text-transparent bg-clip-text shrink-0 bg-gradient-to-r from-[#0055FF] to-sky-500" aria-hidden="true">
+            {activeTech.map((tech: string, idx: number) => (
+              <span key={`tech-2-${idx}`}>{tech}</span>
+            ))}
+          </div>
         </div>
       </div>
     </section>

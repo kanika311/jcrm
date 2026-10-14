@@ -2,7 +2,6 @@
 
 import { useRef, useState, useEffect } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { FiExternalLink, FiChevronLeft, FiChevronRight, FiLayers } from "react-icons/fi";
 import { ClientProjectItem, DEFAULT_CLIENTS_PROJECTS } from "@/lib/clientsProjectsData";
 
@@ -76,13 +75,7 @@ export default function ClientsProjectsSection({
     <section className="py-12 sm:py-20 md:py-24 relative z-10 overflow-hidden bg-gradient-to-b from-transparent via-blue-50/30 to-transparent">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ duration: 0.5 }}
-          className="space-y-4 mb-6 sm:mb-8"
-        >
+        <div className="space-y-4 mb-6 sm:mb-8 reveal">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-50/90 border border-blue-200/80 text-[#0055FF] text-xs font-black uppercase tracking-wider mb-2 sm:mb-3 shadow-xs">
@@ -155,7 +148,7 @@ export default function ClientsProjectsSection({
               })}
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Scrollable Container with Custom Modern Scrollbar */}
         <div
@@ -171,13 +164,9 @@ export default function ClientsProjectsSection({
           {filteredProjects.map((project, idx) => {
             const clientInitial = project.clientName?.charAt(0) || "C";
             return (
-              <motion.div
+              <div
                 key={project.id || idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: idx * 0.05 }}
-                className="w-[280px] sm:w-[360px] md:w-[390px] shrink-0 rounded-2xl sm:rounded-[32px] bg-white/90 backdrop-blur-xl border border-white/95 shadow-[0_4px_24px_rgba(0,85,255,0.08)] hover:shadow-2xl hover:shadow-blue-500/15 hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden group pointer-events-auto"
+                className="w-[280px] sm:w-[360px] md:w-[390px] shrink-0 rounded-2xl sm:rounded-[32px] bg-white/90 backdrop-blur-xl border border-white/95 shadow-[0_4px_24px_rgba(0,85,255,0.08)] hover:shadow-2xl hover:shadow-blue-500/15 hover:-translate-y-2 transition-all duration-300 flex flex-col overflow-hidden group pointer-events-auto reveal"
               >
                 {/* Project Cover & Category Badges */}
                 <div className="relative h-44 sm:h-52 w-full bg-slate-100 overflow-hidden">
@@ -266,7 +255,7 @@ export default function ClientsProjectsSection({
                     </div>
                   )}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

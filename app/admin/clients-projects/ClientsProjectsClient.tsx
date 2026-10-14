@@ -87,6 +87,9 @@ export default function ClientsProjectsClient({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
+  const [isFetchingMeta, setIsFetchingMeta] = useState(false);
+  const [metaFetchMessage, setMetaFetchMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const lastFetchedUrlRef = useRef<string>("");
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -115,8 +118,101 @@ export default function ClientsProjectsClient({
     }, 4000);
   };
 
+  // Auto-fetch Cover Pic and Logo from Website Link
+  const handleFetchSiteMetadata = async (targetUrl?: string) => {
+    const raw = (targetUrl !== undefined ? targetUrl : formData.projectUrl).trim();
+    if (!raw) {
+      setMetaFetchMessage({ type: "error", text: "Please enter a valid website link first." });
+      return;
+    }
+
+    // Ignore pure relative paths like /erp-solutions or anchors unless explicit
+    if (raw.startsWith("/") || raw.startsWith("#")) {
+      return;
+    }
+
+    if (!raw.includes(".")) {
+      return;
+    }
+
+    if (lastFetchedUrlRef.current === raw) {
+      return;
+    }
+
+    setIsFetchingMeta(true);
+    setMetaFetchMessage(null);
+
+    try {
+      const res = await fetch("/api/admin/fetch-link-meta", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: raw }),
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || "Failed to fetch metadata from link");
+      }
+
+      const data = await res.json();
+      lastFetchedUrlRef.current = raw;
+
+      let fetchedCover = false;
+      let fetchedLogo = false;
+
+      setFormData((prev) => {
+        const updated = { ...prev };
+        if (data.image) {
+          updated.image = data.image;
+          fetchedCover = true;
+        }
+        if (data.logo) {
+          updated.logo = data.logo;
+          fetchedLogo = true;
+        }
+        if (!updated.projectName && data.title) {
+          updated.projectName = data.title;
+        }
+        if (!updated.clientName && data.domain) {
+          const namePart = data.domain.split(".")[0];
+          updated.clientName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
+        }
+        if (!updated.description && data.description) {
+          updated.description = data.description;
+        }
+        return updated;
+      });
+
+      const details = [];
+      if (fetchedCover) details.push("cover image");
+      if (fetchedLogo) details.push("logo");
+
+      if (details.length > 0) {
+        setMetaFetchMessage({
+          type: "success",
+          text: `Auto-fetched ${details.join(" & ")} from ${data.domain}!`,
+        });
+        showNotification("success", `Fetched ${details.join(" & ")} from ${data.domain}`);
+      } else {
+        setMetaFetchMessage({
+          type: "success",
+          text: `Fetched favicon for ${data.domain}`,
+        });
+      }
+    } catch (err: any) {
+      setMetaFetchMessage({
+        type: "error",
+        text: err.message || "Could not fetch metadata from this URL.",
+      });
+    } finally {
+      setIsFetchingMeta(false);
+    }
+  };
+
   // Open Add Modal
   const openAddModal = () => {
+    lastFetchedUrlRef.current = "";
+    setMetaFetchMessage(null);
     setFormData({
       projectName: "",
       clientName: "",
@@ -136,6 +232,8 @@ export default function ClientsProjectsClient({
 
   // Open Edit Modal
   const openEditModal = (project: ClientProjectItem) => {
+    lastFetchedUrlRef.current = project.projectUrl || "";
+    setMetaFetchMessage(null);
     setFormData({
       projectName: project.projectName,
       clientName: project.clientName,
@@ -1065,15 +1163,29 @@ export default function ClientsProjectsClient({
                             Auto WebP
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => fileInputRef.current?.click()}
-                          disabled={isUploadingImage}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0055FF] hover:underline cursor-pointer disabled:opacity-50"
-                        >
-                          <FiUploadCloud className="w-3.5 h-3.5" />
-                          <span>{isUploadingImage ? "Converting to WebP..." : "Upload from Device"}</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {formData.projectUrl && formData.projectUrl.includes(".") && !formData.projectUrl.startsWith("/") && (
+                            <button
+                              type="button"
+                              onClick={() => handleFetchSiteMetadata()}
+                              disabled={isFetchingMeta}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 hover:text-purple-800 hover:underline cursor-pointer disabled:opacity-50"
+                              title="Fetch cover pic from link"
+                            >
+                              <FiRefreshCw className={`w-3 h-3 ${isFetchingMeta ? "animate-spin" : ""}`} />
+                              <span>From Link</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={isUploadingImage}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0055FF] hover:underline cursor-pointer disabled:opacity-50"
+                          >
+                            <FiUploadCloud className="w-3.5 h-3.5" />
+                            <span>{isUploadingImage ? "Converting to WebP..." : "Upload from Device"}</span>
+                          </button>
+                        </div>
                         <input
                           ref={fileInputRef}
                           type="file"
@@ -1134,15 +1246,29 @@ export default function ClientsProjectsClient({
                             Auto WebP
                           </span>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => logoInputRef.current?.click()}
-                          disabled={isUploadingLogo}
-                          className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0055FF] hover:underline cursor-pointer disabled:opacity-50"
-                        >
-                          <FiUploadCloud className="w-3.5 h-3.5" />
-                          <span>{isUploadingLogo ? "Converting to WebP..." : "Upload Logo"}</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                          {formData.projectUrl && formData.projectUrl.includes(".") && !formData.projectUrl.startsWith("/") && (
+                            <button
+                              type="button"
+                              onClick={() => handleFetchSiteMetadata()}
+                              disabled={isFetchingMeta}
+                              className="inline-flex items-center gap-1 text-[11px] font-bold text-purple-600 hover:text-purple-800 hover:underline cursor-pointer disabled:opacity-50"
+                              title="Fetch logo from link"
+                            >
+                              <FiRefreshCw className={`w-3 h-3 ${isFetchingMeta ? "animate-spin" : ""}`} />
+                              <span>From Link</span>
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => logoInputRef.current?.click()}
+                            disabled={isUploadingLogo}
+                            className="inline-flex items-center gap-1 text-[11px] font-bold text-[#0055FF] hover:underline cursor-pointer disabled:opacity-50"
+                          >
+                            <FiUploadCloud className="w-3.5 h-3.5" />
+                            <span>{isUploadingLogo ? "Converting to WebP..." : "Upload Logo"}</span>
+                          </button>
+                        </div>
                         <input
                           ref={logoInputRef}
                           type="file"
@@ -1230,20 +1356,80 @@ export default function ClientsProjectsClient({
                   </div>
 
                   {/* Live URL, Featured, Status */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-center p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-start p-4 rounded-2xl bg-slate-50 border border-slate-200/80">
                     <div>
-                      <label className="block text-xs font-bold text-slate-700 mb-1">
-                        Demo / Project URL
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="e.g. /erp-solutions or https://..."
-                        value={formData.projectUrl}
-                        onChange={(e) =>
-                          setFormData({ ...formData, projectUrl: e.target.value })
-                        }
-                        className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 bg-white"
-                      />
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-bold text-slate-700">
+                          Demo / Project URL
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => handleFetchSiteMetadata()}
+                          disabled={isFetchingMeta || !formData.projectUrl || formData.projectUrl.startsWith("/")}
+                          className="inline-flex items-center gap-1 text-[11px] font-extrabold text-[#0055FF] hover:underline cursor-pointer disabled:opacity-40"
+                          title="Auto-fetch cover picture & logo from this URL"
+                        >
+                          <FiRefreshCw className={`w-3 h-3 ${isFetchingMeta ? "animate-spin text-[#0055FF]" : ""}`} />
+                          <span>{isFetchingMeta ? "Fetching..." : "Auto-Fetch Meta"}</span>
+                        </button>
+                      </div>
+                      <div className="relative">
+                        <input
+                          type="text"
+                          placeholder="e.g. https://company.com or /erp-solutions"
+                          value={formData.projectUrl}
+                          onChange={(e) => {
+                            const val = e.target.value;
+                            setFormData({ ...formData, projectUrl: val });
+                          }}
+                          onBlur={() => {
+                            if (
+                              formData.projectUrl &&
+                              (formData.projectUrl.startsWith("http://") ||
+                                formData.projectUrl.startsWith("https://") ||
+                                (formData.projectUrl.includes(".") && !formData.projectUrl.startsWith("/")))
+                            ) {
+                              handleFetchSiteMetadata(formData.projectUrl);
+                            }
+                          }}
+                          onPaste={(e) => {
+                            const pasted = e.clipboardData.getData("text");
+                            if (
+                              pasted &&
+                              (pasted.startsWith("http://") ||
+                                pasted.startsWith("https://") ||
+                                (pasted.includes(".") && !pasted.startsWith("/")))
+                            ) {
+                              setTimeout(() => handleFetchSiteMetadata(pasted), 60);
+                            }
+                          }}
+                          className="w-full px-3 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 bg-white focus:outline-none focus:ring-2 focus:ring-[#0055FF]/20 focus:border-[#0055FF]"
+                        />
+                        {isFetchingMeta && (
+                          <div className="absolute right-2.5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 text-[10px] font-bold text-[#0055FF] bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200 shadow-2xs pointer-events-none">
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#0055FF] animate-ping" />
+                            <span>Fetching...</span>
+                          </div>
+                        )}
+                      </div>
+                      {metaFetchMessage ? (
+                        <p
+                          className={`text-[10px] mt-1 font-semibold flex items-center gap-1 ${
+                            metaFetchMessage.type === "success" ? "text-emerald-600" : "text-rose-600"
+                          }`}
+                        >
+                          {metaFetchMessage.type === "success" ? (
+                            <FiCheck className="w-3 h-3 shrink-0" />
+                          ) : (
+                            <FiX className="w-3 h-3 shrink-0" />
+                          )}
+                          <span>{metaFetchMessage.text}</span>
+                        </p>
+                      ) : (
+                        <p className="text-[10px] text-slate-400 mt-1">
+                          Add or paste website link to automatically fetch its cover pic &amp; logo.
+                        </p>
+                      )}
                     </div>
 
                     <div>

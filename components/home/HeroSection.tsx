@@ -11,11 +11,11 @@ export default function HeroSection({
   highlight?: string;
   subtitle?: string;
 }) {
-  const displayTitle = title || "JCRM Technologies:";
-  const displayHighlight = highlight || "Engineering Courses & ERP Software";
+  const displayTitle = title || "JCRM Technologies :";
+  const displayHighlight = highlight || "Enterprise ERP & Engineering Education";
   const displaySubtitle =
     subtitle ||
-    "Project-based engineering courses, enterprise ERP software solutions, and internship programs with 100% placement assistance. Also known as Jain CRM, empowering 10,000+ developers and scaling modern businesses across India.";
+"";
 
   return (
     <section className="relative min-h-0 sm:min-h-[calc(100vh-80px)] flex items-center justify-center py-8 sm:py-16 md:py-24 overflow-hidden">

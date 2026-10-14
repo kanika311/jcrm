@@ -48,9 +48,7 @@ export default function TrustAuthoritySection() {
           <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-2">
             Trust &amp; Authority <span className="text-[#0055FF]">Signals</span>
           </h2>
-          <p className="text-xs sm:text-base text-slate-600 font-medium">
-            Recognized by government bodies, audited for corporate placements, and trusted by leading enterprises.
-          </p>
+        
           <div className="mt-3 text-[11px] sm:text-xs font-bold text-slate-500">
             <span>Last updated: October 2026</span>
             <span className="mx-2">•</span>

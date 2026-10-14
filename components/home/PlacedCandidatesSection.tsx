@@ -70,9 +70,7 @@ export default function PlacedCandidatesSection({
             <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
               Successfully Placed <span className="text-[#0055FF]">Candidates</span>
             </h2>
-            <p className="text-xs sm:text-base text-slate-600 font-medium mt-1.5 max-w-2xl">
-              Real success stories from JCRM Technologies (Jain CRM) engineering graduates thriving at global MNCs.
-            </p>
+          
           </div>
         </div>
 

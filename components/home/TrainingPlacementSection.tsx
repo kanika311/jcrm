@@ -27,9 +27,7 @@ export default function TrainingPlacementSection() {
           <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold mb-2 sm:mb-4 text-slate-900">
             Training & <span className="text-[#0055FF]">100% Placement Assistance</span>
           </h2>
-          <p className="text-xs sm:text-base md:text-lg text-slate-600 font-medium max-w-2xl mx-auto">
-            Rigorous, project-based engineering courses designed to transition students and professionals into high-paying engineering roles.
-          </p>
+
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-stretch">

@@ -25,6 +25,7 @@ import {
   FiGlobe,
   FiAward,
   FiBriefcase,
+  FiStar,
 } from "react-icons/fi";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -78,6 +79,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { name: "Clients & Projects", href: "/admin/clients-projects", icon: FiGlobe },
     { name: "Services", href: "/admin/services", icon: FiBriefcase },
     { name: "Sponsored", href: "/admin/sponsored", icon: FiAward },
+    { name: "Reviews", href: "/admin/reviews", icon: FiStar },
     { name: "CMS", href: "/admin/cms", icon: FiEdit3 },
     { name: "Messages", href: "/admin/messages", icon: FiMail },
     { name: "Leads", href: "/admin/leads", icon: FiTarget },

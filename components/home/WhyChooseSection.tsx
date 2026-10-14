@@ -57,9 +57,7 @@ export default function WhyChooseSection() {
           <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold mb-2 sm:mb-4 text-slate-900">
             Why Choose <span className="text-[#0055FF]">JCRM Technologies</span>
           </h2>
-          <p className="text-xs sm:text-base md:text-lg text-slate-600 font-medium max-w-2xl mx-auto">
-            Practical engineering courses, scalable enterprise ERP systems, and committed 100% placement support.
-          </p>
+       
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-12 items-center">

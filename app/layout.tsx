@@ -1,27 +1,22 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans, Inter, Space_Grotesk } from "next/font/google";
+import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
-import DynamicBackgroundExtract from "@/components/DynamicBackgroundExtract";
+import AuthProvider from "@/components/AuthProvider";
+import { getSiteContent } from "@/lib/cms";
+import Footer from "@/components/Footer";
+import ClientOverlays from "@/components/ClientOverlays";
+import { GoogleAnalytics } from "@next/third-parties/google";
 
 const fontHeading = Plus_Jakarta_Sans({
   subsets: ["latin"],
   variable: "--font-heading",
-  weight: ["600", "700", "800"],
   display: "swap",
 });
 
 const fontBody = Inter({
   subsets: ["latin"],
   variable: "--font-body",
-  weight: ["400", "500", "600"],
-  display: "swap",
-});
-
-const fontButton = Space_Grotesk({
-  subsets: ["latin"],
-  variable: "--font-button",
-  weight: ["600", "700"],
   display: "swap",
 });
 
@@ -38,10 +33,9 @@ export const metadata: Metadata = {
     template: "%s | JCRM Technologies",
   },
   description:
-    "JCRM Technologies (Jain CRM) offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
+    "JCRM Technologies  offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
   keywords: [
     "JCRM Technologies",
-    "Jain CRM",
     "engineering courses",
     "ERP software",
     "internship and training",
@@ -51,18 +45,19 @@ export const metadata: Metadata = {
     "hospital ERP software",
     "LMS software",
   ],
+  
   openGraph: {
     title: "JCRM Technologies | Engineering Courses & ERP Software",
     description:
-      "JCRM Technologies (Jain CRM) offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
+      "JCRM Technologies  offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
     url: "https://www.jcrm.in",
     siteName: "JCRM Technologies",
     images: [
       {
-        url: "https://www.jcrm.in/logo-jcrm.webp",
-        width: 640,
-        height: 640,
-        alt: "JCRM Technologies Logo",
+        url: "https://www.jcrm.in/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "JCRM Technologies - Engineering Courses & Enterprise ERP Solutions",
       },
     ],
     locale: "en_IN",
@@ -72,53 +67,19 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "JCRM Technologies | Engineering Courses & ERP Software",
     description:
-      "JCRM Technologies (Jain CRM) offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
-    images: ["https://www.jcrm.in/logo-jcrm.webp"],
+      "JCRM Technologies  offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
+    images: [
+      {
+        url: "https://www.jcrm.in/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "JCRM Technologies - Engineering Courses & Enterprise ERP Solutions",
+      },
+    ],
   },
 };
 
-import AuthProvider from "@/components/AuthProvider";
-import { getSiteContent } from "@/lib/cms";
-import Footer from "@/components/Footer";
-import GlobalWhatsAppWidget from "@/components/GlobalWhatsAppWidget";
-import { GoogleAnalytics } from "@next/third-parties/google";
-
 export const revalidate = 3600;
-
-const organizationJsonLd = {
-  "@context": "https://schema.org",
-  "@graph": [
-    {
-      "@type": ["Organization", "EducationalOrganization", "LocalBusiness"],
-      "@id": "https://www.jcrm.in/#organization",
-      name: "JCRM Technologies",
-      alternateName: ["Jain CRM", "JCRM"],
-      url: "https://www.jcrm.in",
-      logo: "https://www.jcrm.in/logo-jcrm.webp",
-      image: "https://www.jcrm.in/logo-jcrm.webp",
-      description:
-        "JCRM Technologies (Jain CRM) provides enterprise ERP software, industry-grade engineering education, internship programs, and placement assistance.",
-      telephone: "+91-8310531309",
-      email: "hr@jcrm.in",
-      address: {
-        "@type": "PostalAddress",
-        streetAddress: "Chak Goraiya, Sikhar",
-        addressLocality: "Mirzapur",
-        addressRegion: "Uttar Pradesh",
-        postalCode: "231306",
-        addressCountry: "IN",
-      },
-      sameAs: [
-        "https://www.linkedin.com/company/jcrm-technologies",
-        "https://x.com/jcrm_tech",
-        "https://www.instagram.com/jcrm_tech",
-        "https://www.facebook.com/jcrmtech",
-        "https://www.youtube.com/@jcrmtechnologies",
-      ],
-      priceRange: "₹₹",
-    },
-  ],
-};
 
 export default async function RootLayout({
   children,
@@ -131,21 +92,57 @@ export default async function RootLayout({
 
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": ["Organization", "EducationalOrganization", "LocalBusiness"],
+        "@id": "https://www.jcrm.in/#organization",
+        name: globalSettings?.siteName || "JCRM Technologies",
+        alternateName: [ "JCRM"],
+        url: "https://www.jcrm.in",
+        logo: "https://www.jcrm.in/logo-jcrm.webp",
+        image: "https://www.jcrm.in/og-image.png",
+        description:
+          globalSettings?.tagline ||
+          footerConfig?.brandDescription ||
+          "JCRM Technologies  provides enterprise ERP software, industry-grade engineering education, internship programs, and placement assistance.",
+        telephone: footerConfig?.contactPhone || "+91-8310531309",
+        email: footerConfig?.contactEmail || "hr@jcrm.in",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "Chak Goraiya, Sikhar",
+          addressLocality: "Mirzapur",
+          addressRegion: "Uttar Pradesh",
+          postalCode: "231306",
+          addressCountry: "IN",
+        },
+        sameAs: [
+          footerConfig?.linkedinUrl || "https://www.linkedin.com/company/jcrm-technologies",
+          footerConfig?.twitterUrl || "https://x.com/jcrm_tech",
+          footerConfig?.instagramUrl || "https://instagram.com/jcrm_technologies?rpxt=N2YydHQwdmNxN2Rx",
+          footerConfig?.facebookUrl || "https://www.facebook.com/jcrmtech",
+          footerConfig?.youtubeUrl || "https://www.youtube.com/@jcrmtechnologies",
+        ],
+        priceRange: "₹₹",
+      },
+    ],
+  };
+
   return (
-    <html lang="en-IN" data-theme="dark" className={`${fontHeading.variable} ${fontBody.variable} ${fontButton.variable}`}>
+    <html lang="en-IN" data-theme="dark" className={`${fontHeading.variable} ${fontBody.variable}`}>
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
-      <body className="min-h-screen flex flex-col antialiased bg-transparent" style={{ color: "var(--text-primary)" }}>
+      <body className="min-h-screen flex flex-col antialiased bg-transparent">
         <AuthProvider>
-          <DynamicBackgroundExtract />
+          <ClientOverlays />
           <Navbar siteName={globalSettings.siteName} links={navbarConfig.links} logoUrl={globalSettings.logoUrl} />
           <main className="flex-1 flex flex-col relative z-10 min-h-0">{children}</main>
           <Footer cmsData={footerConfig} siteName={globalSettings.siteName} />
-          <GlobalWhatsAppWidget />
         </AuthProvider>
         {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
       </body>

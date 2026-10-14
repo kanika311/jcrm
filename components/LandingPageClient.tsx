@@ -222,9 +222,7 @@ export default function LandingPageClient({
             <span className="inline-block">{initialData.heroTitle || "Build skills that"}</span>{" "}
             <span className="shimmer-text inline-block">{initialData.heroHighlight || "ship real products."}</span>
           </h1>
-          <p className="text-xs sm:text-base md:text-xl max-w-3xl mb-6 sm:mb-10 font-normal sm:font-medium leading-relaxed text-slate-600">
-            {initialData.heroSubtitle || "Project-based engineering courses taught by the industry's top 1%. Join 10,000+ developers building the future of software."}
-          </p>
+       
 
           <div className="flex flex-row flex-wrap sm:flex-nowrap gap-3 mb-6 sm:mb-10 justify-center items-center w-full">
             <Link href="/contact" className="px-5 py-3 sm:px-8 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-extrabold flex items-center justify-center gap-2 text-white transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-blue-500/30" style={{ background: '#0055FF' }}>

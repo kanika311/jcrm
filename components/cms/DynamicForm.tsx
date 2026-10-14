@@ -73,75 +73,99 @@ export default function DynamicForm({ schema, data, onChange }: DynamicFormProps
 
             {field.type === "array" && field.itemSchema && (
               <div className="space-y-4 mt-4">
-                {Array.isArray(val) && val.map((item: any, index: number) => (
-                  <div key={index} className="p-4 rounded-lg border relative group" style={{ borderColor: 'var(--border-strong)', background: 'var(--bg-base)' }}>
-                     <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
-                       <button 
-                         onClick={() => {
-                           const newArr = [...val];
-                           // Swap up
-                           if (index > 0) {
-                             [newArr[index - 1], newArr[index]] = [newArr[index], newArr[index - 1]];
-                             handleChange(key, newArr);
-                           }
-                         }}
-                         className="p-1 rounded bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20"
-                         title="Move Up"
-                       >
-                         ↑
-                       </button>
-                       <button 
-                         onClick={() => {
-                           const newArr = [...val];
-                           // Swap down
-                           if (index < newArr.length - 1) {
-                             [newArr[index + 1], newArr[index]] = [newArr[index], newArr[index + 1]];
-                             handleChange(key, newArr);
-                           }
-                         }}
-                         className="p-1 rounded bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20"
-                         title="Move Down"
-                       >
-                         ↓
-                       </button>
-                       <button 
-                         onClick={() => {
-                           const newArr = [...val];
-                           newArr.splice(index, 1);
-                           handleChange(key, newArr);
-                         }}
-                         className="p-1 rounded bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                         title="Delete Row"
-                       >
-                         Delete
-                       </button>
-                     </div>
-                     <DynamicForm 
-                       schema={field.itemSchema!} 
-                       data={item} 
-                       onChange={(newItemData) => {
-                         const newArr = [...val];
-                         newArr[index] = newItemData;
-                         handleChange(key, newArr);
-                       }} 
-                     />
-                  </div>
-                ))}
-                
+                {Array.isArray(val) && val.map((item: any, index: number) => {
+                  const itemTitle =
+                    item?.question ||
+                    item?.title ||
+                    item?.name ||
+                    item?.label ||
+                    `Item #${index + 1}`;
+                  return (
+                    <div
+                      key={index}
+                      className="p-4 sm:p-5 rounded-2xl border relative group transition-all duration-200 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-2xs hover:shadow-sm"
+                    >
+                      <div className="flex items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="w-6 h-6 rounded-full bg-blue-50 text-[#0055FF] text-xs font-black flex items-center justify-center shrink-0">
+                            {index + 1}
+                          </span>
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate max-w-[240px] sm:max-w-md">
+                            {itemTitle}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            disabled={index === 0}
+                            onClick={() => {
+                              const newArr = [...val];
+                              if (index > 0) {
+                                [newArr[index - 1], newArr[index]] = [newArr[index], newArr[index - 1]];
+                                handleChange(key, newArr);
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            title="Move Up"
+                          >
+                            ↑ Up
+                          </button>
+                          <button
+                            type="button"
+                            disabled={index === val.length - 1}
+                            onClick={() => {
+                              const newArr = [...val];
+                              if (index < newArr.length - 1) {
+                                [newArr[index + 1], newArr[index]] = [newArr[index], newArr[index + 1]];
+                                handleChange(key, newArr);
+                              }
+                            }}
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                            title="Move Down"
+                          >
+                            ↓ Down
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const newArr = [...val];
+                              newArr.splice(index, 1);
+                              handleChange(key, newArr);
+                            }}
+                            className="px-2.5 py-1 rounded-lg text-xs font-bold bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 transition-colors"
+                            title="Delete Item"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                      <DynamicForm
+                        schema={field.itemSchema!}
+                        data={item}
+                        onChange={(newItemData) => {
+                          const newArr = [...val];
+                          newArr[index] = newItemData;
+                          handleChange(key, newArr);
+                        }}
+                      />
+                    </div>
+                  );
+                })}
+
                 <button
+                  type="button"
                   onClick={() => {
                     const newArr = Array.isArray(val) ? [...val] : [];
-                    // Generate empty default based on itemSchema
                     const emptyItem: any = {};
                     Object.entries(field.itemSchema!).forEach(([k, f]) => {
-                      emptyItem[k] = f.default;
+                      emptyItem[k] = f.default !== undefined ? f.default : "";
                     });
                     newArr.push(emptyItem);
                     handleChange(key, newArr);
                   }}
-                  className="btn-secondary w-full py-3 mt-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2"
+                  className="w-full py-3.5 mt-2 rounded-xl text-sm font-bold flex items-center justify-center gap-2 border-2 border-dashed border-blue-200 hover:border-[#0055FF] bg-blue-50/60 hover:bg-blue-50 text-[#0055FF] transition-all cursor-pointer shadow-2xs"
                 >
-                  <span>+ Add Row ({field.label})</span>
+                  <span>+ Add Item ({field.label})</span>
                 </button>
               </div>
             )}

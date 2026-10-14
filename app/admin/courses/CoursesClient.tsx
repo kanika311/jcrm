@@ -156,10 +156,10 @@ function CurriculumEditor({
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-300">
-            Course Modules & Syllabus ({modules.length} Modules)
+          <label className="block text-xs font-bold uppercase tracking-wider text-slate-800">
+            Course Modules &amp; Syllabus ({modules.length} Modules)
           </label>
-          <p className="text-[11px] text-[var(--text-tertiary)]">
+          <p className="text-[11px] text-slate-500">
             Create structured modules and add lesson topics that appear on the course detail page.
           </p>
         </div>
@@ -168,7 +168,7 @@ function CurriculumEditor({
           <button
             type="button"
             onClick={autoFillTemplate}
-            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-500/20 text-purple-300 hover:bg-purple-500/30 border border-purple-500/30 transition-colors flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
             title="Automatically generate modules based on course title"
           >
             <span>✨ Auto-Fill Template</span>
@@ -185,8 +185,8 @@ function CurriculumEditor({
       </div>
 
       {modules.length === 0 && (
-        <div className="p-6 rounded-2xl border border-dashed border-white/10 text-center space-y-2 bg-black/10">
-          <p className="text-xs text-[var(--text-secondary)]">No modules defined yet for this course.</p>
+        <div className="p-6 rounded-2xl border border-dashed border-slate-300 text-center space-y-2 bg-slate-50">
+          <p className="text-xs text-slate-600">No modules defined yet for this course.</p>
           <button
             type="button"
             onClick={autoFillTemplate}
@@ -201,19 +201,18 @@ function CurriculumEditor({
         {modules.map((mod, modIdx) => (
           <div
             key={modIdx}
-            className="p-4 rounded-2xl border space-y-3 transition-all"
-            style={{ background: "var(--bg-base)", borderColor: "var(--border-soft)" }}
+            className="p-4 rounded-2xl border border-slate-200 bg-slate-50/80 space-y-3 transition-all"
           >
             {/* Module Title Bar */}
             <div className="flex items-center gap-2">
-              <span className="w-7 h-7 rounded-lg bg-[#0055FF]/20 text-[#0055FF] border border-[#0055FF]/30 flex items-center justify-center text-xs font-extrabold shrink-0">
+              <span className="w-7 h-7 rounded-lg bg-blue-100 text-[#0055FF] border border-blue-200 flex items-center justify-center text-xs font-extrabold shrink-0">
                 {modIdx + 1}
               </span>
 
               <input
                 type="text"
                 required
-                className="input-premium flex-1 px-3 py-1.5 rounded-xl text-xs font-bold"
+                className="flex-1 px-3 py-2 rounded-xl text-xs font-bold bg-white border border-slate-200 focus:border-[#0055FF] focus:outline-none text-slate-900 shadow-2xs"
                 placeholder={`e.g. Module ${modIdx + 1}: Core Concepts & Lab`}
                 value={mod.title}
                 onChange={e => updateModuleTitle(modIdx, e.target.value)}
@@ -222,10 +221,10 @@ function CurriculumEditor({
               <button
                 type="button"
                 onClick={() => removeModule(modIdx)}
-                className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-red-400 hover:bg-red-500/15 transition-colors cursor-pointer shrink-0"
+                className="px-2.5 py-1.5 rounded-lg text-xs font-bold text-rose-600 hover:bg-rose-50 border border-transparent hover:border-rose-200 transition-colors cursor-pointer shrink-0"
                 title="Delete this module"
               >
-                🗑
+                Delete
               </button>
             </div>
 
@@ -235,13 +234,13 @@ function CurriculumEditor({
                 {(mod.topics || []).map((topic, topicIdx) => (
                   <span
                     key={topicIdx}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-white/5 border border-white/10 text-slate-200"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-white border border-slate-200 text-slate-800 shadow-2xs"
                   >
                     <span>{topic}</span>
                     <button
                       type="button"
                       onClick={() => removeTopic(modIdx, topicIdx)}
-                      className="text-slate-400 hover:text-red-400 font-bold ml-1 cursor-pointer"
+                      className="text-slate-400 hover:text-rose-600 font-bold ml-1 cursor-pointer"
                       title="Remove topic"
                     >
                       ×
@@ -254,7 +253,7 @@ function CurriculumEditor({
               <div className="flex items-center gap-2 pt-1">
                 <input
                   type="text"
-                  className="input-premium flex-1 px-3 py-1 rounded-lg text-xs"
+                  className="flex-1 px-3 py-1.5 rounded-lg text-xs bg-white border border-slate-200 focus:border-[#0055FF] focus:outline-none text-slate-900 placeholder-slate-400 shadow-2xs"
                   placeholder="+ Add syllabus lesson / topic (press Enter)..."
                   value={topicInputs[modIdx] || ""}
                   onChange={e => setTopicInputs({ ...topicInputs, [modIdx]: e.target.value })}
@@ -268,7 +267,7 @@ function CurriculumEditor({
                 <button
                   type="button"
                   onClick={() => handleAddTopic(modIdx)}
-                  className="px-3 py-1 rounded-lg text-xs font-bold bg-white/10 hover:bg-white/20 text-white transition-colors cursor-pointer shrink-0"
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 text-white hover:bg-slate-700 transition-colors cursor-pointer shrink-0 shadow-2xs"
                 >
                   + Add
                 </button>
@@ -684,25 +683,21 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
             onClick={() => setIsAddModalOpen(false)}
           >
             <div
-              className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden m-auto"
-              style={{ background: "var(--bg-card)", border: "1px solid var(--border-soft)" }}
+              className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden m-auto bg-white border border-slate-200 text-slate-900"
               onClick={e => e.stopPropagation()}
             >
               {/* Header */}
-              <div
-                className="flex justify-between items-center px-6 py-4 border-b shrink-0"
-                style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-              >
+              <div className="flex justify-between items-center px-6 py-4 border-b border-slate-200 shrink-0 bg-slate-50/90">
                 <div>
-                  <h3 className="text-xl font-bold">Add New Course & Curriculum</h3>
-                  <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  <h3 className="text-xl font-bold text-slate-900">Add New Course &amp; Curriculum</h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Build course details, learning outcomes, and module syllabus.
                   </p>
                 </div>
                 <button
                   type="button"
                   onClick={() => setIsAddModalOpen(false)}
-                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 text-gray-400 hover:text-white transition-colors cursor-pointer"
+                  className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-slate-200 text-slate-500 hover:text-slate-900 transition-colors cursor-pointer"
                 >
                   ✕
                 </button>
@@ -719,16 +714,13 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Course Title *
                         </label>
                         <input
                           type="text"
                           required
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                           placeholder="e.g. Next.js & Full-Stack AI Mastery"
                           value={newTitle}
                           onChange={e => setNewTitle(e.target.value)}
@@ -736,15 +728,12 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                       </div>
 
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Instructor Name
                         </label>
                         <input
                           type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                           placeholder="e.g. Aisha Verma"
                           value={newInstructor}
                           onChange={e => setNewInstructor(e.target.value)}
@@ -754,15 +743,12 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Instructor Role / Title
                         </label>
                         <input
                           type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                           placeholder="e.g. Senior Frontend Lead @ JCRM Technologies"
                           value={newInstructorRole}
                           onChange={e => setNewInstructorRole(e.target.value)}
@@ -770,15 +756,12 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                       </div>
 
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
-                          Duration & Hours
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
+                          Duration &amp; Hours
                         </label>
                         <input
                           type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                           placeholder="e.g. 3 Months • 120 Hours"
                           value={newDuration}
                           onChange={e => setNewDuration(e.target.value)}
@@ -787,16 +770,13 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                     </div>
 
                     <div>
-                      <label
-                        className="block text-xs font-bold mb-1 uppercase"
-                        style={{ color: "var(--text-secondary)" }}
-                      >
+                      <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                         Description *
                       </label>
                       <textarea
                         required
                         rows={3}
-                        className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                        className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                         placeholder="Brief overview of curriculum, hands-on projects, and learning outcomes..."
                         value={newDescription}
                         onChange={e => setNewDescription(e.target.value)}
@@ -805,17 +785,14 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
 
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Price (₹) *
                         </label>
                         <input
                           type="number"
                           required
                           min={0}
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                           placeholder="14999"
                           value={newPrice}
                           onChange={e => setNewPrice(e.target.value)}
@@ -823,14 +800,11 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                       </div>
 
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Level
                         </label>
                         <select
-                          className="select-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 border border-slate-200 focus:border-[#0055FF] focus:outline-none shadow-2xs cursor-pointer"
                           value={newLevel}
                           onChange={e => setNewLevel(e.target.value)}
                         >
@@ -843,14 +817,11 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                       </div>
 
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Status
                         </label>
                         <select
-                          className="select-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 border border-slate-200 focus:border-[#0055FF] focus:outline-none shadow-2xs cursor-pointer"
                           value={newStatus}
                           onChange={e => setNewStatus(e.target.value as any)}
                         >
@@ -862,15 +833,12 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Badge (e.g. 100% Placement)
                         </label>
                         <input
                           type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                           placeholder="e.g. 100% Placement Track, Best Seller"
                           value={newBadge}
                           onChange={e => setNewBadge(e.target.value)}
@@ -878,15 +846,12 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                       </div>
 
                       <div>
-                        <label
-                          className="block text-xs font-bold mb-1 uppercase"
-                          style={{ color: "var(--text-secondary)" }}
-                        >
+                        <label className="block text-xs font-bold mb-1 uppercase text-slate-700">
                           Tags (comma-separated)
                         </label>
                         <input
                           type="text"
-                          className="input-premium w-full px-4 py-2.5 rounded-xl text-sm"
+                          className="w-full px-4 py-2.5 rounded-xl text-sm bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none transition shadow-2xs"
                           placeholder="React, Frontend, Next.js"
                           value={newTags}
                           onChange={e => setNewTags(e.target.value)}
@@ -896,24 +861,18 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                   </div>
 
                   {/* Image Section */}
-                  <div className="space-y-2 pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
+                  <div className="space-y-2 pt-2 border-t border-slate-200">
                     <h4 className="text-xs font-bold text-[#0055FF] uppercase tracking-wider">
                       2. Course Thumbnail Image
                     </h4>
 
-                    <div
-                      className="space-y-3 p-4 rounded-2xl border"
-                      style={{ background: "var(--bg-base)", borderColor: "var(--border-soft)" }}
-                    >
+                    <div className="space-y-3 p-4 rounded-2xl border border-slate-200 bg-slate-50/70">
                       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-                        <div
-                          className="relative w-28 h-20 rounded-xl overflow-hidden border shrink-0 bg-black/10 flex items-center justify-center"
-                          style={{ borderColor: "var(--border-soft)" }}
-                        >
+                        <div className="relative w-28 h-20 rounded-xl overflow-hidden border border-slate-200 shrink-0 bg-slate-100 flex items-center justify-center">
                           {newImage ? (
                             <img src={newImage} alt="Course preview" className="w-full h-full object-cover" />
                           ) : (
-                            <span className="text-xs text-gray-400">No Image</span>
+                            <span className="text-xs text-slate-400">No Image</span>
                           )}
                         </div>
 
@@ -942,20 +901,20 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                               <button
                                 type="button"
                                 onClick={() => setNewImage("")}
-                                className="px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors cursor-pointer"
+                                className="px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                               >
                                 Remove
                               </button>
                             )}
                           </div>
-                          <p className="text-[11px] text-[var(--text-tertiary)]">PNG, JPG, WEBP up to 5MB.</p>
+                          <p className="text-[11px] text-slate-500">PNG, JPG, WEBP up to 5MB.</p>
                         </div>
                       </div>
 
-                      <div className="pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
+                      <div className="pt-2 border-t border-slate-200">
                         <input
                           type="url"
-                          className="input-premium w-full px-3 py-2 rounded-xl text-xs"
+                          className="w-full px-3 py-2 rounded-xl text-xs bg-white border border-slate-200 focus:border-[#0055FF] focus:outline-none text-slate-900 placeholder-slate-400 shadow-2xs"
                           placeholder="Or paste image URL: https://images.unsplash.com/..."
                           value={newImage}
                           onChange={e => setNewImage(e.target.value)}
@@ -965,7 +924,7 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                   </div>
 
                   {/* What You'll Learn Section */}
-                  <div className="space-y-2 pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
+                  <div className="space-y-2 pt-2 border-t border-slate-200">
                     <div className="flex items-center justify-between">
                       <h4 className="text-xs font-bold text-[#0055FF] uppercase tracking-wider">
                         3. What You'll Learn (Outcomes)
@@ -973,17 +932,17 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                       <button
                         type="button"
                         onClick={() => setNewWhatYouLearn(DEFAULT_WHAT_YOU_LEARN(newTitle))}
-                        className="text-xs font-bold text-purple-400 hover:underline cursor-pointer"
+                        className="text-xs font-bold text-purple-700 hover:text-purple-800 hover:underline cursor-pointer"
                       >
                         ✨ Reset Suggestions
                       </button>
                     </div>
-                    <p className="text-[11px] text-[var(--text-tertiary)]">
+                    <p className="text-[11px] text-slate-500">
                       Enter each learning takeaway on a new line. These display as checkmark bullets on the course detail page.
                     </p>
                     <textarea
                       rows={4}
-                      className="input-premium w-full px-4 py-2.5 rounded-xl text-xs font-mono leading-relaxed"
+                      className="w-full px-4 py-2.5 rounded-xl text-xs font-mono leading-relaxed bg-slate-50/70 focus:bg-white text-slate-900 placeholder-slate-400 border border-slate-200 focus:border-[#0055FF] focus:outline-none shadow-2xs"
                       placeholder="Master modern frontend development&#10;Build 5 production-grade portfolio applications&#10;100% placement assistance & mentorship"
                       value={newWhatYouLearn}
                       onChange={e => setNewWhatYouLearn(e.target.value)}
@@ -991,7 +950,7 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                   </div>
 
                   {/* Curriculum Modules Section */}
-                  <div className="pt-2 border-t" style={{ borderColor: "var(--border-soft)" }}>
+                  <div className="pt-2 border-t border-slate-200">
                     <CurriculumEditor
                       modules={newCurriculum}
                       onChange={setNewCurriculum}
@@ -1001,21 +960,18 @@ export default function CoursesClient({ initialCourses }: { initialCourses: Cour
                 </div>
 
                 {/* Sticky Footer */}
-                <div
-                  className="px-6 py-4 border-t flex justify-end gap-3 shrink-0"
-                  style={{ borderColor: "var(--border-soft)", background: "var(--bg-surface)" }}
-                >
+                <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3 shrink-0 bg-slate-50/90">
                   <button
                     type="button"
                     onClick={() => setIsAddModalOpen(false)}
-                    className="btn-secondary px-5 py-2.5 rounded-xl text-sm font-bold cursor-pointer"
+                    className="px-5 py-2.5 rounded-xl text-sm font-bold bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 transition cursor-pointer shadow-2xs"
                   >
                     Cancel
                   </button>
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold shadow-lg cursor-pointer"
+                    className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[#0055FF] hover:bg-blue-600 shadow-sm shadow-blue-500/20 transition cursor-pointer disabled:opacity-50"
                   >
                     {isSubmitting ? "Creating..." : "Add Course & Modules"}
                   </button>

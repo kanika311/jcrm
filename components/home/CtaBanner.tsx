@@ -11,9 +11,7 @@ export default function CtaBanner() {
             <h3 className="heading-font text-xl sm:text-3xl md:text-5xl font-extrabold text-slate-900 mb-2 sm:mb-4 tracking-tight">
               Ready to <span className="text-[#0055FF]">Transform Your Business?</span>
             </h3>
-            <p className="text-xs sm:text-base md:text-xl text-slate-600 font-medium max-w-2xl mb-4 sm:mb-8 leading-relaxed">
-              Schedule a free demo and discover how JCRM Technologies (Jain CRM) enterprise software unifies your operations, billing, and management workflows.
-            </p>
+           
             <Link
               href="/contact"
               className="px-6 py-2.5 sm:px-10 sm:py-4 md:py-5 rounded-full text-xs sm:text-base md:text-xl font-extrabold text-white bg-[#0055FF] shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300 inline-flex items-center gap-2 sm:gap-3"

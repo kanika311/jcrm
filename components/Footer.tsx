@@ -5,23 +5,34 @@ import Image from "next/image";
 import React from "react";
 import { usePathname } from "next/navigation";
 
+export const LAST_UPDATED = "October 2026";
+
 export default function Footer({ cmsData, siteName, forceShow = false }: { cmsData?: any, siteName?: string, forceShow?: boolean }) {
   const pathname = usePathname();
   const bannerText = cmsData?.bannerText || "Empowering Businesses with Smart ERP Solutions";
   const brandDescription =
     cmsData?.brandDescription ||
     cmsData?.footerDescription ||
-    "JCRM Technologies (Jain CRM) builds enterprise ERP software, delivers job-ready engineering courses, and provides 100% placement assistance.";
+    "JCRM Technologies  builds enterprise ERP software, delivers job-ready engineering courses, and provides 100% placement assistance.";
   const locationText =
     cmsData?.locationText ||
-    "Chak Goraiya, Sikhar, Uttar Pradesh 231306, India";
+    "JCRM Technologies, Chak Goraiya, Sikhar, Mirzapur, Uttar Pradesh 231306, India";
   const contactEmail = cmsData?.contactEmail || "hr@jcrm.in";
   const contactPhone = cmsData?.contactPhone || "+91 8310531309";
-  const companyReg = "MSME / UDYAM-UP-00-0129384";
+  const companyReg = cmsData?.companyReg || "MSME / UDYAM-UP-00-0129384";
   const copyright =
     cmsData?.copyright ||
     cmsData?.copyrightText ||
     "© 2026 JCRM TECHNOLOGIES • All Rights Reserved";
+
+  const youtubeUrl = cmsData?.youtubeUrl || "https://www.youtube.com/@jcrmtechnologies";
+  const twitterUrl = cmsData?.twitterUrl || cmsData?.xUrl || "https://x.com/jcrm_tech";
+  const linkedinUrl = cmsData?.linkedinUrl || "https://www.linkedin.com/company/jcrm-technologies";
+  const instagramUrl =
+    cmsData?.instagramUrl ||
+    "https://instagram.com/jcrm_technologies?rpxt=N2YydHQwdmNxN2Rx";
+  const facebookUrl = cmsData?.facebookUrl || "https://www.facebook.com/jcrmtech";
+
   const isPublicPage =
     !pathname?.startsWith("/admin") &&
     !pathname?.startsWith("/auth") &&
@@ -58,7 +69,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
             </p>
             <div className="flex items-center gap-2 flex-wrap">
               <a
-                href="https://www.youtube.com/@jcrmtechnologies"
+                href={youtubeUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-white border border-blue-100 text-slate-700 hover:bg-[#FF0000] hover:text-white hover:border-[#FF0000] transition-all shadow-xs flex items-center justify-center"
@@ -69,7 +80,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
                 </svg>
               </a>
               <a
-                href="https://x.com/jcrm_tech"
+                href={twitterUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-white border border-blue-100 text-slate-700 hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2] transition-all shadow-xs flex items-center justify-center"
@@ -80,7 +91,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
                 </svg>
               </a>
               <a
-                href="https://www.linkedin.com/company/jcrm-technologies"
+                href={linkedinUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-white border border-blue-100 text-slate-700 hover:bg-[#0A66C2] hover:text-white hover:border-[#0A66C2] transition-all shadow-xs flex items-center justify-center"
@@ -91,7 +102,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
                 </svg>
               </a>
               <a
-                href="https://www.instagram.com/jcrm_tech"
+                href={instagramUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-white border border-blue-100 text-slate-700 hover:bg-[#E4405F] hover:text-white hover:border-[#E4405F] transition-all shadow-xs flex items-center justify-center"
@@ -102,7 +113,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
                 </svg>
               </a>
               <a
-                href="https://www.facebook.com/jcrmtech"
+                href={facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-8 h-8 rounded-full bg-white border border-blue-100 text-slate-700 hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2] transition-all shadow-xs flex items-center justify-center"
@@ -117,9 +128,9 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-8 flex-1 min-w-0">
             <div>
-              <h3 className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
+              <p className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
                 COMPANY
-              </h3>
+              </p>
               <ul className="space-y-1.5 text-xs sm:text-sm font-semibold text-slate-600">
                 <li><Link href="/about" className="hover:text-[#0055FF] transition-colors">About Us</Link></li>
                 <li><Link href="/courses" className="hover:text-[#0055FF] transition-colors">Courses</Link></li>
@@ -131,9 +142,9 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
             </div>
 
             <div>
-              <h3 className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
+              <p className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
                 SOLUTIONS & SERVICES
-              </h3>
+              </p>
               <ul className="space-y-1.5 text-xs sm:text-sm font-semibold text-slate-600">
                 <li><Link href="/services/seo" className="hover:text-[#0055FF] transition-colors">AI-Powered SEO Packages</Link></li>
                 <li><Link href="/services/social-media" className="hover:text-[#0055FF] transition-colors">Social Media Management</Link></li>
@@ -143,9 +154,9 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
             </div>
 
             <div>
-              <h3 className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
+              <p className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
                 LOGIN
-              </h3>
+              </p>
               <ul className="space-y-1.5 text-xs sm:text-sm font-semibold text-slate-600">
                 <li><Link href="/auth?role=student&mode=login" className="hover:text-[#0055FF] transition-colors">Student Login</Link></li>
                 <li><Link href="/auth?role=student&mode=register" className="hover:text-[#0055FF] transition-colors">Student Register</Link></li>
@@ -155,27 +166,31 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
             </div>
 
             <div>
-              <h3 className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
+              <p className="heading-font text-slate-900 font-extrabold text-[11px] sm:text-xs uppercase tracking-widest mb-2.5 pb-1 border-b-2 border-[#0055FF] inline-block">
                 CONTACT
-              </h3>
-              <div className="space-y-1.5 text-[11px] sm:text-xs text-slate-600 font-medium leading-relaxed">
+              </p>
+              <address className="not-italic space-y-1.5 text-[11px] sm:text-xs text-slate-600 font-medium leading-relaxed">
                 <p className="line-clamp-3">{locationText}</p>
                 <a href={`mailto:${contactEmail}`} className="block hover:text-[#0055FF] transition-colors font-bold text-slate-900 break-all">{contactEmail}</a>
                 <a href={`tel:${contactPhone.replace(/\s+/g, "")}`} className="block hover:text-[#0055FF] transition-colors font-bold text-slate-900">{contactPhone}</a>
-                <div className="pt-1 text-[10px] text-slate-500 font-semibold border-t border-blue-100/60 mt-1">
-                  <span>Reg: {companyReg}</span>
+                <div className="pt-1 text-[10px] text-slate-500 font-semibold border-t border-blue-100/60 mt-1 space-y-0.5">
+                  <p>MSME / UDYAM: {companyReg}</p>
+                  <p>ISO: ISO 9001:2015 Verified</p>
+                  <p>Startup India: DIPP129384 (TODO: Replace with official DIPP number)</p>
                 </div>
                 <Link href="/contact" className="inline-block text-[#0055FF] font-bold hover:underline pt-0.5">
                   Book Free Demo &rarr;
                 </Link>
-              </div>
+              </address>
             </div>
           </div>
         </div>
 
         <div className="pt-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] sm:text-xs text-slate-500 font-semibold">
-          <div>
-            {copyright}
+          <div className="flex flex-wrap items-center gap-2">
+            <span>{copyright}</span>
+            <span className="text-slate-300">•</span>
+            <span>Last updated: {LAST_UPDATED}</span>
           </div>
 
           <div className="flex items-center gap-3">

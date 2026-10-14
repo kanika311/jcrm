@@ -158,9 +158,9 @@ p, span, li, label, input, textarea, select, blockquote, .font-body {
   font-family: var(--font-body), 'Inter', system-ui, sans-serif;
 }
 
-/* 3. Buttons, Nav Links, & CTA Font: Space Grotesk */
+/* 3. Buttons, Nav Links, & CTA Font: Plus Jakarta Sans */
 button, .btn, .btn-primary, .btn-secondary, a.btn, nav a, .font-button {
-  font-family: var(--font-button), 'Space Grotesk', system-ui, sans-serif;
+  font-family: var(--font-heading), 'Plus Jakarta Sans', system-ui, sans-serif;
 }
 
 code, pre, .font-mono {
@@ -777,3 +777,67 @@ select option {
 .animate-drawer-left {
   animation: slideInLeft 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   DYNAMIC BACKGROUND & SCROLL-REVEAL VISIBILITY
+───────────────────────────────────────────────────────────────────────────── */
+.dyn-bg-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -2;
+  transition: all 0.5s ease;
+  background-color: var(--bg-base);
+}
+
+.dyn-bg-overlay {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  transition: all 0.5s ease;
+}
+
+.dyn-bg-overlay-dark {
+  background: radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.2) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(88, 230, 217, 0.12) 0%, transparent 50%), radial-gradient(circle at 50% 50%, rgba(99, 102, 241, 0.08) 0%, transparent 70%);
+}
+
+.dyn-bg-overlay-light {
+  background: radial-gradient(circle at 80% 20%, rgba(217, 119, 6, 0.08) 0%, transparent 60%), radial-gradient(circle at 20% 80%, rgba(79, 70, 229, 0.08) 0%, transparent 60%);
+}
+
+/* Scroll-reveal / Initial SSR Visibility */
+.reveal {
+  opacity: 1;
+  transform: none;
+}
+
+@media (scripting: none) {
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* Page fade-in without blocking SSR text */
+.page-fade-in {
+  opacity: 1;
+  animation: pageFadeIn 0.35s ease-out;
+}
+
+@keyframes pageFadeIn {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+@media (scripting: none) {
+  .page-fade-in {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}
+

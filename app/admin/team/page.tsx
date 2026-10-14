@@ -5,7 +5,7 @@ import { authOptions } from "@/lib/authOptions";
 import { redirect } from "next/navigation";
 import { TEAM_MEMBERS } from "@/lib/teamData";
 import { getSiteContent } from "@/lib/cms";
-import { DEFAULT_PLACED_CANDIDATES } from "@/app/api/admin/team/placement/route";
+import { DEFAULT_PLACED_CANDIDATES } from "@/lib/placedCandidatesData";
 
 export const dynamic = "force-dynamic";
 

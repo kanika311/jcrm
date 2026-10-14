@@ -112,9 +112,7 @@ export default function ErpProductsSection() {
           <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold mb-1.5 sm:mb-3 text-slate-900">
             Enterprise <span className="text-[#0055FF]">ERP Products & Software</span>
           </h2>
-          <p className="text-xs sm:text-base md:text-lg text-slate-600 font-medium max-w-2xl mx-auto">
-            Purpose-built cloud ERP solutions by JCRM Technologies (Jain CRM) designed for educational institutes, hospitals, and growing businesses.
-          </p>
+        
         </div>
 
         <div className="flex flex-wrap justify-center gap-3 sm:gap-6">

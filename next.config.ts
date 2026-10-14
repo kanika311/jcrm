@@ -78,6 +78,15 @@ const nextConfig: NextConfig = {
         headers: securityHeaders,
       },
       {
+        source: '/:path*.(webp|png|jpg|jpeg|gif|svg|ico|txt|xml)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
+          },
+        ],
+      },
+      {
         // Edge caching with stale-while-revalidate for super fast TTFB
         source: '/',
         headers: [

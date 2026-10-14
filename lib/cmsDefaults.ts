@@ -18,11 +18,14 @@ export const CMS_EDITOR_PAGES: { id: string; name: string; path: string; descrip
   { id: "public-home", name: "Home Page", path: "/", description: "Hero text, stats, and homepage sections" },
   { id: "public-about", name: "About Page", path: "/about", description: "About heading, story, and team" },
   { id: "public-contact", name: "Contact Page", path: "/contact", description: "Contact heading, email, phone, and address" },
+  { id: "public-faq", name: "FAQs CMS", path: "/#faq", description: "Homepage Frequently Asked Questions & Answers" },
+  { id: "public-testimonials", name: "Reviews CMS", path: "/admin/reviews", description: "Full CMS for Client & Trainee Reviews, Ratings, and Proof Screenshots" },
   { id: "public-privacy", name: "Privacy Policy", path: "/legal/privacy", description: "Privacy policy text and clauses" },
   { id: "public-terms", name: "Terms & Conditions", path: "/legal/terms", description: "Terms and conditions text" },
   { id: "public-services", name: "Growth Services CMS", path: "/admin/services", description: "Full CMS for SEO, Social Media & Digital Services" },
   { id: "clients-projects", name: "Clients & Projects CMS", path: "/admin/clients-projects", description: "Full CMS for Homepage Clients & Showcase Projects" },
-  { id: "global-footer", name: "Footer", path: "/", description: "Footer text, contact details, and copyright" },
+  { id: "global-footer", name: "Footer & Social Media", path: "/", description: "Footer text, contact details, social media links, and copyright" },
+  { id: "global-settings", name: "Global Settings & Branding", path: "/", description: "Website branding, logo, favicon, and company information" },
 ];
 
 export const CMS_SCHEMAS: PageSchema[] = [
@@ -140,14 +143,20 @@ export const CMS_SCHEMAS: PageSchema[] = [
   },
   {
     id: "global-footer",
-    name: "Footer",
+    name: "Footer & Social Media",
     category: "global",
     schema: {
       bannerText: { type: "string", label: "Top banner text", default: "Empowering Businesses with Smart ERP Solutions" },
       brandDescription: { type: "text", label: "Company description", default: "We build powerful ERP systems and digital solutions that help businesses scale, automate workflows, and achieve operational excellence." },
-      locationText: { type: "text", label: "Office address", default: "404, 1st floor, 4th A Cross Rd, HRBR Layout 2nd Block, HRBR Layout, Kalyan Nagar, Bengaluru, Karnataka 560043" },
+      locationText: { type: "text", label: "Office address", default: "Chak Goraiya, Sikhar, Uttar Pradesh 231306, India" },
       contactEmail: { type: "string", label: "Email", default: "hr@jcrm.in" },
       contactPhone: { type: "string", label: "Phone", default: "+91 8310531309" },
+      companyReg: { type: "string", label: "Company Registration / MSME", default: "MSME / UDYAM-UP-00-0129384" },
+      instagramUrl: { type: "string", label: "Instagram Profile URL", default: "https://instagram.com/jcrm_technologies?rpxt=N2YydHQwdmNxN2Rx" },
+      linkedinUrl: { type: "string", label: "LinkedIn Company URL", default: "https://www.linkedin.com/company/jcrm-technologies" },
+      youtubeUrl: { type: "string", label: "YouTube Channel URL", default: "https://www.youtube.com/@jcrmtechnologies" },
+      twitterUrl: { type: "string", label: "X / Twitter Profile URL", default: "https://x.com/jcrm_tech" },
+      facebookUrl: { type: "string", label: "Facebook Page URL", default: "https://www.facebook.com/jcrmtech" },
       copyright: { type: "string", label: "Copyright text", default: "© 2026 JCRM TECHNOLOGIES • All Rights Reserved" },
     }
   },
@@ -240,9 +249,9 @@ export const CMS_SCHEMAS: PageSchema[] = [
     name: "Home Page",
     category: "public",
     schema: {
-      heroTitle: { type: "string", label: "Hero Title Prefix", default: "Build skills that" },
-      heroHighlight: { type: "string", label: "Hero Title Highlight", default: "ship real products." },
-      heroSubtitle: { type: "text", label: "Hero Subtitle", default: "Project-based engineering courses taught by the industry's top 1%." },
+      heroTitle: { type: "string", label: "Hero Title Prefix", default: "JCRM Technologies" },
+      heroHighlight: { type: "string", label: "Hero Title Highlight", default: "Enterprise ERP & Engineering Education" },
+      heroSubtitle: { type: "text", label: "Hero Subtitle", default: "" },
       stats: {
         type: "array",
         label: "Key Statistics",
@@ -400,6 +409,66 @@ export const CMS_SCHEMAS: PageSchema[] = [
       email: { type: "string", label: "Email", default: "hr@jcrm.in" },
       phone: { type: "string", label: "Phone", default: "+91 8310531309" },
     }
+  },
+  {
+    id: "public-faq",
+    name: "Frequently Asked Questions (FAQ)",
+    category: "public",
+    schema: {
+      badgeText: { type: "string", label: "Eyebrow / Badge Text", default: "Got Questions? We Have Answers" },
+      headingPrefix: { type: "string", label: "Heading Prefix", default: "Frequently Asked" },
+      headingHighlight: { type: "string", label: "Heading Highlight (Gradient Text)", default: "Questions (FAQ)" },
+      faqs: {
+        type: "array",
+        label: "Frequently Asked Questions",
+        itemSchema: {
+          question: { type: "string", label: "Question", default: "" },
+          answer: { type: "text", label: "Answer", default: "" },
+        },
+        default: [
+          {
+            question: "What engineering courses does JCRM Technologies offer?",
+            answer:
+              "JCRM Technologies offers job-ready engineering courses across 10 specialized disciplines: Frontend Development (React & Next.js), Backend Development (Java Spring Boot & Node.js), AI & Machine Learning, Data Science & Analytics, Cyber Security (VAPT & SOC operations), Forensic Science, Cloud & DevOps (AWS & Kubernetes), QA Automation, Digital Marketing, and Zen AI. Every program includes live enterprise microservice projects and production deployments.",
+          },
+          {
+            question: "What is the relationship between JCRM Technologies?",
+            answer:
+              "JCRM Technologies is officially registered as JCRM Technologies and is widely searched and referred to by students, enterprises, and partners. Both names represent the same organization offering enterprise cloud ERP software, engineering education, internship programs, and hiring placement services in India.",
+          },
+          {
+            question: "How does JCRM Technologies' 100% placement assistance program work?",
+            answer:
+              "Our placement assistance includes personalized 1-on-1 resume building, LinkedIn and GitHub portfolio optimization, technical mock interviews, and direct HR referrals to our network of 150+ hiring partners, including top MNCs like Deloitte, Tech Mahindra, Cognizant, TCS, Infosys, and Cisco.",
+          },
+          {
+            question: "What are the course fees and payment options?",
+            answer:
+              "Course fees range between ₹12,999 and ₹21,999 depending on the chosen track and mentoring depth. We provide zero-interest EMI options, flexible installment plans, and merit-based scholarship fee waivers to ensure accessibility for deserving candidates.",
+          },
+          {
+            question: "Can college students and working professionals join the training programs?",
+            answer:
+              "Yes. We offer dedicated tracks for college students seeking official academic internship credits, as well as evening and weekend batches for working professionals aiming to upskill or transition into high-paying engineering roles.",
+          },
+          {
+            question: "What enterprise ERP software products does JCRM develop?",
+            answer:
+              "JCRM Technologies builds modular cloud ERP solutions including Institute & Academy LMS ERP, Coaching Center & EdTech ERP, Healthcare & Clinical Hospital ERP (NABH-compliant), Polyclinic & Pharmacy ERP, HR & Payroll Management, Gym Management, and custom cloud microservices.",
+          },
+          {
+            question: "How can an institution or business book a free ERP software demo?",
+            answer:
+              "You can book a free, personalized 1-on-1 walkthrough by clicking the 'Request Free Demo' button on our homepage, navigating to our Contact page, or reaching out directly to our enterprise solutions team via email at hr@jcrm.in or telephone at +91 8310531309.",
+          },
+          {
+            question: "Do trainees receive recognized certifications after course completion?",
+            answer:
+              "Yes, every graduate receives an ISO 9001:2015 verified course completion certificate, a verified internship experience letter, and a GitHub repository of production-ready projects deployable on AWS or Docker.",
+          },
+        ],
+      },
+    },
   },
   {
     id: "public-feedback",

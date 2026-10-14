@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
 import { CMS_SCHEMAS, getDefaultDataForSchema } from "./cmsDefaults";
 
 // Helper for deep merging objects and arrays
@@ -23,6 +24,20 @@ function deepMerge(target: any, source: any): any {
   return source;
 }
 
+const getCachedSiteContent = unstable_cache(
+  async (pageId: string) => {
+    return prisma.siteContent.findUnique({
+      where: { pageId },
+      select: { content: true },
+    });
+  },
+  ["site-content-by-page-id"],
+  {
+    revalidate: 3600,
+    tags: ["cms"],
+  }
+);
+
 export async function getSiteContent(pageId: string, runtimeDefaults?: any) {
   try {
     const pageSchema = CMS_SCHEMAS.find(s => s.id === pageId);
@@ -31,9 +46,7 @@ export async function getSiteContent(pageId: string, runtimeDefaults?: any) {
     // Fallback to runtime defaults if provided (for backwards compatibility)
     const baseDefaults = { ...runtimeDefaults, ...schemaDefaults };
 
-    const page = await prisma.siteContent.findUnique({
-      where: { pageId },
-    });
+    const page = await getCachedSiteContent(pageId);
 
     if (!page || !page.content) {
       return baseDefaults;

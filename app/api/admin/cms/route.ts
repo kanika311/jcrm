@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { prisma } from "@/lib/prisma";
 
 export async function GET(req: Request) {
@@ -42,8 +42,12 @@ export async function POST(req: Request) {
       },
     });
 
-    // Invalidate the root layout cache so navbar and global settings update immediately
+    // Invalidate caches so homepage, layout, and components update immediately
     revalidatePath("/", "layout");
+    revalidatePath("/", "page");
+    try {
+      (revalidateTag as any)("cms");
+    } catch (_) {}
 
     return NextResponse.json({ message: "Saved successfully", data: updated });
   } catch (error) {

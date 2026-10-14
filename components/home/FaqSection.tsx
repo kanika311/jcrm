@@ -10,9 +10,9 @@ export const FAQS: FaqItem[] = [
       "JCRM Technologies offers job-ready engineering courses across 10 specialized disciplines: Frontend Development (React & Next.js), Backend Development (Java Spring Boot & Node.js), AI & Machine Learning, Data Science & Analytics, Cyber Security (VAPT & SOC operations), Forensic Science, Cloud & DevOps (AWS & Kubernetes), QA Automation, Digital Marketing, and Zen AI. Every program includes live enterprise microservice projects and production deployments.",
   },
   {
-    question: "What is the relationship between JCRM Technologies and Jain CRM?",
+    question: "What is the relationship between JCRM Technologies?",
     answer:
-      "JCRM Technologies is officially registered as JCRM Technologies and is widely searched and referred to by students, enterprises, and partners as 'Jain CRM'. Both names represent the same organization offering enterprise cloud ERP software, engineering education, internship programs, and hiring placement services in India.",
+      "JCRM Technologies is officially registered as JCRM Technologies and is widely searched and referred to by students, enterprises, and partners. Both names represent the same organization offering enterprise cloud ERP software, engineering education, internship programs, and hiring placement services in India.",
   },
   {
     question: "How does JCRM Technologies' 100% placement assistance program work?",
@@ -46,37 +46,53 @@ export const FAQS: FaqItem[] = [
   },
 ];
 
-export default function FaqSection() {
+interface FaqSectionProps {
+  badgeText?: string;
+  headingPrefix?: string;
+  headingHighlight?: string;
+  faqs?: FaqItem[];
+}
+
+export default function FaqSection({
+  badgeText,
+  headingPrefix,
+  headingHighlight,
+  faqs,
+}: FaqSectionProps = {}) {
+  const displayFaqs = Array.isArray(faqs) && faqs.length > 0 ? faqs : FAQS;
+  const badge = badgeText || "Got Questions? We Have Answers";
+  const prefix = headingPrefix || "Frequently Asked";
+  const highlight = headingHighlight || "Questions (FAQ)";
+
   return (
     <section className="py-10 sm:py-20 md:py-24 relative z-10" id="faq">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8 sm:mb-14">
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#0055FF] text-xs font-black uppercase tracking-wider mb-2">
-            <span>Got Questions? We Have Answers</span>
+            <span>{badge}</span>
           </div>
           <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-2 sm:mb-3 tracking-tight">
-            Frequently Asked <span className="text-[#0055FF]">Questions (FAQ)</span>
+            {prefix} <span className="text-[#0055FF]">{highlight}</span>
           </h2>
-          <p className="text-xs sm:text-base text-slate-600 font-medium">
-            Everything you need to know about JCRM Technologies (Jain CRM) courses, fees, placements, internships, and ERP software.
-          </p>
         </div>
 
         <div className="space-y-3 sm:space-y-4">
-          {FAQS.map((faq, index) => (
+          {displayFaqs.map((faq, index) => (
             <details
               key={index}
               className="group rounded-2xl bg-white/90 backdrop-blur-xl border border-blue-100/90 shadow-xs p-4 sm:p-6 transition-all duration-200 open:shadow-md open:border-blue-300"
             >
-              <summary className="flex items-center justify-between cursor-pointer font-extrabold text-slate-900 text-sm sm:text-lg list-none select-none">
-                <span className="pr-4">{faq.question}</span>
-                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-50 group-open:bg-[#0055FF] text-[#0055FF] group-open:text-white flex items-center justify-center shrink-0 transition-transform duration-200 group-open:rotate-180 text-xs sm:text-sm font-black">
+              <summary className="flex items-center justify-between cursor-pointer list-none select-none">
+                <h3 className="font-extrabold text-slate-900 text-sm sm:text-lg pr-4 inline-block">
+                  {faq.question}
+                </h3>
+                <span className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-blue-50 group-open:bg-[#0055FF] text-[#0055FF] group-open:text-white flex items-center justify-center shrink-0 transition-transform duration-200 group-open:rotate-180 text-xs sm:text-sm font-black" aria-hidden="true">
                   ↓
                 </span>
               </summary>
-              <div className="pt-3 sm:pt-4 text-xs sm:text-base text-slate-600 leading-relaxed font-normal border-t border-slate-100 mt-3">
+              <p className="pt-3 sm:pt-4 text-xs sm:text-base text-slate-600 leading-relaxed font-normal border-t border-slate-100 mt-3 whitespace-pre-line">
                 {faq.answer}
-              </div>
+              </p>
             </details>
           ))}
         </div>

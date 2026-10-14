@@ -1,7 +1,8 @@
 import { getSiteContent } from "@/lib/cms";
 import { prisma } from "@/lib/prisma";
-import { DEFAULT_PLACED_CANDIDATES } from "@/app/api/admin/team/placement/route";
+import { DEFAULT_PLACED_CANDIDATES } from "@/lib/placedCandidatesData";
 import { DEFAULT_CLIENTS_PROJECTS } from "@/lib/clientsProjectsData";
+import { DEFAULT_REVIEWS } from "@/lib/reviewsData";
 import { sanitizeCandidateImage } from "@/lib/imageCleanServer";
 import HeroSection from "@/components/home/HeroSection";
 import StatsStrip from "@/components/home/StatsStrip";
@@ -11,7 +12,10 @@ import CtaBanner from "@/components/home/CtaBanner";
 import WhyChooseSection from "@/components/home/WhyChooseSection";
 import TrainingPlacementSection from "@/components/home/TrainingPlacementSection";
 import PlacedCandidatesSection from "@/components/home/PlacedCandidatesSection";
-import ClientsProjectsSection from "@/components/ClientsProjectsSection";
+import dynamic from "next/dynamic";
+const ClientsProjectsSection = dynamic(
+  () => import("@/components/ClientsProjectsSection")
+);
 import TalentNetworkSection from "@/components/home/TalentNetworkSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import TrustAuthoritySection from "@/components/home/TrustAuthoritySection";
@@ -20,23 +24,28 @@ import FaqSection, { FAQS } from "@/components/home/FaqSection";
 export const revalidate = 3600;
 
 export default async function Home() {
-  const [cmsData, placedData, homepageMembers, clientsProjectsData] = await Promise.all([
-    getSiteContent("public-home"),
-    getSiteContent("placed-candidates", { candidates: DEFAULT_PLACED_CANDIDATES }),
-    prisma.teamMember.findMany({
-      where: { status: { in: ["PLACED", "ALUMNI"] } },
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        image: true,
-        company: true,
-        department: true,
-      },
-      orderBy: { updatedAt: "desc" },
-    }).catch(() => []),
-    getSiteContent("clients-projects", { projects: DEFAULT_CLIENTS_PROJECTS }),
-  ]);
+  const [cmsData, placedData, homepageMembers, clientsProjectsData, faqCms, testimonialsRecord] =
+    await Promise.all([
+      getSiteContent("public-home"),
+      getSiteContent("placed-candidates", { candidates: DEFAULT_PLACED_CANDIDATES }),
+      prisma.teamMember
+        .findMany({
+          where: { status: { in: ["PLACED", "ALUMNI"] } },
+          select: {
+            id: true,
+            name: true,
+            role: true,
+            image: true,
+            company: true,
+            department: true,
+          },
+          orderBy: { updatedAt: "desc" },
+        })
+        .catch(() => []),
+      getSiteContent("clients-projects", { projects: DEFAULT_CLIENTS_PROJECTS }),
+      getSiteContent("public-faq"),
+      getSiteContent("public-testimonials", { reviews: DEFAULT_REVIEWS }),
+    ]);
 
   const fromTeam = await Promise.all(
     homepageMembers.map(async (m) => ({
@@ -64,11 +73,19 @@ export default async function Home() {
     : DEFAULT_CLIENTS_PROJECTS;
   const clientsProjects = rawProjects.length > 0 ? rawProjects : DEFAULT_CLIENTS_PROJECTS;
 
+  const rawReviews = Array.isArray(testimonialsRecord?.reviews)
+    ? testimonialsRecord.reviews
+    : DEFAULT_REVIEWS;
+
+  const rawFaqs = Array.isArray(faqCms?.faqs) && faqCms.faqs.length > 0 ? faqCms.faqs : FAQS;
+  const activeFaqs = rawFaqs.filter((f: any) => f && (f.question || f.answer));
+  const finalFaqs = activeFaqs.length > 0 ? activeFaqs : FAQS;
+
   // 1. FAQPage JSON-LD Schema
   const faqSchema = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQS.map((f) => ({
+    mainEntity: finalFaqs.map((f: any) => ({
       "@type": "Question",
       name: f.question,
       acceptedAnswer: {
@@ -83,7 +100,7 @@ export default async function Home() {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: "Engineering Courses & Training at JCRM Technologies",
-    description: "Industry-aligned engineering training programs with 100% placement assistance by JCRM Technologies (Jain CRM).",
+    description: "Industry-aligned engineering training programs with 100% placement assistance by JCRM Technologies .",
     itemListElement: [
       {
         "@type": "ListItem",
@@ -208,9 +225,14 @@ export default async function Home() {
         <PlacedCandidatesSection candidates={placedCandidates} />
         <ClientsProjectsSection initialProjects={clientsProjects} />
         <TalentNetworkSection />
-        <TestimonialsSection />
+        <TestimonialsSection initialReviews={rawReviews} />
         <TrustAuthoritySection />
-        <FaqSection />
+        <FaqSection
+          badgeText={faqCms?.badgeText}
+          headingPrefix={faqCms?.headingPrefix}
+          headingHighlight={faqCms?.headingHighlight}
+          faqs={finalFaqs}
+        />
       </div>
     </>
   );
