@@ -90,7 +90,10 @@ export default async function RootLayout({
     getSiteContent("global-footer"),
   ]);
 
-  const gaId = process.env.NEXT_PUBLIC_GA_ID;
+  const gaId =
+    process.env.NEXT_PUBLIC_GA_ID && process.env.NEXT_PUBLIC_GA_ID !== "G-XXXXXXXXXX"
+      ? process.env.NEXT_PUBLIC_GA_ID
+      : "G-WEC25ESY7B";
 
   const organizationJsonLd = {
     "@context": "https://schema.org",
