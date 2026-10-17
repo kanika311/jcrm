@@ -65,19 +65,13 @@ export default function Navbar({
     { name: "Services", href: "/services", isActive: true },
     { name: "ERP Solutions", href: "/erp-solutions", isActive: true },
     { name: "Key Clients", href: "/key-clients", isActive: true },
-    { name: "Reviews", href: "/reviews", isActive: true },
     { name: "Our Team", href: "/ourteam", isActive: true },
     { name: "Workshop", href: "/workshop", isActive: true },
     { name: "Join Us", href: "/joinus", isActive: true },
-    { name: "About Us", href: "/about", isActive: true },
-    { name: "Contact", href: "/contact", isActive: true },
   ];
 
   const isLinkActive = (href: string) => {
     if (href === "/") return pathname === "/";
-    if (href === "/reviews" || href === "/testimonials") {
-      return pathname === "/reviews" || pathname === "/testimonials";
-    }
     if (href === "/ourteam") {
       return pathname === "/ourteam" || pathname === "/our-team" || pathname?.startsWith("/im");
     }
@@ -110,15 +104,34 @@ export default function Navbar({
       rawLinks.push({ name: "Key Clients", href: "/key-clients", isActive: true });
     }
   }
-  if (!rawLinks.some((l: any) => l.href === "/reviews" || l.href === "/testimonials")) {
-    const keyIdx = rawLinks.findIndex((l: any) => l.href === "/key-clients" || l.href === "/erp-solutions");
-    if (keyIdx !== -1) {
-      rawLinks.splice(keyIdx + 1, 0, { name: "Reviews", href: "/reviews", isActive: true });
-    } else {
-      rawLinks.push({ name: "Reviews", href: "/reviews", isActive: true });
-    }
-  }
-  const activeLinks = rawLinks.filter((link: any) => link.isActive !== false);
+
+  // Filter out Reviews, About Us, and Contact Us from navbar to prevent overlapping
+  const excludedHrefs = new Set([
+    "/reviews",
+    "/testimonials",
+    "/about",
+    "/about-us",
+    "/contact",
+    "/contact-us",
+  ]);
+  const excludedNames = new Set([
+    "reviews",
+    "testimonials",
+    "about",
+    "about us",
+    "contact",
+    "contact us",
+  ]);
+
+  const activeLinks = rawLinks
+    .filter((link: any) => {
+      const href = (link?.href || "").toLowerCase().trim();
+      const name = (link?.name || "").toLowerCase().trim();
+      if (excludedHrefs.has(href) || excludedNames.has(name)) {
+        return false;
+      }
+      return link.isActive !== false;
+    });
 
   const displayLogoUrl = "/logo-jcrm.webp";
 

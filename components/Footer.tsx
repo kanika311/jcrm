@@ -133,11 +133,11 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
               </p>
               <ul className="space-y-1.5 text-xs sm:text-sm font-semibold text-slate-600">
                 <li><Link href="/about" className="hover:text-[#0055FF] transition-colors">About Us</Link></li>
+                <li><Link href="/contact" className="hover:text-[#0055FF] transition-colors">Contact Us</Link></li>
                 <li><Link href="/courses" className="hover:text-[#0055FF] transition-colors">Courses</Link></li>
                 <li><Link href="/key-clients" className="hover:text-[#0055FF] transition-colors">Key Clients & Tie-ups</Link></li>
                 <li><Link href="/ourteam" className="hover:text-[#0055FF] transition-colors">Our Team</Link></li>
                 <li><Link href="/joinus" className="hover:text-[#0055FF] transition-colors">Join Us</Link></li>
-                <li><Link href="/contact" className="hover:text-[#0055FF] transition-colors">Contact</Link></li>
               </ul>
             </div>
 
@@ -179,7 +179,7 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
                   <p>Startup India: DIPP129384 (TODO: Replace with official DIPP number)</p>
                 </div>
                 <Link href="/contact" className="inline-block text-[#0055FF] font-bold hover:underline pt-0.5">
-                  Book Free Demo &rarr;
+                  Contact Us &bull; Book Free Demo &rarr;
                 </Link>
               </address>
             </div>
@@ -193,7 +193,11 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
             <span>Last updated: {LAST_UPDATED}</span>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <Link href="/about" className="hover:text-[#0055FF] transition-colors">About Us</Link>
+            <span className="text-slate-300">|</span>
+            <Link href="/contact" className="hover:text-[#0055FF] transition-colors">Contact Us</Link>
+            <span className="text-slate-300">|</span>
             <Link href="/legal/privacy" className="hover:text-[#0055FF] transition-colors">Privacy Policy</Link>
             <span className="text-slate-300">|</span>
             <Link href="/legal/terms" className="hover:text-[#0055FF] transition-colors">Terms & Conditions</Link>
