@@ -34,10 +34,21 @@ export interface TeamMemberItem {
   updatedAt: string;
 }
 
-export default function TeamManagementClient({ initialMembers, initialPlacedCandidates = [] }: { initialMembers: TeamMemberItem[]; initialPlacedCandidates?: any[] }) {
+export default function TeamManagementClient({
+  initialMembers,
+  initialPlacedCandidates = [],
+  initialSponsoredAd,
+}: {
+  initialMembers: TeamMemberItem[];
+  initialPlacedCandidates?: any[];
+  initialSponsoredAd?: SponsoredAd;
+}) {
   const [members, setMembers] = useState<TeamMemberItem[]>(initialMembers);
-  const [activeTab, setActiveTab] = useState<"ALL" | "CANDIDATE" | "STUDENT" | "PLACED" | "ALUMNI">("CANDIDATE");
+  const [activeTab, setActiveTab] = useState<"ALL" | "CANDIDATE" | "STUDENT" | "PLACED" | "ALUMNI">("ALL");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [pageSize, setPageSize] = useState<number>(10);
+  const [currentPage, setCurrentPage] = useState<number>(1);
 
   // Placed Candidates State (Synced with Home Page)
   const [placedList, setPlacedList] = useState<any[]>(initialPlacedCandidates);
@@ -49,7 +60,9 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isSponsoredModalOpen, setIsSponsoredModalOpen] = useState(false);
-  const [sponsoredAd, setSponsoredAd] = useState<SponsoredAd>(DEFAULT_SPONSORED_AD);
+  const [sponsoredAd, setSponsoredAd] = useState<SponsoredAd>(
+    initialSponsoredAd || DEFAULT_SPONSORED_AD
+  );
 
   // Form states for New Member
   const [newName, setNewName] = useState("");
@@ -78,13 +91,15 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
 
   useEffect(() => {
     setMounted(true);
-    fetch("/api/admin/sponsored")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.ad) setSponsoredAd(data.ad);
-      })
-      .catch((err) => console.error("Failed to load sponsored ad:", err));
-  }, []);
+    if (!initialSponsoredAd) {
+      fetch("/api/admin/sponsored")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data?.ad) setSponsoredAd(data.ad);
+        })
+        .catch((err) => console.error("Failed to load sponsored ad:", err));
+    }
+  }, [initialSponsoredAd]);
 
   // Lock background scrolling when modal is open
   useEffect(() => {
@@ -253,38 +268,85 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
     }
   };
 
-  const handleStatusSelect = (member: TeamMemberItem, nextStatus: TeamStatus) => {
+  const isMemberActive = (m: TeamMemberItem) => {
+    return normalizeTeamStatus(m.status) !== "CANDIDATE" && m.isVerified !== false;
+  };
+
+  const handleToggleActive = async (member: TeamMemberItem) => {
+    const currentlyActive = isMemberActive(member);
+    const nextActive = !currentlyActive;
+    const nextStatus = nextActive
+      ? (normalizeTeamStatus(member.status) === "CANDIDATE" ? "STUDENT" : member.status)
+      : "CANDIDATE";
+
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+
+    try {
+      const res = await fetch("/api/admin/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: member.id,
+          status: nextStatus,
+          isVerified: nextActive,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to update status");
+
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === member.id
+            ? { ...m, status: nextStatus as any, isVerified: nextActive }
+            : m
+        )
+      );
+      setFeedbackMsg({
+        type: "success",
+        text: nextActive
+          ? `"${member.name}" is now Active (visible on site).`
+          : `"${member.name}" is now Inactive (hidden from site).`,
+      });
+    } catch (err: any) {
+      setFeedbackMsg({ type: "error", text: err.message || "Failed to update status" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleCategoryChange = async (member: TeamMemberItem, nextStatus: TeamStatus) => {
     if (normalizeTeamStatus(member.status) === nextStatus) return;
     if (nextStatus === "PLACED") {
       openPlacementModal(member);
       return;
     }
-    void handleQuickStatusChange(member.id, nextStatus);
-  };
-
-  const handleQuickStatusChange = async (id: string, nextStatus: TeamStatus) => {
+    const isActivating = nextStatus !== "CANDIDATE";
     setIsSubmitting(true);
     setFeedbackMsg(null);
     try {
       const res = await fetch("/api/admin/team", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id, status: nextStatus }),
+        body: JSON.stringify({
+          id: member.id,
+          status: nextStatus,
+          isVerified: isActivating,
+        }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to update status");
 
-      setMembers(prev =>
-        prev.map(m => (m.id === id ? { ...m, status: nextStatus } : m))
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === member.id
+            ? { ...m, status: nextStatus, isVerified: isActivating }
+            : m
+        )
       );
       setFeedbackMsg({
         type: "success",
-        text:
-          nextStatus === "STUDENT"
-            ? "Marked as Student. Profile can appear on Our Team."
-            : nextStatus === "PLACED" || nextStatus === "ALUMNI"
-            ? `Marked as ${nextStatus === "PLACED" ? "Placed" : "Alumni"}. They will show on the home page.`
-            : "Status updated to Candidate.",
+        text: `"${member.name}" updated to ${TEAM_STATUS_LABELS[nextStatus] || nextStatus}.`,
       });
     } catch (err: any) {
       setFeedbackMsg({ type: "error", text: err.message || "An error occurred" });
@@ -369,6 +431,81 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
     }
   };
 
+  // Bulk actions
+  const handleBulkActivate = async () => {
+    if (selectedIds.length === 0) return;
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+    try {
+      const res = await fetch("/api/admin/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids: selectedIds,
+          status: "STUDENT",
+          isVerified: true,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to bulk activate");
+      setMembers((prev) =>
+        prev.map((m) =>
+          selectedIds.includes(m.id)
+            ? {
+                ...m,
+                status: normalizeTeamStatus(m.status) === "CANDIDATE" ? "STUDENT" : m.status,
+                isVerified: true,
+              }
+            : m
+        )
+      );
+      setFeedbackMsg({
+        type: "success",
+        text: `Successfully activated ${selectedIds.length} members! They are now live on the site.`,
+      });
+      setSelectedIds([]);
+    } catch (err: any) {
+      setFeedbackMsg({ type: "error", text: err.message || "Failed to bulk activate" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBulkDeactivate = async () => {
+    if (selectedIds.length === 0) return;
+    setIsSubmitting(true);
+    setFeedbackMsg(null);
+    try {
+      const res = await fetch("/api/admin/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ids: selectedIds,
+          status: "CANDIDATE",
+          isVerified: false,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to bulk deactivate");
+      setMembers((prev) =>
+        prev.map((m) =>
+          selectedIds.includes(m.id)
+            ? { ...m, status: "CANDIDATE", isVerified: false }
+            : m
+        )
+      );
+      setFeedbackMsg({
+        type: "success",
+        text: `Deactivated ${selectedIds.length} members (hidden from site).`,
+      });
+      setSelectedIds([]);
+    } catch (err: any) {
+      setFeedbackMsg({ type: "error", text: err.message || "Failed to bulk deactivate" });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Calculate counts
   const candidateCount = members.filter(m => normalizeTeamStatus(m.status) === "CANDIDATE").length;
   const studentCount = members.filter(m => normalizeTeamStatus(m.status) === "STUDENT").length;
@@ -392,170 +529,177 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
     return matchesTab && matchesSearch;
   });
 
+  // Pagination calculation
+  const totalEntries = filteredMembers.length;
+  const totalPages = Math.ceil(totalEntries / pageSize) || 1;
+  const validCurrentPage = Math.min(currentPage, totalPages);
+  const startIndex = (validCurrentPage - 1) * pageSize;
+  const paginatedMembers = filteredMembers.slice(startIndex, startIndex + pageSize);
+
+  const pageMemberIds = paginatedMembers.map(m => m.id);
+  const allPageSelected =
+    pageMemberIds.length > 0 && pageMemberIds.every(id => selectedIds.includes(id));
+
+  const toggleSelectAll = () => {
+    if (allPageSelected) {
+      setSelectedIds(prev => prev.filter(id => !pageMemberIds.includes(id)));
+    } else {
+      setSelectedIds(prev => Array.from(new Set([...prev, ...pageMemberIds])));
+    }
+  };
+
+  const toggleSelectMember = (id: string) => {
+    setSelectedIds(prev =>
+      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    );
+  };
+
   return (
-    <div className="space-y-6 pb-20">
-      {/* Top Action Bar (Header text removed as requested) */}
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <span className="text-xs font-extrabold uppercase tracking-wider text-slate-500">
-            Candidate &amp; Team Management
-          </span>
-        </div>
+    <div className="space-y-5 pb-20">
+      {/* Top Bulk Action Buttons Bar (Yogsathi style) */}
+      <div className="flex flex-wrap items-center gap-2.5">
+        <button
+          type="button"
+          onClick={() => setIsAddModalOpen(true)}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+        >
+          <span className="text-sm leading-none font-bold">+</span>
+          <span>Add Expert</span>
+        </button>
 
-        <div className="flex items-center gap-3">
-          <button
-            type="button"
-            onClick={() => setIsSponsoredModalOpen(true)}
-            className="bg-blue-50 hover:bg-blue-100 text-[#0055FF] border border-[#D4E8F8] px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-xs transition-all hover:scale-[1.02] cursor-pointer"
-            title="Configure Right-Panel Sponsored Ad"
-          >
-            <span>📢</span>
-            <span>Sponsored Banner</span>
-          </button>
+        <button
+          type="button"
+          onClick={handleBulkActivate}
+          disabled={isSubmitting || selectedIds.length === 0}
+          className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+          title={selectedIds.length > 0 ? `Activate ${selectedIds.length} selected` : "Select members to activate"}
+        >
+          <span>✓</span>
+          <span>Bulk Activate {selectedIds.length > 0 ? `(${selectedIds.length})` : ""}</span>
+        </button>
 
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="bg-[#0055FF] hover:bg-blue-600 text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 shadow-md shadow-blue-500/20 transition-all hover:scale-[1.02] cursor-pointer"
-          >
-            <span className="text-base leading-none font-bold">+</span>
-            <span>Add Team Member</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={handleBulkDeactivate}
+          disabled={isSubmitting || selectedIds.length === 0}
+          className="bg-amber-600 hover:bg-amber-700 disabled:opacity-40 disabled:cursor-not-allowed text-white px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-sm transition cursor-pointer"
+          title={selectedIds.length > 0 ? `Deactivate ${selectedIds.length} selected` : "Select members to deactivate"}
+        >
+          <span>✕</span>
+          <span>Bulk Deactivate {selectedIds.length > 0 ? `(${selectedIds.length})` : ""}</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setIsSponsoredModalOpen(true)}
+          className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 px-4 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 shadow-xs transition cursor-pointer ml-auto"
+          title="Configure Right-Panel Sponsored Ad"
+        >
+          <span>📢</span>
+          <span>Sponsored Ad</span>
+        </button>
       </div>
 
-      {/* KPI Stats Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        <div
-          onClick={() => setActiveTab("CANDIDATE")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "CANDIDATE"
-              ? "border-amber-500 bg-amber-50/80 shadow-md ring-2 ring-amber-500/20"
-              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
-          }`}
-        >
-          <span className="text-xs font-bold text-amber-700 block mb-2">Candidate</span>
-          <div className="text-3xl font-black text-slate-900">{candidateCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">Join Us applications</p>
-        </div>
-
-        <div
-          onClick={() => setActiveTab("STUDENT")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "STUDENT"
-              ? "border-blue-500 bg-blue-50/80 shadow-md ring-2 ring-blue-500/20"
-              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
-          }`}
-        >
-          <span className="text-xs font-bold text-blue-700 block mb-2">Student</span>
-          <div className="text-3xl font-black text-slate-900">{studentCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">Visible on Our Team</p>
-        </div>
-
-        <div
-          onClick={() => setActiveTab("PLACED")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "PLACED"
-              ? "border-emerald-500 bg-emerald-50/80 shadow-md ring-2 ring-emerald-500/20"
-              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-emerald-700">Placed</span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">HOME</span>
-          </div>
-          <div className="text-3xl font-black text-slate-900">{placedCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">Shows on home page</p>
-        </div>
-
-        <div
-          onClick={() => setActiveTab("ALUMNI")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "ALUMNI"
-              ? "border-indigo-500 bg-indigo-50/80 shadow-md ring-2 ring-indigo-500/20"
-              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
-          }`}
-        >
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-indigo-700">Alumni</span>
-            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800">HOME</span>
-          </div>
-          <div className="text-3xl font-black text-slate-900">{alumniCount}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">Shows on home page</p>
-        </div>
-
-        <div
-          onClick={() => setActiveTab("ALL")}
-          className={`p-5 rounded-2xl border transition-all cursor-pointer ${
-            activeTab === "ALL"
-              ? "border-slate-500 bg-slate-50 shadow-md ring-2 ring-slate-500/20"
-              : "border-slate-200/90 bg-white hover:border-slate-300 hover:shadow-sm"
-          }`}
-        >
-          <span className="text-xs font-bold text-slate-700 block mb-2">Total</span>
-          <div className="text-3xl font-black text-slate-900">{members.length}</div>
-          <p className="text-[11px] font-medium text-slate-500 mt-1">All profiles</p>
-        </div>
+      {/* Title & Subtitle (Yogsathi style) */}
+      <div>
+        <h1 className="text-2xl font-black tracking-tight text-slate-900 uppercase">
+          MANAGE ALL TRAINERS
+        </h1>
+        <p className="text-xs text-slate-500 mt-1">
+          Bulk actions apply to all trainers — or select rows to limit scope
+        </p>
       </div>
 
-      {/* Tabs & Search Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-1.5 p-1.5 rounded-2xl border border-slate-200 bg-white shadow-xs">
-          <button
-            onClick={() => setActiveTab("CANDIDATE")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "CANDIDATE" ? "bg-amber-500 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            Candidate ({candidateCount})
-          </button>
-          <button
-            onClick={() => setActiveTab("STUDENT")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "STUDENT" ? "bg-[#0055FF] text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            Student ({studentCount})
-          </button>
-          <button
-            onClick={() => setActiveTab("PLACED")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "PLACED" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            Placed ({placedCount})
-          </button>
-          <button
-            onClick={() => setActiveTab("ALUMNI")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "ALUMNI" ? "bg-indigo-600 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            Alumni ({alumniCount})
-          </button>
-          <button
-            onClick={() => setActiveTab("ALL")}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-              activeTab === "ALL" ? "bg-slate-900 text-white shadow-xs" : "text-slate-600 hover:bg-slate-100"
-            }`}
-          >
-            All ({members.length})
-          </button>
+      {/* Controls Bar: Show entries, Tabs, Search */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pt-1">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 text-xs text-slate-600 font-semibold">
+            <span>Show</span>
+            <select
+              value={pageSize}
+              onChange={(e) => {
+                setPageSize(Number(e.target.value));
+                setCurrentPage(1);
+              }}
+              className="bg-white border border-slate-300 rounded-md px-2 py-1 text-xs font-semibold text-slate-800 cursor-pointer focus:outline-none focus:border-[#0055FF]"
+            >
+              <option value={10}>10</option>
+              <option value={25}>25</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span>entries</span>
+          </div>
+
+          {/* Quick Filter Tabs */}
+          <div className="flex flex-wrap items-center gap-1 p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs font-bold">
+            <button
+              type="button"
+              onClick={() => { setActiveTab("ALL"); setCurrentPage(1); }}
+              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                activeTab === "ALL" ? "bg-white text-slate-900 shadow-xs" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              All ({members.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActiveTab("CANDIDATE"); setCurrentPage(1); }}
+              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                activeTab === "CANDIDATE" ? "bg-amber-500 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Candidate ({candidateCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActiveTab("STUDENT"); setCurrentPage(1); }}
+              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                activeTab === "STUDENT" ? "bg-[#0055FF] text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Student ({studentCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActiveTab("PLACED"); setCurrentPage(1); }}
+              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                activeTab === "PLACED" ? "bg-emerald-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Placed ({placedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => { setActiveTab("ALUMNI"); setCurrentPage(1); }}
+              className={`px-3 py-1 rounded-lg transition cursor-pointer ${
+                activeTab === "ALUMNI" ? "bg-indigo-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Alumni ({alumniCount})
+            </button>
+          </div>
         </div>
 
-        <div className="relative w-full sm:w-80">
+        {/* Search */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-slate-500 font-semibold whitespace-nowrap">Search:</span>
           <input
             type="text"
-            placeholder="Search by name, role, college, skill..."
-            className="w-full bg-white text-slate-800 placeholder-slate-400 text-xs font-medium rounded-xl px-4 py-2.5 border border-slate-200 focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/10 shadow-xs transition"
+            placeholder="Search by name, email, phone, cat"
             value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+            className="bg-white border border-slate-300 rounded-md px-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#0055FF] w-64 shadow-xs"
           />
         </div>
       </div>
 
       {feedbackMsg && (
         <div
-          className={`p-4 rounded-xl text-sm font-semibold flex items-center justify-between gap-3 shadow-xs ${
+          className={`p-3.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-3 shadow-xs ${
             feedbackMsg.type === "success"
               ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
               : "bg-red-50 border border-red-200 text-red-800"
@@ -568,174 +712,251 @@ export default function TeamManagementClient({ initialMembers, initialPlacedCand
         </div>
       )}
 
-      {/* Team Members Table */}
-      <div className="rounded-2xl overflow-hidden shadow-xs bg-white border border-slate-200">
+      {/* Main Table — Exact Yogsathi Clean Reference */}
+      <div className="rounded-xl overflow-hidden shadow-xs bg-white border border-slate-200">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="bg-slate-50/90 border-b border-slate-200 text-slate-600 text-[11px] font-bold uppercase tracking-wider">
-                <th className="p-4 font-bold">Candidate / Member</th>
-                <th className="p-4 font-bold">Role &amp; Department</th>
-                <th className="p-4 font-bold">Location &amp; College</th>
-                <th className="p-4 font-bold">Status</th>
-                <th className="p-4 font-bold">Placement (Home Page)</th>
-                <th className="p-4 font-bold text-right">Status / Actions</th>
+              <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 text-[11px] font-bold uppercase tracking-wider">
+                <th className="p-3 w-10 text-center">
+                  <input
+                    type="checkbox"
+                    checked={allPageSelected}
+                    onChange={toggleSelectAll}
+                    className="w-4 h-4 rounded text-[#0055FF] border-slate-300 focus:ring-0 cursor-pointer"
+                  />
+                </th>
+                <th className="p-3 font-bold">Trainer</th>
+                <th className="p-3 font-bold">Contact</th>
+                <th className="p-3 font-bold">Pin Code</th>
+                <th className="p-3 font-bold">Category</th>
+                <th className="p-3 font-bold">City</th>
+                <th className="p-3 font-bold">State</th>
+                <th className="p-3 font-bold">Plan / Role</th>
+                <th className="p-3 font-bold text-center">Status</th>
+                <th className="p-3 font-bold text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredMembers.map(member => (
-                <tr key={member.id} className="hover:bg-slate-50/70 transition-colors">
-                  {/* Candidate Info */}
-                  <td className="p-4 max-w-xs">
-                    <div className="flex items-center gap-3">
-                      <div className="relative w-11 h-11 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
-                        <NameAvatar
-                          name={member.name}
-                          src={member.image}
-                          alt={member.name}
-                          className="w-full h-full object-cover"
-                          textClassName="text-xs"
-                        />
-                        {member.isVerified && (
-                          <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-blue-500 rounded-full border-2 border-white flex items-center justify-center text-[8px] text-white">
-                            ✓
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <div className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                          <span>{member.name}</span>
+              {paginatedMembers.map((member) => {
+                const active = isMemberActive(member);
+                const isSelected = selectedIds.includes(member.id);
+                return (
+                  <tr
+                    key={member.id}
+                    className={`hover:bg-slate-50/80 transition-colors ${
+                      isSelected ? "bg-blue-50/40" : ""
+                    }`}
+                  >
+                    {/* Checkbox */}
+                    <td className="p-3 text-center">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => toggleSelectMember(member.id)}
+                        className="w-4 h-4 rounded text-[#0055FF] border-slate-300 focus:ring-0 cursor-pointer"
+                      />
+                    </td>
+
+                    {/* Trainer / Member Info */}
+                    <td className="p-3">
+                      <div className="flex items-center gap-3">
+                        <div className="relative w-9 h-9 rounded-full overflow-hidden shrink-0 border border-slate-200 bg-slate-100">
+                          <NameAvatar
+                            name={member.name}
+                            src={member.image}
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                            textClassName="text-xs"
+                          />
                         </div>
-                        <div className="text-xs text-slate-500">{member.email}</div>
-                        {member.phone && (
-                          <div className="text-[11px] text-slate-400 font-mono">{member.phone}</div>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-
-                  {/* Role & Department */}
-                  <td className="p-4">
-                    <div className="text-sm font-bold text-slate-900">{member.role}</div>
-                    <div className="text-xs text-slate-500 font-medium">{member.department || "Engineering"}</div>
-                    {member.experience && (
-                      <span className="inline-block mt-1 px-2 py-0.5 text-[10px] font-semibold rounded bg-slate-100 text-slate-600 border border-slate-200">
-                        {member.experience}
-                      </span>
-                    )}
-                  </td>
-
-                  {/* Location & College */}
-                  <td className="p-4 max-w-xs">
-                    <div className="text-xs font-semibold text-slate-700">
-                      📍 {member.city || "Bangalore"}, {member.state || "Karnataka"}
-                    </div>
-                    {member.college && (
-                      <div className="text-[11px] text-slate-500 truncate mt-0.5" title={member.college}>
-                        🎓 {member.college}
-                      </div>
-                    )}
-                  </td>
-
-                  {/* Status Badge */}
-                  <td className="p-4">
-                    {(() => {
-                      const status = normalizeTeamStatus(member.status);
-                      const styles = {
-                        CANDIDATE: "bg-amber-50 text-amber-800 border-amber-200",
-                        STUDENT: "bg-blue-50 text-blue-800 border-blue-200",
-                        PLACED: "bg-emerald-50 text-emerald-800 border-emerald-200",
-                        ALUMNI: "bg-indigo-50 text-indigo-800 border-indigo-200",
-                      }[status];
-                      const labels = {
-                        CANDIDATE: "Candidate",
-                        STUDENT: "Student",
-                        PLACED: "Placed",
-                        ALUMNI: "Alumni",
-                      }[status];
-                      return (
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold border w-fit ${styles}`}>
-                          {labels}
-                        </span>
-                      );
-                    })()}
-                  </td>
-
-                  {/* Placement Status */}
-                  <td className="p-4">
-                    {(() => {
-                      const placement = getPlacementInfo(member);
-                      if (placement) {
-                        return (
-                          <div className="space-y-1">
-                            <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-800 border border-blue-200 flex items-center gap-1.5 w-fit shadow-2xs">
-                              <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                              <span>Placed at {placement.company}</span>
-                            </span>
-                            {placement.package && (
-                              <span className="text-[11px] font-bold text-slate-500 block pl-1">
-                                Pkg: {placement.package}
-                              </span>
-                            )}
+                        <div>
+                          <div className="font-bold text-sm text-slate-900 leading-tight">
+                            {member.name}
                           </div>
-                        );
-                      }
-                      return (
-                        <span className="text-xs text-slate-400 italic">Not placed</span>
-                      );
-                    })()}
-                  </td>
+                          <div className="text-xs text-slate-500 leading-tight mt-0.5">
+                            {member.email}
+                          </div>
+                          {(member.college || member.dateOfBirth) && (
+                            <div className="text-[10px] text-slate-400 mt-0.5">
+                              {member.college ? `🎓 ${member.college}` : ""}
+                              {member.college && member.dateOfBirth ? " • " : ""}
+                              {member.dateOfBirth ? `DOB: ${member.dateOfBirth}` : ""}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </td>
 
-                  {/* Actions */}
-                  <td className="p-4 text-right">
-                    <div className="flex gap-2 justify-end items-center">
+                    {/* Contact */}
+                    <td className="p-3 whitespace-nowrap text-xs text-slate-700 font-medium">
+                      {member.phone ? (
+                        <a
+                          href={`https://wa.me/${member.phone.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 hover:text-emerald-600 font-mono text-[11px]"
+                          title="Chat on WhatsApp"
+                        >
+                          <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] shrink-0 font-bold">
+                            📞
+                          </span>
+                          <span>{member.phone}</span>
+                        </a>
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
+                    </td>
+
+                    {/* Pin Code */}
+                    <td className="p-3 whitespace-nowrap text-xs text-slate-600 font-mono">
+                      {member.pinCode || "—"}
+                    </td>
+
+                    {/* Category Dropdown (Yogsathi Plan style) */}
+                    <td className="p-3 whitespace-nowrap">
                       <select
                         disabled={isSubmitting}
                         value={normalizeTeamStatus(member.status)}
-                        onChange={(e) => handleStatusSelect(member, e.target.value as TeamStatus)}
-                        className="appearance-auto bg-white text-slate-800 border border-slate-300 px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer min-w-[130px] focus:outline-none focus:border-[#0055FF] focus:ring-2 focus:ring-[#0055FF]/15"
+                        onChange={(e) => handleCategoryChange(member, e.target.value as TeamStatus)}
+                        className="appearance-auto bg-slate-50 hover:bg-white text-slate-800 border border-slate-300 px-2 py-1 rounded-md text-xs font-semibold cursor-pointer focus:outline-none focus:border-[#0055FF]"
                       >
-                        {TEAM_STATUSES.map((status) => (
-                          <option key={status} value={status}>
-                            {TEAM_STATUS_LABELS[status]}
-                          </option>
-                        ))}
+                        <option value="CANDIDATE">Candidate</option>
+                        <option value="STUDENT">Student</option>
+                        <option value="PLACED">Placed</option>
+                        <option value="ALUMNI">Alumni</option>
                       </select>
+                    </td>
 
-                      <Link
-                        href={`/admin/team/${member.id}/edit`}
-                        className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors"
-                      >
-                        Edit
-                      </Link>
+                    {/* City */}
+                    <td className="p-3 whitespace-nowrap text-xs text-slate-700">
+                      {member.city || "—"}
+                    </td>
 
-                      {/* Delete Member */}
+                    {/* State */}
+                    <td className="p-3 whitespace-nowrap text-xs text-slate-700">
+                      {member.state || "—"}
+                    </td>
+
+                    {/* Plan / Role */}
+                    <td className="p-3 text-xs text-slate-800 font-medium max-w-[180px] truncate" title={member.role}>
+                      {member.role || "Software Engineering Intern"}
+                    </td>
+
+                    {/* STATUS (Yogsathi Clickable Round Dot: 🟢 Active / 🔴 Inactive) */}
+                    <td className="p-3 text-center">
                       <button
+                        type="button"
                         disabled={isSubmitting}
-                        onClick={() => handleDeleteMember(member.id, member.name)}
-                        className="bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-2.5 py-1.5 rounded-lg text-xs font-bold transition-colors cursor-pointer"
-                        title="Permanently delete this record"
+                        onClick={() => handleToggleActive(member)}
+                        className="inline-flex items-center justify-center p-1 rounded-full hover:bg-slate-100 transition cursor-pointer"
+                        title={active ? "Active (Visible on site) — Click to deactivate" : "Inactive (Hidden) — Click to activate"}
                       >
-                        🗑
+                        <span
+                          className={`w-3.5 h-3.5 rounded-full inline-block transition-transform hover:scale-125 shadow-xs ${
+                            active
+                              ? "bg-emerald-500 ring-2 ring-emerald-500/20"
+                              : "bg-rose-500 ring-2 ring-rose-500/20"
+                          }`}
+                        />
                       </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                    </td>
 
-              {filteredMembers.length === 0 && (
+                    {/* ACTIONS (Yogsathi Style: Edit / Delete / View) */}
+                    <td className="p-3 text-right text-xs font-semibold whitespace-nowrap">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <Link
+                          href={`/admin/team/${member.id}/edit`}
+                          className="text-[#0055FF] hover:underline"
+                        >
+                          Edit
+                        </Link>
+                        <span className="text-slate-300">/</span>
+                        <button
+                          type="button"
+                          disabled={isSubmitting}
+                          onClick={() => handleDeleteMember(member.id, member.name)}
+                          className="text-rose-600 hover:underline cursor-pointer"
+                        >
+                          Delete
+                        </button>
+                        <span className="text-slate-300">/</span>
+                        <Link
+                          href={`/ourteam/${member.id}`}
+                          target="_blank"
+                          className="text-slate-700 hover:text-slate-900 hover:underline"
+                        >
+                          View
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+
+              {paginatedMembers.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="p-12 text-center text-slate-500 font-medium">
-                    {activeTab === "CANDIDATE"
-                      ? "No candidate applications yet. Join Us submissions will appear here."
-                      : "No team members found matching criteria."}
+                  <td colSpan={10} className="p-12 text-center text-slate-500 font-medium">
+                    No records found matching criteria.
                   </td>
                 </tr>
               )}
             </tbody>
           </table>
         </div>
+
+        {/* Pagination Bar (Yogsathi bottom style) */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-3.5 bg-slate-50/70 border-t border-slate-200 text-xs text-slate-600 font-medium">
+          <div>
+            Showing {totalEntries === 0 ? 0 : startIndex + 1} to {Math.min(startIndex + pageSize, totalEntries)} of {totalEntries} entries
+            {selectedIds.length > 0 && (
+              <span className="ml-2 font-bold text-[#0055FF]">
+                ({selectedIds.length} selected)
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={validCurrentPage === 1}
+              className="px-3 py-1 rounded-md border border-slate-300 bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 font-semibold cursor-pointer"
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: totalPages }, (_, i) => i + 1)
+              .filter(p => p === 1 || p === totalPages || Math.abs(p - validCurrentPage) <= 1)
+              .map((p, idx, arr) => (
+                <span key={p} className="flex items-center">
+                  {idx > 0 && arr[idx - 1] !== p - 1 && <span className="px-1 text-slate-400">...</span>}
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage(p)}
+                    className={`px-2.5 py-1 rounded-md text-xs font-bold transition cursor-pointer ${
+                      validCurrentPage === p
+                        ? "bg-[#0055FF] text-white"
+                        : "bg-white border border-slate-300 text-slate-700 hover:bg-slate-100"
+                    }`}
+                  >
+                    {p}
+                  </button>
+                </span>
+              ))}
+
+            <button
+              type="button"
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={validCurrentPage === totalPages || totalPages === 0}
+              className="px-3 py-1 rounded-md border border-slate-300 bg-white text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-slate-100 font-semibold cursor-pointer"
+            >
+              Next
+            </button>
+          </div>
+        </div>
       </div>
+
 
       {/* MODAL: ADD NEW TEAM MEMBER */}
       {mounted &&

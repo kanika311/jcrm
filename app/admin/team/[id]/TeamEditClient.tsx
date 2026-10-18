@@ -332,16 +332,19 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
                   ? "CANDIDATE"
                   : form.status
               }
-              onChange={(e) => update("status", e.target.value as TeamMemberItem["status"])}
+              onChange={(e) => {
+                const nextStatus = e.target.value as TeamMemberItem["status"];
+                update("status", nextStatus);
+                if (nextStatus !== "CANDIDATE") {
+                  update("isVerified", true);
+                }
+              }}
             >
-              <option value="CANDIDATE">Candidate</option>
-              <option value="STUDENT">Student</option>
+              <option value="CANDIDATE">Candidate (Inactive)</option>
+              <option value="STUDENT">Student (Active)</option>
               <option value="PLACED">Placed</option>
               <option value="ALUMNI">Alumni</option>
             </select>
-            <p className="text-xs text-slate-500 mt-1">
-              Placed and Alumni appear on the home page.
-            </p>
           </div>
           <div className="flex items-center gap-2.5 pt-7">
             <input

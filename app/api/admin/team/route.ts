@@ -3,33 +3,36 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { TEAM_MEMBERS } from "@/lib/teamData";
+import { revalidatePath } from "next/cache";
 
 // Helper to seed initial team members if table is completely empty
 async function seedInitialMembersIfEmpty() {
   const count = await prisma.teamMember.count();
   if (count === 0) {
-    for (const m of TEAM_MEMBERS) {
-      await prisma.teamMember.create({
-        data: {
-          name: m.name,
-          email: `${m.name.toLowerCase().replace(/\s+/g, '.')}@jcrmtechnologies.com`,
-          phone: "+91 98765 43210",
-          role: m.role,
-          department: m.role,
-          image: m.image,
-          city: m.city,
-          state: m.state,
-          country: "India",
-          college: m.college,
-          education: m.education,
-          experience: m.experience,
-          skills: m.skills,
-          bio: m.bio,
-          status: "APPROVED",
-          isVerified: true,
-        },
-      });
-    }
+    await Promise.all(
+      TEAM_MEMBERS.map((m) =>
+        prisma.teamMember.create({
+          data: {
+            name: m.name,
+            email: `${m.name.toLowerCase().replace(/\s+/g, '.') }@jcrmtechnologies.com`,
+            phone: "+91 98765 43210",
+            role: m.role,
+            department: m.role,
+            image: m.image,
+            city: m.city,
+            state: m.state,
+            country: "India",
+            college: m.college,
+            education: m.education,
+            experience: m.experience,
+            skills: m.skills,
+            bio: m.bio,
+            status: "APPROVED",
+            isVerified: true,
+          },
+        })
+      )
+    );
   }
 }
 
@@ -133,7 +136,7 @@ export async function POST(req: Request) {
   }
 }
 
-// PUT /api/admin/team — Update Team Member or Change Status (Approve / Reject)
+// PUT /api/admin/team — Update Team Member or Change Status (Approve / Reject / Bulk)
 export async function PUT(req: Request) {
   try {
     const session = await getServerSession(authOptions);
@@ -142,10 +145,10 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { id, ...updates } = body;
+    const { id, ids, ...updates } = body;
 
-    if (!id) {
-      return NextResponse.json({ message: "Member ID is required" }, { status: 400 });
+    if (!id && (!Array.isArray(ids) || ids.length === 0)) {
+      return NextResponse.json({ message: "Member ID or IDs array is required" }, { status: 400 });
     }
 
     if (updates.skills && typeof updates.skills === "string") {
@@ -162,10 +165,41 @@ export async function PUT(req: Request) {
       if (updates[key] !== undefined) data[key] = updates[key];
     }
 
+    if (data.status) {
+      if (["STUDENT", "APPROVED", "PLACED", "ALUMNI"].includes(data.status)) {
+        if (data.isVerified === undefined) data.isVerified = true;
+      } else if (["CANDIDATE", "PENDING", "REJECTED"].includes(data.status)) {
+        if (data.isVerified === undefined) data.isVerified = false;
+      }
+    }
+
+    if (Array.isArray(ids) && ids.length > 0) {
+      await prisma.teamMember.updateMany({
+        where: { id: { in: ids } },
+        data,
+      });
+
+      try {
+        revalidatePath("/ourteam");
+        revalidatePath("/im");
+        revalidatePath("/admin/team");
+        revalidatePath("/");
+      } catch {}
+
+      return NextResponse.json({ success: true, count: ids.length }, { status: 200 });
+    }
+
     const updatedMember = await prisma.teamMember.update({
       where: { id },
       data,
     });
+
+    try {
+      revalidatePath("/ourteam");
+      revalidatePath("/im");
+      revalidatePath("/admin/team");
+      revalidatePath("/");
+    } catch {}
 
     return NextResponse.json({ success: true, member: updatedMember }, { status: 200 });
   } catch (error: any) {
@@ -184,12 +218,25 @@ export async function DELETE(req: Request) {
 
     const { searchParams } = new URL(req.url);
     let id = searchParams.get("id");
+    let ids: string[] = [];
 
-    if (!id) {
+    try {
+      const body = await req.json();
+      if (body.id) id = body.id;
+      if (Array.isArray(body.ids)) ids = body.ids;
+    } catch {}
+
+    if (ids.length > 0) {
+      await prisma.teamMember.deleteMany({
+        where: { id: { in: ids } },
+      });
       try {
-        const body = await req.json();
-        id = body.id;
+        revalidatePath("/ourteam");
+        revalidatePath("/im");
+        revalidatePath("/admin/team");
+        revalidatePath("/");
       } catch {}
+      return NextResponse.json({ success: true, count: ids.length }, { status: 200 });
     }
 
     if (!id) {
@@ -199,6 +246,13 @@ export async function DELETE(req: Request) {
     await prisma.teamMember.delete({
       where: { id },
     });
+
+    try {
+      revalidatePath("/ourteam");
+      revalidatePath("/im");
+      revalidatePath("/admin/team");
+      revalidatePath("/");
+    } catch {}
 
     return NextResponse.json({ success: true, message: "Member deleted successfully" }, { status: 200 });
   } catch (error: any) {

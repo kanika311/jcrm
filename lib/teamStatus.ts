@@ -20,12 +20,19 @@ export function isHomepageStatus(status?: string | null) {
   return normalized === "PLACED" || normalized === "ALUMNI";
 }
 
+/**
+ * Only active members (Student, Placed, Alumni) appear on the public Our Team site.
+ * Newly registered candidates remain INACTIVE until admin approves/activates them.
+ */
 export function isOurTeamStatus(status?: string | null) {
   const normalized = normalizeTeamStatus(status);
   return (
-    normalized === "CANDIDATE" ||
     normalized === "STUDENT" ||
     normalized === "PLACED" ||
     normalized === "ALUMNI"
   );
+}
+
+export function isActiveStatus(status?: string | null): boolean {
+  return isOurTeamStatus(status);
 }

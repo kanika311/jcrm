@@ -1,6 +1,10 @@
 import { getCandidateById, TEAM_MEMBERS, maskEmail, maskPhone } from "@/lib/teamData";
 import CandidateDetailClient from "./CandidateDetailClient";
 import { prisma } from "@/lib/prisma";
+import { isOurTeamStatus } from "@/lib/teamStatus";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
+import Link from "next/link";
 
 export const dynamicParams = true;
 
@@ -11,6 +15,9 @@ export async function generateStaticParams() {
 
   try {
     const dbMembers = await prisma.teamMember.findMany({
+      where: {
+        status: { in: ["STUDENT", "APPROVED", "PLACED", "ALUMNI"] },
+      },
       select: { id: true },
     });
     return [...staticList, ...dbMembers.map((m) => ({ id: m.id }))];
@@ -31,6 +38,25 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   } catch {}
 
   if (dbMember) {
+    const isPubliclyActive = isOurTeamStatus(dbMember.status);
+    if (!isPubliclyActive) {
+      const session = await getServerSession(authOptions).catch(() => null);
+      const isAdmin = session?.user?.role === "ADMIN";
+      if (!isAdmin) {
+        return (
+          <div className="max-w-xl mx-auto my-20 p-8 text-center bg-white rounded-2xl border border-slate-200">
+            <h2 className="text-xl font-bold text-slate-800 mb-2">Profile Under Review</h2>
+            <p className="text-sm text-slate-600 mb-6">
+              This candidate application is currently inactive and awaiting admin activation.
+            </p>
+            <Link href="/ourteam" className="text-sm font-bold text-[#0055FF] hover:underline">
+              ← Back to Our Team
+            </Link>
+          </div>
+        );
+      }
+    }
+
     const maskedPhone = maskPhone(dbMember.phone);
     const maskedEmail = maskEmail(dbMember.email);
 
