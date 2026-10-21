@@ -4,31 +4,14 @@ import GoogleProvider from "next-auth/providers/google";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
-import type { Adapter, AdapterAccount } from "next-auth/adapters";
+import type { Adapter } from "next-auth/adapters";
 import { cookies } from "next/headers";
 
 const prismaAdapter = PrismaAdapter(prisma) as Adapter;
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
-  adapter: {
-    ...prismaAdapter,
-    linkAccount: (account: AdapterAccount) =>
-      prismaAdapter.linkAccount!({
-        userId: account.userId,
-        type: account.type,
-        provider: account.provider,
-        providerAccountId: account.providerAccountId,
-        refresh_token: account.refresh_token,
-        access_token: account.access_token,
-        expires_at: account.expires_at,
-        token_type: account.token_type,
-        scope: account.scope,
-        id_token: account.id_token,
-        session_state:
-          account.session_state == null ? undefined : String(account.session_state),
-      }),
-  },
+  adapter: prismaAdapter,
   session: {
     strategy: "jwt",
   },
