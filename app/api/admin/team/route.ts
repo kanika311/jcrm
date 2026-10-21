@@ -4,6 +4,29 @@ import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import { TEAM_MEMBERS } from "@/lib/teamData";
 import { revalidatePath } from "next/cache";
+import sharp from "sharp";
+
+async function compressImageIfBase64(imageStr?: string | null): Promise<string | null> {
+  if (!imageStr || typeof imageStr !== "string") return imageStr || null;
+  const trimmed = imageStr.trim();
+  if (!trimmed.startsWith("data:image/")) return trimmed;
+
+  try {
+    const match = trimmed.match(/^data:image\/[a-zA-Z0-9+.-]+;base64,(.+)$/);
+    if (match && match[1]) {
+      const buffer = Buffer.from(match[1], "base64");
+      const compressed = await sharp(buffer, { failOn: "none" })
+        .rotate()
+        .resize(320, 320, { fit: "cover", withoutEnlargement: true })
+        .webp({ quality: 80, effort: 4 })
+        .toBuffer();
+      return `data:image/webp;base64,${compressed.toString("base64")}`;
+    }
+  } catch (err: any) {
+    console.warn("[ADMIN_TEAM_SHARP_WARN]", err?.message);
+  }
+  return trimmed;
+}
 
 // Helper to seed initial team members if table is completely empty
 async function seedInitialMembersIfEmpty() {
@@ -106,6 +129,8 @@ export async function POST(req: Request) {
       ? skills.split(",").map((s: string) => s.trim()).filter(Boolean)
       : [];
 
+    const finalImage = await compressImageIfBase64(image);
+
     const member = await prisma.teamMember.create({
       data: {
         name,
@@ -113,7 +138,7 @@ export async function POST(req: Request) {
         phone: phone || null,
         role: role || "Software Engineer",
         department: department || role || "Engineering",
-        image: image || null,
+        image: finalImage,
         city: city || null,
         state: state || null,
         country: country || "India",
@@ -171,6 +196,10 @@ export async function PUT(req: Request) {
       } else if (["CANDIDATE", "PENDING", "REJECTED"].includes(data.status)) {
         if (data.isVerified === undefined) data.isVerified = false;
       }
+    }
+
+    if (data.image) {
+      data.image = await compressImageIfBase64(data.image);
     }
 
     if (Array.isArray(ids) && ids.length > 0) {

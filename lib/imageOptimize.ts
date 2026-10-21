@@ -18,8 +18,9 @@ export function getOptimizedImageUrl(
   const trimmed = url.trim();
   if (!trimmed) return "";
 
-  // Data SVG or inline vector graphics don't need raster compression
-  if (trimmed.startsWith("data:image/svg+xml")) return trimmed;
+  // 0. Data URLs (SVG, PNG, JPEG, WebP, etc.) - NEVER route through GET query params!
+  // URLs in GET requests have 2KB-8KB length limits. Passing base64 in query string causes 414 URI Too Long!
+  if (trimmed.startsWith("data:")) return trimmed;
 
   const { width = 320, height, quality = 80, fit = "cover" } = options;
 
@@ -50,8 +51,8 @@ export function getOptimizedImageUrl(
     }
   }
 
-  // 3. If already optimized via our API, return as is
-  if (trimmed.startsWith("/api/image-optimize")) {
+  // 3. If already optimized via our API or dynamic avatar endpoint, return as is
+  if (trimmed.startsWith("/api/image-optimize") || trimmed.startsWith("/api/avatar/")) {
     return trimmed;
   }
 

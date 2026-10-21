@@ -1,4 +1,4 @@
-import { getCandidateById, TEAM_MEMBERS, maskEmail, maskPhone } from "@/lib/teamData";
+import { getCandidateById, TEAM_MEMBERS, maskEmail, maskPhone, toPublicTeamMember } from "@/lib/teamData";
 import CandidateDetailClient from "./CandidateDetailClient";
 import { prisma } from "@/lib/prisma";
 import { isOurTeamStatus } from "@/lib/teamStatus";
@@ -57,26 +57,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
       }
     }
 
-    const maskedPhone = maskPhone(dbMember.phone);
-    const maskedEmail = maskEmail(dbMember.email);
-
-    const member = {
-      id: dbMember.id,
-      name: dbMember.name,
-      role: dbMember.role || "Software Engineering Intern",
-      image: dbMember.image || "",
-      city: dbMember.city || "Bangalore",
-      state: dbMember.state || "Karnataka",
-      maskedPhone,
-      maskedEmail,
-      college: dbMember.college || "JCRM Engineering",
-      education: dbMember.education || "Bachelor of Technology",
-      experience: dbMember.experience || "Fresher / Intern",
-      skills: dbMember.skills && dbMember.skills.length > 0 ? dbMember.skills : ["Full Stack", "JavaScript", "React"],
-      bio: dbMember.bio || `${dbMember.name} is a software engineer and contributor at JCRM Technologies.`,
-      isVerified: dbMember.isVerified,
-    };
-
+    const member = toPublicTeamMember(dbMember);
     return <CandidateDetailClient member={member} />;
   }
 

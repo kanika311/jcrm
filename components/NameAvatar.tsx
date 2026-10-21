@@ -66,8 +66,8 @@ export default function NameAvatar({
         loading="lazy"
         decoding="async"
         onError={() => {
-          // If the optimized URL failed, fallback to original once before giving up
-          if (currentSrc !== trimmed && trimmed) {
+          // If the optimized URL failed, fallback to original once (only if not a heavy data URL)
+          if (currentSrc !== trimmed && trimmed && !trimmed.startsWith("data:")) {
             setCurrentSrc(trimmed);
           } else {
             setFailed(true);

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import sharp from "sharp";
 
 export async function POST(req: Request) {
   try {
@@ -35,6 +36,24 @@ export async function POST(req: Request) {
       ? skills.split(",").map((s: string) => s.trim()).filter(Boolean)
       : [];
 
+    let finalPhoto = photoPreview || null;
+    if (photoPreview && typeof photoPreview === "string" && photoPreview.startsWith("data:image/")) {
+      try {
+        const match = photoPreview.match(/^data:image\/[a-zA-Z0-9+.-]+;base64,(.+)$/);
+        if (match && match[1]) {
+          const rawBuffer = Buffer.from(match[1], "base64");
+          const compressed = await sharp(rawBuffer, { failOn: "none" })
+            .rotate()
+            .resize(480, 480, { fit: "cover", withoutEnlargement: true })
+            .webp({ quality: 80, effort: 4 })
+            .toBuffer();
+          finalPhoto = `data:image/webp;base64,${compressed.toString("base64")}`;
+        }
+      } catch (sharpErr) {
+        console.warn("[JOIN_PHOTO_COMPRESSION_WARN]", sharpErr);
+      }
+    }
+
     const newMember = await prisma.teamMember.create({
       data: {
         name: fullName,
@@ -42,7 +61,7 @@ export async function POST(req: Request) {
         phone: phoneNumber || null,
         role: department || "Software Engineering Intern",
         department: department || null,
-        image: photoPreview || null,
+        image: finalPhoto,
         city: city || null,
         state: state || null,
         country: country || "India",

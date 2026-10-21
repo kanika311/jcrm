@@ -37,13 +37,16 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
-  serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma"],
+  serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma", "sharp"],
   experimental: {
     optimizePackageImports: ["react-icons", "framer-motion"],
   },
   images: {
     formats: ['image/avif', 'image/webp'],
     localPatterns: [
+      {
+        pathname: '/api/avatar/**',
+      },
       {
         pathname: '/api/image-optimize',
         search: '?**',

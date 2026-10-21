@@ -174,11 +174,18 @@ export function toPublicTeamMember(m: {
   bio?: string | null;
   isVerified?: boolean | null;
 }): TeamMember {
+  let cleanImage = (m.image || "").trim();
+  // If image is a large base64 data URL, NEVER send it in SSR JSON props!
+  // Instead, delegate to /api/avatar/[id] which compresses and caches it on demand as WebP.
+  if (cleanImage.startsWith("data:image/")) {
+    cleanImage = `/api/avatar/${m.id}`;
+  }
+
   return {
     id: m.id,
     name: m.name,
     role: m.role || "Software Engineering Intern",
-    image: m.image || "",
+    image: cleanImage,
     city: m.city || "Bangalore",
     state: m.state || "Karnataka",
     maskedPhone: maskPhone(m.phone),

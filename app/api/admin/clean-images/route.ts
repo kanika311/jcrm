@@ -1,31 +1,21 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import sharp from "sharp";
-import path from "path";
-import { writeFile, mkdir } from "fs/promises";
 
 export const dynamic = "force-dynamic";
 
-async function convertBase64ToWebp(base64Str: string, prefix: string): Promise<string | null> {
+async function convertBase64ToWebp(base64Str: string): Promise<string | null> {
   const match = base64Str.match(/^data:image\/[a-zA-Z0-9+.-]+;base64,(.+)$/);
   if (!match || !match[1]) return null;
 
   const buffer = Buffer.from(match[1], "base64");
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await mkdir(uploadDir, { recursive: true });
-
-  const safePrefix = prefix.replace(/[^\w-]/g, "").slice(0, 30);
-  const filename = `${safePrefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}.webp`;
-  const filePath = path.join(uploadDir, filename);
-
   const webpBuffer = await sharp(buffer, { failOn: "none" })
     .rotate()
     .resize(320, 320, { fit: "cover" })
     .webp({ quality: 80, effort: 4 })
     .toBuffer();
 
-  await writeFile(filePath, webpBuffer);
-  return `/uploads/${filename}`;
+  return `data:image/webp;base64,${webpBuffer.toString("base64")}`;
 }
 
 export async function GET() {
@@ -41,7 +31,7 @@ export async function GET() {
     for (const m of members) {
       if (m.image && m.image.startsWith("data:image/")) {
         try {
-          const webpUrl = await convertBase64ToWebp(m.image, `member-${m.id}`);
+          const webpUrl = await convertBase64ToWebp(m.image);
           if (webpUrl) {
             await prisma.teamMember.update({
               where: { id: m.id },
@@ -68,7 +58,7 @@ export async function GET() {
         const c = candidates[i];
         if (c.image && typeof c.image === "string" && c.image.startsWith("data:image/")) {
           try {
-            const webpUrl = await convertBase64ToWebp(c.image, `candidate-${c.id || i}`);
+            const webpUrl = await convertBase64ToWebp(c.image);
             if (webpUrl) {
               candidates[i].image = webpUrl;
               modified = true;
