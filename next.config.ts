@@ -1,22 +1,29 @@
 import type { NextConfig } from "next";
 
+const isDev = process.env.NODE_ENV !== "production";
+
 const securityHeaders = [
   {
     key: "Content-Security-Policy",
     value: `
       default-src 'self';
-      script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;
+      ${isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;" : "script-src 'self' 'unsafe-inline' https:;"}
       style-src 'self' 'unsafe-inline' https:;
       img-src 'self' data: blob: https:;
       media-src 'self' https: blob:;
-      font-src 'self' https:;
+      font-src 'self' https: data:;
       connect-src 'self' https: wss:;
       frame-src 'self' https://api.razorpay.com https://*.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://*.youtube.com https://player.vimeo.com https://*.vimeo.com https://meet.jit.si https://*.jit.si https: blob:;
       child-src 'self' https://api.razorpay.com https://*.razorpay.com https://checkout.razorpay.com https: blob:;
+      frame-ancestors 'self';
       object-src 'none';
       base-uri 'self';
       form-action 'self' https://api.razorpay.com https://*.razorpay.com;
     `.replace(/\n/g, "").replace(/\s+/g, " ").trim()
+  },
+  {
+    key: "Permissions-Policy",
+    value: "camera=(self \"https://meet.jit.si\"), microphone=(self \"https://meet.jit.si\"), geolocation=(), browsing-topics=()"
   },
   {
     key: "Referrer-Policy",
@@ -37,6 +44,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  poweredByHeader: false,
   serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma", "sharp"],
   experimental: {
     optimizePackageImports: ["react-icons", "framer-motion"],
@@ -66,11 +74,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: '**',
+        hostname: 'lh3.googleusercontent.com',
       },
       {
-        protocol: 'http',
-        hostname: '**',
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
       },
     ],
   },
@@ -113,6 +125,11 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
+      {
+        source: '/security.txt',
+        destination: '/.well-known/security.txt',
+        permanent: true,
+      },
       {
         source: '/about-us',
         destination: '/about',

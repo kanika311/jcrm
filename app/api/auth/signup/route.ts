@@ -1,92 +1,105 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 
 export async function POST(req: Request) {
   try {
+    const ip = getClientIp(req);
+    const rate = checkRateLimit(`signup_${ip}`, 10, 15 * 60 * 1000);
+    if (!rate.allowed) {
+      return NextResponse.json(
+        { message: `Too many registration attempts. Please try again in ${Math.ceil(rate.resetSeconds / 60)} minutes.` },
+        { 
+          status: 429,
+          headers: { "Retry-After": String(rate.resetSeconds) }
+        }
+      );
+    }
+
     const body = await req.json();
     const { fullName, email, password, phoneNumber, role } = body;
 
-    if (!email || !password || !fullName) {
+    if (!email || typeof email !== "string" || !email.trim()) {
       return NextResponse.json(
-        { message: "Missing required fields" },
+        { message: "A valid email address is required" },
+        { status: 400 }
+      );
+    }
+
+    if (!password || typeof password !== "string" || password.length < 6) {
+      return NextResponse.json(
+        { message: "Password must be at least 6 characters long" },
+        { status: 400 }
+      );
+    }
+
+    if (!fullName || typeof fullName !== "string" || !fullName.trim()) {
+      return NextResponse.json(
+        { message: "Full name is required" },
         { status: 400 }
       );
     }
 
     const normalizedEmail = email.trim().toLowerCase();
-
-    // Default to STUDENT if role is missing or invalid
-    let validRole = role === "INSTRUCTOR" ? "INSTRUCTOR" : "STUDENT";
-    
-    // Hardcoded Super Admin Check
-    const superAdminEmail = (process.env.SUPER_ADMIN_EMAIL || "pandey.ashutosh699@gmail.com").toLowerCase();
-    if (normalizedEmail === superAdminEmail) {
-      validRole = "ADMIN";
-    }
-
-    // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
-      where: { email: normalizedEmail },
-    });
-
-    // Hash password
-    const passwordHash = await bcrypt.hash(password, 10);
-
-    // If user already exists in database
-    if (existingUser) {
-      // 1. If existing user already has the requested role
-      if (existingUser.role === validRole) {
-        return NextResponse.json(
-          { 
-            message: `An account with this email is already registered as ${validRole === "INSTRUCTOR" ? "Teacher / Faculty" : "Student"}. Please switch to Sign In.` 
-          },
-          { status: 409 }
-        );
-      }
-
-      // 2. If existing user has a DIFFERENT role (e.g. was Student, now registering as Teacher or vice-versa)
-      // Allow seamless role activation & update credentials
-      const updatedUser = await prisma.user.update({
-        where: { email: normalizedEmail },
-        data: {
-          role: validRole as "STUDENT" | "INSTRUCTOR" | "ADMIN",
-          passwordHash,
-          fullName: fullName || existingUser.fullName,
-          name: fullName || existingUser.name,
-          phoneNumber: phoneNumber || existingUser.phoneNumber,
-        },
-      });
-
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(normalizedEmail)) {
       return NextResponse.json(
-        { 
-          message: `Your account role has been updated to ${validRole === "INSTRUCTOR" ? "Teacher / Faculty" : "Student"} successfully!`,
-          userId: updatedUser.id 
-        },
-        { status: 200 }
+        { message: "Please provide a valid email address format" },
+        { status: 400 }
       );
     }
 
-    // 3. Create brand new user (same phone number across accounts is fully supported)
+    // Role safety: Public registration only permits STUDENT or INSTRUCTOR.
+    // ADMIN roles can NEVER be claimed through public signup.
+    const validRole: "STUDENT" | "INSTRUCTOR" = role === "INSTRUCTOR" ? "INSTRUCTOR" : "STUDENT";
+
+    // Check if user already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          { email: { equals: normalizedEmail, mode: "insensitive" } },
+        ],
+      },
+    });
+
+    if (existingUser) {
+      return NextResponse.json(
+        { 
+          message: "An account with this email is already registered. Please switch to Sign In." 
+        },
+        { status: 409 }
+      );
+    }
+
+    // Hash password securely with bcrypt
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Create new user in database
     const newUser = await prisma.user.create({
       data: {
-        fullName,
-        name: fullName, // NextAuth uses 'name'
+        fullName: fullName.trim(),
+        name: fullName.trim(), // NextAuth standard adapter field
         email: normalizedEmail,
-        phoneNumber: phoneNumber || null,
+        phoneNumber: phoneNumber ? String(phoneNumber).trim() : null,
         passwordHash,
-        role: validRole as "STUDENT" | "INSTRUCTOR" | "ADMIN",
+        role: validRole,
       },
     });
 
     return NextResponse.json(
-      { message: "User created successfully", userId: newUser.id },
+      { 
+        message: "User created successfully", 
+        userId: newUser.id,
+        role: newUser.role
+      },
       { status: 201 }
     );
   } catch (error: any) {
-    console.error("Signup error:", error);
+    console.error("Signup error occurred:", error?.message || error);
     return NextResponse.json(
-      { message: error?.message || "Internal server error" },
+      { message: "Unable to complete registration. Please try again later." },
       { status: 500 }
     );
   }

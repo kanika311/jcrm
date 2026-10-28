@@ -12,13 +12,14 @@ const prismaAdapter = PrismaAdapter(prisma) as Adapter;
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
   adapter: prismaAdapter,
+  useSecureCookies: process.env.NODE_ENV === "production" && !process.env.NEXTAUTH_URL?.startsWith("http://localhost"),
   session: {
     strategy: "jwt",
   },
   pages: {
     signIn: "/auth",
     newUser: "/onboarding",
-    error: "/jcrm-sushant",
+    error: "/auth",
   },
   providers: [
     GoogleProvider({
@@ -66,39 +67,41 @@ export const authOptions: NextAuthOptions = {
           throw new Error("Missing credentials");
         }
 
-        const emailOrPhone = credentials.email.trim();
+        const rawInput = credentials.email.trim();
+        const normalizedEmail = rawInput.toLowerCase();
         const user = await prisma.user.findFirst({
           where: {
             OR: [
-              { email: { equals: emailOrPhone, mode: "insensitive" } },
-              { phoneNumber: emailOrPhone }
+              { email: normalizedEmail },
+              { email: { equals: rawInput, mode: "insensitive" } },
+              { phoneNumber: rawInput }
             ]
           }
         });
 
         if (!user) {
-          throw new Error("User not found with this email or phone number");
+          throw new Error("Invalid credentials. Please verify your email/phone and password.");
         }
 
         if (!user.passwordHash) {
-          throw new Error("Please log in with Google");
+          throw new Error("This account is registered with Google. Please use Google Sign In.");
         }
 
         if (user.isBlocked) {
-          throw new Error("Your account has been blocked by the admin.");
+          throw new Error("Your account has been blocked by the administrator.");
         }
 
         const isValid = await bcrypt.compare(credentials.password, user.passwordHash);
 
         if (!isValid) {
-          throw new Error("Invalid password");
+          throw new Error("Invalid credentials. Please verify your email/phone and password.");
         }
 
         return {
           id: user.id,
           email: user.email,
-          name: user.fullName,
-          role: user.role,
+          name: user.fullName || user.name || "User",
+          role: user.role || "STUDENT",
         };
       },
     }),

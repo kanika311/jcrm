@@ -176,7 +176,6 @@ export default function Footer({ cmsData, siteName, forceShow = false }: { cmsDa
                 <div className="pt-1 text-[10px] text-slate-500 font-semibold border-t border-blue-100/60 mt-1 space-y-0.5">
                   <p>MSME / UDYAM: {companyReg}</p>
                   <p>ISO: ISO 9001:2015 Verified</p>
-                  <p>Startup India: DIPP129384 (TODO: Replace with official DIPP number)</p>
                 </div>
                 <Link href="/contact" className="inline-block text-[#0055FF] font-bold hover:underline pt-0.5">
                   Contact Us &bull; Book Free Demo &rarr;

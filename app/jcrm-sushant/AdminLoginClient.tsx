@@ -61,8 +61,7 @@ export default function AdminLoginClient() {
         userEmail === "pandey.ashutosh699@gmail.com";
 
       if (role === "ADMIN" || isSuperAdmin) {
-        router.push("/admin");
-        router.refresh();
+        window.location.href = "/admin";
       } else {
         await signOut({ redirect: false });
         setErrorMsg(

@@ -1,0 +1,8 @@
+Contact: mailto:security@jcrm.in
+Contact: mailto:info@jcrm.in
+Expires: 2027-12-31T23:59:59.000Z
+Preferred-Languages: en
+Canonical: https://www.jcrm.in/.well-known/security.txt
+Policy: https://www.jcrm.in/legal/privacy
+Acknowledgments: https://www.jcrm.in/about
+Hiring: https://www.jcrm.in/careers

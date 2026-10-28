@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { signIn } from "next-auth/react";
+import { signIn, signOut, getSession } from "next-auth/react";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 
@@ -85,45 +85,38 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
   // Route user according to their verified role
   const routeByRole = async () => {
     try {
-      const sessionRes = await fetch("/api/auth/session");
-      const sessionData = await sessionRes.json();
-      const role = sessionData?.user?.role;
+      let session = await getSession();
+      // If session is not immediately available, retry briefly for cookie propagation
+      if (!session?.user) {
+        for (let i = 0; i < 3; i++) {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+          session = await getSession();
+          if (session?.user) break;
+        }
+      }
+
+      const role = session?.user?.role;
 
       // STRICT CHECK: Admin is NEVER allowed to log in from the public /auth portal
       if (role === "ADMIN") {
-        await import("next-auth/react").then(m => m.signOut({ redirect: false }));
+        await signOut({ redirect: false });
         setErrorMsg("Access Denied: Administrators must sign in through the Admin Console.");
         setIsLoading(false);
         return;
       }
 
-      // Role match check for login
-      if (activeTab === "login") {
-        if (loginRole === "INSTRUCTOR" && role !== "INSTRUCTOR") {
-          await import("next-auth/react").then(m => m.signOut({ redirect: false }));
-          setErrorMsg("This account is registered as a Student. Please select 'Student' role to sign in.");
-          setIsLoading(false);
-          return;
-        }
-        if (loginRole === "STUDENT" && role !== "STUDENT") {
-          await import("next-auth/react").then(m => m.signOut({ redirect: false }));
-          setErrorMsg("This account is registered as an Instructor. Please select 'Teacher / Faculty' role to sign in.");
-          setIsLoading(false);
-          return;
-        }
+      let destination = "/student";
+      if (role === "INSTRUCTOR") {
+        destination = "/faculty";
+      } else if (callbackUrl && !callbackUrl.startsWith("/auth")) {
+        destination = callbackUrl;
       }
 
-      if (callbackUrl && callbackUrl !== "/student") {
-        router.push(callbackUrl);
-      } else if (role === "INSTRUCTOR") {
-        router.push("/faculty");
-      } else {
-        router.push("/student");
-      }
-      router.refresh();
+      // Hard navigation flushes stale App Router RSC prefetch caches and syncs cookies
+      window.location.href = destination;
     } catch {
-      router.push(signupRole === "INSTRUCTOR" ? "/faculty" : "/student");
-      router.refresh();
+      const fallback = (loginRole === "INSTRUCTOR" || signupRole === "INSTRUCTOR") ? "/faculty" : "/student";
+      window.location.href = callbackUrl && !callbackUrl.startsWith("/auth") ? callbackUrl : fallback;
     }
   };
 

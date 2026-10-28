@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
 
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
-  try {
-    console.log("Testing minimal session retrieval without firebase-admin...");
-    const session = await getServerSession({
-      providers: [],
-      secret: process.env.NEXTAUTH_SECRET || "dummy_secret"
-    });
-    return NextResponse.json({ 
-      success: true, 
-      hasSession: !!session,
-      user: session?.user || null 
-    });
-  } catch (error: any) {
-    console.error("Test admin session error:", error);
-    return NextResponse.json({ 
-      success: false, 
-      error: error.message || String(error), 
-      stack: error.stack 
-    }, { status: 500 });
+  if (process.env.NODE_ENV === "production") {
+    return new NextResponse(null, { status: 404 });
   }
+
+  const session = await getServerSession(authOptions);
+  if (!session || session.user?.role !== "ADMIN") {
+    return new NextResponse(null, { status: 404 });
+  }
+
+  return NextResponse.json({ 
+    success: true, 
+    hasSession: true,
+    userRole: session.user.role 
+  });
 }
+
