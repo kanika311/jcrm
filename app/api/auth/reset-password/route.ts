@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       const parseResult = passwordResetRequestSchema.safeParse(body);
       if (!parseResult.success) {
         return NextResponse.json(
-          { error: parseResult.error.errors[0]?.message || "Invalid email" },
+          { error: parseResult.error.issues[0]?.message || "Invalid email" },
           { status: 400 }
         );
       }
@@ -135,7 +135,7 @@ export async function POST(req: Request) {
       const parseResult = passwordResetConfirmSchema.safeParse(body);
       if (!parseResult.success) {
         return NextResponse.json(
-          { error: parseResult.error.errors[0]?.message || "Invalid reset payload" },
+          { error: parseResult.error.issues[0]?.message || "Invalid reset payload" },
           { status: 400 }
         );
       }
