@@ -4,14 +4,14 @@ interface RateLimitEntry {
   resetAt: number;
 }
 
-const ipStore = new Map<string, RateLimitEntry>();
+const rateLimitStore = new Map<string, RateLimitEntry>();
 
 // Cleanup stale records periodically
 setInterval(() => {
   const now = Date.now();
-  for (const [key, entry] of ipStore.entries()) {
+  for (const [key, entry] of rateLimitStore.entries()) {
     if (entry.resetAt <= now) {
-      ipStore.delete(key);
+      rateLimitStore.delete(key);
     }
   }
 }, 60 * 1000).unref?.();
@@ -24,21 +24,21 @@ export interface RateLimitResult {
 }
 
 /**
- * Check if a request from the given IP exceeds the limit within the time window.
- * @param ip Client IP address or unique identifier
+ * Check if a request for the given key exceeds the limit within the time window.
+ * @param key Unique identifier (IP, email, or composite key)
  * @param limit Maximum allowed requests in the window (default: 10)
  * @param windowMs Time window in milliseconds (default: 15 minutes = 900,000 ms)
  */
 export function checkRateLimit(
-  ip: string,
+  key: string,
   limit: number = 10,
   windowMs: number = 15 * 60 * 1000
 ): RateLimitResult {
   const now = Date.now();
-  const entry = ipStore.get(ip);
+  const entry = rateLimitStore.get(key);
 
   if (!entry || entry.resetAt <= now) {
-    ipStore.set(ip, { count: 1, resetAt: now + windowMs });
+    rateLimitStore.set(key, { count: 1, resetAt: now + windowMs });
     return {
       allowed: true,
       limit,
@@ -65,10 +65,33 @@ export function checkRateLimit(
   };
 }
 
+/**
+ * Clear a rate limit entry (e.g. upon successful authentication)
+ */
+export function clearRateLimit(key: string): void {
+  rateLimitStore.delete(key);
+}
+
+/**
+ * Extract sanitized client IP address from request headers.
+ * Under Apache reverse proxy, X-Real-IP is set to the client's actual IP.
+ */
 export function getClientIp(req: Request): string {
+  // 1. Prefer x-real-ip set by trusted reverse proxy (Apache)
+  const realIp = req.headers.get("x-real-ip");
+  if (realIp && realIp.trim()) {
+    return realIp.trim();
+  }
+
+  // 2. Check x-forwarded-for
   const forwarded = req.headers.get("x-forwarded-for");
   if (forwarded) {
-    return forwarded.split(",")[0].trim();
+    const parts = forwarded.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 0) {
+      return parts[0];
+    }
   }
-  return req.headers.get("x-real-ip") || "127.0.0.1";
+
+  // 3. Fallback
+  return "127.0.0.1";
 }

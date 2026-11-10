@@ -129,9 +129,9 @@ export async function POST(req: Request) {
     const { role, lifeStage, organization, degree, experienceYears, techStack, bio, linkedinUrl, githubUrl, portfolioUrl, country, state, city, pincode, languages, image } = body;
     const userId = session.user.id;
     
-    // Build User table updates
+    // Build User table updates (prevent privilege escalation: only ADMIN can assign INSTRUCTOR)
     const userUpdateData: any = {};
-    if (session.user.role !== "ADMIN" && (role === "STUDENT" || role === "INSTRUCTOR")) {
+    if (session.user.role === "ADMIN" && (role === "STUDENT" || role === "INSTRUCTOR")) {
       userUpdateData.role = role;
     }
     if (image) {

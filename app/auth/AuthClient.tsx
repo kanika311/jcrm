@@ -19,6 +19,22 @@ function tabFromQuery(value: string | null): "login" | "signup" {
   return "login";
 }
 
+function sanitizeRedirect(url: string | null, fallback: string): string {
+  if (!url) return fallback;
+  const trimmed = url.trim();
+  if (
+    !trimmed.startsWith("/") ||
+    trimmed.startsWith("//") ||
+    trimmed.startsWith("/\\") ||
+    trimmed.includes(":") ||
+    trimmed.startsWith("/auth") ||
+    trimmed.startsWith("/jcrm-sushant")
+  ) {
+    return fallback;
+  }
+  return trimmed;
+}
+
 export default function AuthClient({ cmsData }: { cmsData: any }) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -105,18 +121,14 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
         return;
       }
 
-      let destination = "/student";
-      if (role === "INSTRUCTOR") {
-        destination = "/faculty";
-      } else if (callbackUrl && !callbackUrl.startsWith("/auth")) {
-        destination = callbackUrl;
-      }
+      let defaultDest = role === "INSTRUCTOR" ? "/faculty" : "/student";
+      const destination = sanitizeRedirect(callbackUrl, defaultDest);
 
       // Hard navigation flushes stale App Router RSC prefetch caches and syncs cookies
       window.location.href = destination;
     } catch {
       const fallback = (loginRole === "INSTRUCTOR" || signupRole === "INSTRUCTOR") ? "/faculty" : "/student";
-      window.location.href = callbackUrl && !callbackUrl.startsWith("/auth") ? callbackUrl : fallback;
+      window.location.href = sanitizeRedirect(callbackUrl, fallback);
     }
   };
 

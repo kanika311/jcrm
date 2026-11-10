@@ -2,11 +2,12 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
+import { getRegistrationState } from "@/lib/courseAccess";
 
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session?.user) {
+    if (!session?.user?.id) {
       return NextResponse.json({ message: "Please log in to your student account to enroll in this course." }, { status: 401 });
     }
 
@@ -20,7 +21,6 @@ export async function POST(req: Request) {
       where: { id: courseId },
     });
 
-    // Fallback search by title or tags if courseId is a slug
     if (!course) {
       const allCourses = await prisma.course.findMany();
       course = allCourses.find(c => 
@@ -31,6 +31,18 @@ export async function POST(req: Request) {
 
     if (!course) {
       return NextResponse.json({ message: "Course not found." }, { status: 404 });
+    }
+
+    // Server-side authorization check: verify registration access or free course
+    const access = await getRegistrationState(session.user.id);
+    const isFree = course.price <= 0 || (access?.fee ?? 499) <= 0;
+    const isAdmin = session.user.role === "ADMIN";
+
+    if (!isAdmin && !isFree && !access?.hasAccess) {
+      return NextResponse.json({
+        message: "Payment required. Please complete course checkout via Razorpay.",
+        requiresPayment: true,
+      }, { status: 402 });
     }
 
     // Check if user is already enrolled
@@ -58,7 +70,7 @@ export async function POST(req: Request) {
         studentId: session.user.id,
         courseId: course.id,
         paymentStatus: "COMPLETED",
-        transactionId: `TXN_JCRM_${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`,
+        transactionId: isFree ? `FREE_${Date.now()}` : `ADMIN_${Date.now()}`,
         progressPercent: 0,
       },
     });

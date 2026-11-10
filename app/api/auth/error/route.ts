@@ -2,10 +2,10 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(req: NextRequest) {
   const error = req.nextUrl.searchParams.get("error") || "AuthenticationFailed";
-  const origin = req.nextUrl.origin || "http://localhost:3001";
+  const origin = req.nextUrl.origin || "https://www.jcrm.in";
   
-  // Gracefully redirect to admin portal or auth with error query
+  // Safe redirect to public /auth portal with encoded error, never leaking secret admin routes
   return NextResponse.redirect(
-    new URL(`/jcrm-sushant?error=${encodeURIComponent(error)}`, origin)
+    new URL(`/auth?error=${encodeURIComponent(error)}`, origin)
   );
 }

@@ -2,11 +2,17 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { registerSchema } from "@/lib/validations/auth";
+import { verifySameOrigin } from "@/lib/csrf";
 
 export async function POST(req: Request) {
   try {
+    if (!verifySameOrigin(req)) {
+      return NextResponse.json({ error: "Invalid request origin (CSRF rejected)" }, { status: 403 });
+    }
+
     const ip = getClientIp(req);
-    const rate = checkRateLimit(`register_${ip}`, 10, 15 * 60 * 1000);
+    const rate = checkRateLimit(`register_${ip}`, 5, 15 * 60 * 1000);
     if (!rate.allowed) {
       return NextResponse.json(
         { error: `Too many registration attempts. Please try again in ${Math.ceil(rate.resetSeconds / 60)} minutes.` },
@@ -17,50 +23,43 @@ export async function POST(req: Request) {
       );
     }
 
-    const body = await req.json();
-    const { fullName, email, password, role, phoneNumber } = body;
+    const body = await req.json().catch(() => ({}));
+    const parseResult = registerSchema.safeParse(body);
 
-    if (!fullName || typeof fullName !== "string" || !fullName.trim()) {
-      return NextResponse.json({ error: "Missing required field: Full Name" }, { status: 400 });
+    if (!parseResult.success) {
+      const firstError = parseResult.error.errors[0]?.message || "Invalid registration data";
+      return NextResponse.json({ error: firstError }, { status: 400 });
     }
 
-    if (!email || typeof email !== "string" || !email.trim()) {
-      return NextResponse.json({ error: "Missing required field: Email" }, { status: 400 });
-    }
-
-    if (!password || typeof password !== "string" || password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters long" }, { status: 400 });
-    }
-
-    const normalizedEmail = email.trim().toLowerCase();
+    const { fullName, email, password, phoneNumber, role } = parseResult.data;
 
     // Check if user already exists
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [
-          { email: normalizedEmail },
-          { email: { equals: normalizedEmail, mode: "insensitive" } },
+          { email },
+          { email: { equals: email, mode: "insensitive" } },
         ],
       },
     });
 
     if (existingUser) {
-      return NextResponse.json({ error: "Email is already registered. Please sign in." }, { status: 409 });
+      // Generic response to prevent account enumeration
+      return NextResponse.json({
+        message: "Registration processed. If you already have an account, please sign in.",
+        success: true,
+      }, { status: 200 });
     }
 
-    // Role enforcement: Public registration only permits STUDENT or INSTRUCTOR
     const validRole: "STUDENT" | "INSTRUCTOR" = role === "INSTRUCTOR" ? "INSTRUCTOR" : "STUDENT";
+    const hashedPassword = await bcrypt.hash(password, 12);
 
-    // Hash the password securely
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Save the new user to the database
     const newUser = await prisma.user.create({
       data: {
-        fullName: fullName.trim(),
-        name: fullName.trim(),
-        email: normalizedEmail,
-        phoneNumber: phoneNumber ? String(phoneNumber).trim() : null,
+        fullName,
+        name: fullName,
+        email,
+        phoneNumber,
         passwordHash: hashedPassword,
         role: validRole,
       },
@@ -74,10 +73,11 @@ export async function POST(req: Request) {
         email: newUser.email,
         role: newUser.role,
       },
+      success: true,
     }, { status: 201 });
 
   } catch (error: any) {
-    console.error("Registration error occurred:", error?.message || error);
+    console.error("Registration error occurred:", error?.message || "Internal error");
     return NextResponse.json({ error: "Unable to complete registration. Please try again later." }, { status: 500 });
   }
 }

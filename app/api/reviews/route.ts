@@ -137,9 +137,9 @@ export async function POST(req: Request) {
       quote,
       rating: Math.min(Math.max(rating, 1), 5),
       screenshot: screenshotUrl || undefined,
-      status: "ACTIVE",
-      isActive: true,
-      featured: true,
+      status: "PENDING",
+      isActive: false,
+      featured: false,
       userSubmitted: true,
       email: email || undefined,
       orderIndex: 0,
@@ -173,7 +173,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       success: true,
       review: newReview,
-      message: "Thank you! Your review has been submitted and published successfully.",
+      message: "Thank you! Your review has been submitted and will appear once approved by our team.",
     });
   } catch (error) {
     console.error("POST /api/reviews error:", error);

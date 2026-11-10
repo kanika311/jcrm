@@ -1,4 +1,6 @@
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/lib/authOptions";
 import { prisma } from "@/lib/prisma";
 import sharp from "sharp";
 
@@ -20,6 +22,11 @@ async function convertBase64ToWebp(base64Str: string): Promise<string | null> {
 
 export async function GET() {
   try {
+    const session = await getServerSession(authOptions);
+    if (!session || !session.user || session.user.role !== "ADMIN") {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     let convertedMembers = 0;
     let convertedCandidates = 0;
 
