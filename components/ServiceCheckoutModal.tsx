@@ -55,6 +55,10 @@ export default function ServiceCheckoutModal({
       }
       const script = document.createElement("script");
       script.src = "https://checkout.razorpay.com/v1/checkout.js";
+      const nonceMeta = document.querySelector('meta[name="csp-nonce"]')?.getAttribute("content");
+      if (nonceMeta) {
+        script.nonce = nonceMeta;
+      }
       script.onload = () => resolve(true);
       script.onerror = () => resolve(false);
       document.body.appendChild(script);

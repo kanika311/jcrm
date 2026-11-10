@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { Plus_Jakarta_Sans, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
@@ -6,6 +7,7 @@ import AuthProvider from "@/components/AuthProvider";
 import { getSiteContent } from "@/lib/cms";
 import Footer from "@/components/Footer";
 import ClientOverlays from "@/components/ClientOverlays";
+import CookieConsent from "@/components/CookieConsent";
 import { GoogleAnalytics } from "@next/third-parties/google";
 
 const fontHeading = Plus_Jakarta_Sans({
@@ -33,7 +35,7 @@ export const metadata: Metadata = {
     template: "%s | JCRM Technologies",
   },
   description:
-    "JCRM Technologies  offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
+    "JCRM Technologies offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
   keywords: [
     "JCRM Technologies",
     "engineering courses",
@@ -49,7 +51,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "JCRM Technologies | Engineering Courses & ERP Software",
     description:
-      "JCRM Technologies  offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
+      "JCRM Technologies offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
     url: "https://www.jcrm.in",
     siteName: "JCRM Technologies",
     images: [
@@ -67,7 +69,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "JCRM Technologies | Engineering Courses & ERP Software",
     description:
-      "JCRM Technologies  offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
+      "JCRM Technologies offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
     images: [
       {
         url: "https://www.jcrm.in/og-image.png",
@@ -79,11 +81,13 @@ export const metadata: Metadata = {
   },
 };
 
-export const revalidate = 3600;
-
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Read per-request nonce generated in proxy.ts
+  const headersList = await headers();
+  const nonce = headersList.get("x-nonce") || undefined;
+
   const [globalSettings, navbarConfig, footerConfig] = await Promise.all([
     getSiteContent("global-settings"),
     getSiteContent("public-navbar"),
@@ -102,14 +106,14 @@ export default async function RootLayout({
         "@type": ["Organization", "EducationalOrganization", "LocalBusiness"],
         "@id": "https://www.jcrm.in/#organization",
         name: globalSettings?.siteName || "JCRM Technologies",
-        alternateName: [ "JCRM"],
+        alternateName: ["JCRM"],
         url: "https://www.jcrm.in",
         logo: "https://www.jcrm.in/logo-jcrm.webp",
         image: "https://www.jcrm.in/og-image.png",
         description:
           globalSettings?.tagline ||
           footerConfig?.brandDescription ||
-          "JCRM Technologies  provides enterprise ERP software, industry-grade engineering education, internship programs, and placement assistance.",
+          "JCRM Technologies provides enterprise ERP software, industry-grade engineering education, internship programs, and placement assistance.",
         telephone: footerConfig?.contactPhone || "+91-8310531309",
         email: footerConfig?.contactEmail || "hr@jcrm.in",
         address: {
@@ -135,7 +139,16 @@ export default async function RootLayout({
   return (
     <html lang="en-IN" data-theme="dark" className={`${fontHeading.variable} ${fontBody.variable}`}>
       <head>
+        {nonce && <meta name="csp-nonce" content={nonce} />}
+        {/* Google Consent Mode v2 default declaration - denied until user grants consent */}
         <script
+          nonce={nonce}
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('consent','default',{'ad_storage':'denied','ad_user_data':'denied','ad_personalization':'denied','analytics_storage':'denied'});`,
+          }}
+        />
+        <script
+          nonce={nonce}
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
@@ -146,8 +159,9 @@ export default async function RootLayout({
           <Navbar siteName={globalSettings.siteName} links={navbarConfig.links} logoUrl={globalSettings.logoUrl} />
           <main className="flex-1 flex flex-col relative z-10 min-h-0">{children}</main>
           <Footer cmsData={footerConfig} siteName={globalSettings.siteName} />
+          <CookieConsent />
         </AuthProvider>
-        {gaId ? <GoogleAnalytics gaId={gaId} /> : null}
+        {gaId ? <GoogleAnalytics gaId={gaId} nonce={nonce} /> : null}
       </body>
     </html>
   );

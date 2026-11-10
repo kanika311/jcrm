@@ -4,47 +4,31 @@ const isDev = process.env.NODE_ENV !== "production";
 
 const securityHeaders = [
   {
-    key: "Content-Security-Policy",
-    value: `
-      default-src 'self';
-      ${isDev ? "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:;" : "script-src 'self' 'unsafe-inline' https:;"}
-      style-src 'self' 'unsafe-inline' https:;
-      img-src 'self' data: blob: https:;
-      media-src 'self' https: blob:;
-      font-src 'self' https: data:;
-      connect-src 'self' https: wss:;
-      frame-src 'self' https://api.razorpay.com https://*.razorpay.com https://checkout.razorpay.com https://www.youtube.com https://*.youtube.com https://player.vimeo.com https://*.vimeo.com https://meet.jit.si https://*.jit.si https: blob:;
-      child-src 'self' https://api.razorpay.com https://*.razorpay.com https://checkout.razorpay.com https: blob:;
-      frame-ancestors 'self';
-      object-src 'none';
-      base-uri 'self';
-      form-action 'self' https://api.razorpay.com https://*.razorpay.com;
-    `.replace(/\n/g, "").replace(/\s+/g, " ").trim()
-  },
-  {
     key: "Permissions-Policy",
-    value: "camera=(self \"https://meet.jit.si\"), microphone=(self \"https://meet.jit.si\"), geolocation=(), browsing-topics=()"
+    value:
+      'camera=(self "https://meet.jit.si"), microphone=(self "https://meet.jit.si"), display-capture=(self "https://meet.jit.si"), geolocation=(), payment=(self "https://checkout.razorpay.com"), usb=(), bluetooth=(), magnetometer=(), gyroscope=(), accelerometer=(), interest-cohort=()',
   },
   {
     key: "Referrer-Policy",
-    value: "strict-origin-when-cross-origin"
+    value: "strict-origin-when-cross-origin",
   },
   {
     key: "X-Content-Type-Options",
-    value: "nosniff"
+    value: "nosniff",
   },
   {
     key: "X-Frame-Options",
-    value: "SAMEORIGIN"
+    value: "SAMEORIGIN",
   },
   {
     key: "Strict-Transport-Security",
-    value: "max-age=31536000; includeSubDomains; preload"
-  }
+    value: "max-age=31536000; includeSubDomains; preload",
+  },
 ];
 
 const nextConfig: NextConfig = {
   poweredByHeader: false,
+  productionBrowserSourceMaps: false,
   serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma", "sharp"],
   experimental: {
     optimizePackageImports: ["react-icons", "framer-motion"],
@@ -102,16 +86,6 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Edge caching with stale-while-revalidate for super fast TTFB
-        source: '/',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, s-maxage=3600, stale-while-revalidate=86400',
-          },
-        ],
-      },
-      {
         // Prevent caching on the auth page redirect
         source: '/auth',
         headers: [
@@ -153,6 +127,16 @@ const nextConfig: NextConfig = {
       {
         source: '/our-team',
         destination: '/ourteam',
+        permanent: true,
+      },
+      {
+        source: '/privacy',
+        destination: '/legal/privacy',
+        permanent: true,
+      },
+      {
+        source: '/terms',
+        destination: '/legal/terms',
         permanent: true,
       },
     ];
