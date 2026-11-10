@@ -113,3 +113,4 @@ if (require.main === module || process.argv[1]?.includes("check-cert-expiry")) {
       process.exit(1);
     });
 }
+

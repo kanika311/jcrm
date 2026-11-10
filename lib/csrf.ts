@@ -24,3 +24,4 @@ export function verifySameOrigin(req: Request): boolean {
     return false;
   }
 }
+
