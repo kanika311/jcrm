@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { TeamMemberItem } from "../TeamManagementClient";
 import { convertImageToWebP } from "@/lib/imageWebp";
+import { formatIndianPhone } from "@/lib/phoneUtils";
 
 const labelClass = "block text-sm font-semibold text-slate-700 mb-1.5 tracking-normal";
 const inputClass =
@@ -72,7 +73,7 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
           id: form.id,
           name: form.name,
           email: form.email,
-          phone: form.phone,
+          phone: form.phone ? formatIndianPhone(form.phone).display : "",
           role: form.role,
           department: form.department,
           image: form.image,

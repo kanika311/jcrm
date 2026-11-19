@@ -3,11 +3,13 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { FaWhatsapp } from "react-icons/fa";
 import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
 import SponsoredAdModal from "@/components/SponsoredAdModal";
 import { normalizeTeamStatus, TEAM_STATUSES, TEAM_STATUS_LABELS, type TeamStatus } from "@/lib/teamStatus";
 import NameAvatar from "@/components/NameAvatar";
 import { convertImageToWebP } from "@/lib/imageWebp";
+import { formatIndianPhone } from "@/lib/phoneUtils";
 
 export interface TeamMemberItem {
   id: string;
@@ -368,7 +370,7 @@ export default function TeamManagementClient({
         body: JSON.stringify({
           name: newName,
           email: newEmail,
-          phone: newPhone,
+          phone: newPhone ? formatIndianPhone(newPhone).display : "",
           role: newRole,
           department: newDepartment,
           city: newCity,
@@ -790,20 +792,23 @@ export default function TeamManagementClient({
 
                     {/* Contact */}
                     <td className="p-3 whitespace-nowrap text-xs text-slate-700 font-medium">
-                      {member.phone ? (
-                        <a
-                          href={`https://wa.me/${member.phone.replace(/\D/g, "")}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 hover:text-emerald-600 font-mono text-[11px]"
-                          title="Chat on WhatsApp"
-                        >
-                          <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[9px] shrink-0 font-bold">
-                            📞
-                          </span>
-                          <span>{member.phone}</span>
-                        </a>
-                      ) : (
+                      {member.phone ? (() => {
+                        const { display, waLink } = formatIndianPhone(member.phone);
+                        return (
+                          <a
+                            href={waLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 dark:hover:bg-emerald-900/50 border border-emerald-200/80 dark:border-emerald-800/60 transition-colors font-mono text-[11px] group"
+                            title="Chat on WhatsApp"
+                          >
+                            <span className="w-4 h-4 rounded-full bg-[#25D366] text-white flex items-center justify-center text-[10px] shrink-0 shadow-xs group-hover:scale-110 transition-transform">
+                              <FaWhatsapp className="w-2.5 h-2.5 fill-current" />
+                            </span>
+                            <span className="font-semibold tracking-tight">{display}</span>
+                          </a>
+                        );
+                      })() : (
                         <span className="text-slate-400">—</span>
                       )}
                     </td>
