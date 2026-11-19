@@ -2,6 +2,8 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { createPortal } from "react-dom";
+import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 const DEPARTMENT_GROUPS: { label: string; options: string[] }[] = [
   {
@@ -207,6 +209,14 @@ export default function JoinForm() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+    if (!formData.phoneNumber) {
+      alert("Please enter your phone number.");
+      return;
+    }
+    if (!isPossiblePhoneNumber(formData.phoneNumber)) {
+      alert("Please enter a valid phone number with the selected country code.");
+      return;
+    }
     if (!formData.agreeTerms) {
       alert("Please agree to the Terms & Conditions to submit your application.");
       return;
@@ -354,14 +364,16 @@ Candidate is requesting fast-track review for interview scheduling.`;
             <label className="block text-[11px] sm:text-xs font-extrabold text-slate-700 uppercase tracking-wide sm:tracking-wider mb-1.5">
               Phone Number *
             </label>
-            <input
-              type="tel"
-              required
-              placeholder="+91 98765 43210"
-              className="w-full px-3.5 sm:px-4 py-3 sm:py-3.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF] shadow-xs"
-              value={formData.phoneNumber}
-              onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-            />
+            <div className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white border border-blue-100 text-slate-900 text-base sm:text-sm font-semibold focus-within:ring-2 focus-within:ring-[#0055FF] shadow-xs transition-all flex items-center">
+              <PhoneInput
+                international
+                defaultCountry="IN"
+                placeholder="Enter phone number"
+                value={formData.phoneNumber}
+                onChange={(value) => setFormData({ ...formData, phoneNumber: value || "" })}
+                className="w-full text-slate-900 text-base sm:text-sm font-semibold"
+              />
+            </div>
           </div>
         </div>
 

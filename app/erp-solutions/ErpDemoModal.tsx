@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 interface ErpDemoModalProps {
   isOpen: boolean;
@@ -152,14 +154,16 @@ export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Ente
                   <label className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1">
                     WhatsApp Phone *
                   </label>
-                  <input
-                    type="tel"
-                    required
-                    placeholder="+91 98765 43210"
-                    className="w-full px-4 py-3 rounded-2xl bg-blue-50/40 border border-blue-100 text-slate-900 text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-[#0055FF]"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
+                  <div className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white border border-blue-100 text-slate-900 focus-within:ring-2 focus-within:ring-[#0055FF] shadow-xs flex items-center">
+                    <PhoneInput
+                      international
+                      defaultCountry="IN"
+                      value={formData.phone}
+                      onChange={(value) => setFormData({ ...formData, phone: value || "" })}
+                      placeholder="Enter phone number"
+                      className="w-full text-xs sm:text-sm font-semibold"
+                    />
+                  </div>
                 </div>
 
                 <div>

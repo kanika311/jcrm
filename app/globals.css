@@ -569,35 +569,94 @@ code, pre, .font-mono {
 .animate-spin-slow { animation: spinSlow 30s linear infinite; }
 .animate-blob { animation: blob 15s infinite; }
 
-/* Phone Input Overrides */
-.phone-input-container {
-  display: flex;
-  align-items: center;
-}
-.phone-input-container input {
-  background: transparent;
-  border: none;
-  outline: none;
-  flex: 1;
-  color: var(--text-primary);
-}
-.phone-input-container .PhoneInputCountry {
-  margin-right: 0.5rem;
+/* Phone Input Overrides with Country Flag Box */
+.PhoneInput {
+  display: flex !important;
+  align-items: center !important;
+  width: 100% !important;
 }
 
-/* Fix Dropdown visibility */
-select option {
-  background-color: var(--bg-card);
-  color: var(--text-primary);
+.PhoneInputCountry {
+  display: flex !important;
+  align-items: center !important;
+  align-self: center !important;
+  margin-right: 0.65rem !important;
+  padding: 0.25rem 0.5rem !important;
+  background-color: rgba(0, 85, 255, 0.06);
+  border: 1px solid rgba(0, 85, 255, 0.18);
+  border-radius: 0.65rem;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.PhoneInputCountry:hover {
+  background-color: rgba(0, 85, 255, 0.12);
+  border-color: rgba(0, 85, 255, 0.35);
+}
+
+.PhoneInputCountryIcon {
+  width: 1.5rem !important;
+  height: 1.05rem !important;
+  border-radius: 3px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.PhoneInputCountryIcon--border {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-sizing: border-box;
+}
+
+.PhoneInputCountrySelectArrow {
+  margin-left: 0.4rem !important;
+  border-top-color: #0055ff !important;
+  opacity: 0.8;
+  transition: transform 0.2s ease;
+}
+
+.PhoneInputCountry:hover .PhoneInputCountrySelectArrow {
+  opacity: 1;
 }
 
 .PhoneInputCountrySelect {
-  background-color: transparent;
-  color: var(--text-primary);
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  height: 100% !important;
+  width: 100% !important;
+  z-index: 10 !important;
+  border: 0 !important;
+  opacity: 0 !important;
+  cursor: pointer !important;
+  background-color: transparent !important;
 }
+
 .PhoneInputCountrySelect option {
-  background-color: var(--bg-card);
-  color: var(--text-primary);
+  background-color: #ffffff;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.dark .PhoneInputCountrySelect option {
+  background-color: #0f172a;
+  color: #f8fafc;
+}
+
+.PhoneInputInput {
+  flex: 1 !important;
+  min-width: 0 !important;
+  background: transparent !important;
+  border: none !important;
+  outline: none !important;
+  font-size: inherit !important;
+  font-weight: 600 !important;
+  color: inherit !important;
+}
+
+.PhoneInputInput::placeholder {
+  color: #94a3b8;
+  font-weight: 500;
 }
 
 /* Shiny Dogtag Effect */

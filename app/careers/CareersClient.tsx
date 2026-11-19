@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 export default function CareersClient({ cmsData }: { cmsData?: any }) {
   const [step, setStep] = useState(1);
@@ -124,7 +126,16 @@ export default function CareersClient({ cmsData }: { cmsData?: any }) {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold mb-2">Phone Number</label>
-                    <input type="text" name="phone" value={formData.phone} onChange={handleChange} className="input-premium" placeholder="+1 (555) 000-0000" />
+                    <div className="input-premium px-3 py-1 flex items-center">
+                      <PhoneInput
+                        international
+                        defaultCountry="IN"
+                        value={formData.phone}
+                        onChange={(value) => setFormData({ ...formData, phone: value || "" })}
+                        placeholder="Enter phone number"
+                        className="w-full text-sm font-medium"
+                      />
+                    </div>
                   </div>
                   <div>
                     <label className="block text-sm font-bold mb-2">Location</label>

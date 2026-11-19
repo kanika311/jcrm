@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import "react-phone-number-input/style.css";
 
 export default function ContactForm() {
   const [status, setStatus] = useState<"idle" | "submitting" | "success">("idle");
@@ -204,16 +206,18 @@ export default function ContactForm() {
             {/* PHONE / WHATSAPP NUMBER */}
             <div>
               <label className="block text-xs font-extrabold uppercase tracking-wider text-slate-700 mb-2">
-                PHONE / WHATSAPP NUMBER
+                PHONE / WHATSAPP NUMBER *
               </label>
-              <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                required
-                className="w-full px-4 py-3.5 rounded-2xl bg-blue-50/50 border border-blue-100/90 text-slate-900 placeholder:text-slate-400 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-[#0055FF] focus:bg-white transition-all"
-                placeholder="+91 98765 43210"
-              />
+              <div className="w-full px-4 py-2 sm:py-2.5 rounded-2xl bg-blue-50/50 border border-blue-100/90 text-slate-900 focus-within:ring-2 focus-within:ring-[#0055FF] focus-within:bg-white transition-all flex items-center">
+                <PhoneInput
+                  international
+                  defaultCountry="IN"
+                  value={phone}
+                  onChange={(value) => setPhone(value || "")}
+                  placeholder="Enter phone number"
+                  className="w-full text-sm font-medium"
+                />
+              </div>
             </div>
 
             {/* TARGET PRODUCT / SERVICE */}
