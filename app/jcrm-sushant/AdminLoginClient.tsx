@@ -56,6 +56,7 @@ export default function AdminLoginClient() {
       const userEmail = (sessionData?.user?.email || "").toLowerCase();
 
       const isSuperAdmin =
+        userEmail === "sush07eee@gmail.com" ||
         userEmail === "aggarwalkanika676@gmail.com" ||
         userEmail === "jcrm technology97@gmail.com" ||
         userEmail === "pandey.ashutosh699@gmail.com";

@@ -10,38 +10,41 @@ import { checkRateLimit, clearRateLimit } from "@/lib/rateLimit";
 
 const prismaAdapter = PrismaAdapter(prisma) as Adapter;
 
-const isProd = process.env.NODE_ENV === "production";
+const useSecureCookies =
+  process.env.NODE_ENV === "production" &&
+  (process.env.NEXTAUTH_URL ? process.env.NEXTAUTH_URL.startsWith("https://") : true) &&
+  !process.env.NEXTAUTH_URL?.startsWith("http://localhost");
 
 export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET || process.env.JWT_SECRET,
   adapter: prismaAdapter,
-  useSecureCookies: isProd && !process.env.NEXTAUTH_URL?.startsWith("http://localhost"),
+  useSecureCookies,
   cookies: {
     sessionToken: {
-      name: isProd ? "__Secure-next-auth.session-token" : "next-auth.session-token",
+      name: useSecureCookies ? "__Secure-next-auth.session-token" : "next-auth.session-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: isProd,
+        secure: useSecureCookies,
       },
     },
     callbackUrl: {
-      name: isProd ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
+      name: useSecureCookies ? "__Secure-next-auth.callback-url" : "next-auth.callback-url",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: isProd,
+        secure: useSecureCookies,
       },
     },
     csrfToken: {
-      name: isProd ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
+      name: useSecureCookies ? "__Host-next-auth.csrf-token" : "next-auth.csrf-token",
       options: {
         httpOnly: true,
         sameSite: "lax",
         path: "/",
-        secure: isProd,
+        secure: useSecureCookies,
       },
     },
   },
@@ -73,6 +76,7 @@ export const authOptions: NextAuthOptions = {
 
         const normalizedEmail = (profile.email || "").toLowerCase().trim();
         if (
+          normalizedEmail === "sush07eee@gmail.com" ||
           normalizedEmail === "aggarwalkanika676@gmail.com" ||
           normalizedEmail === "jcrm technology97@gmail.com" ||
           normalizedEmail === "pandey.ashutosh699@gmail.com"
@@ -332,6 +336,7 @@ export const authOptions: NextAuthOptions = {
       }
 
       const superAdminEmails = new Set([
+        "sush07eee@gmail.com",
         "jcrm technology97@gmail.com",
         "pandey.ashutosh699@gmail.com",
         "aggarwalkanika676@gmail.com",
