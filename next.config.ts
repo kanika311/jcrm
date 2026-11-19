@@ -27,6 +27,7 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  devIndicators: false,
   poweredByHeader: false,
   productionBrowserSourceMaps: false,
   serverExternalPackages: ["firebase-admin", "@prisma/client", "prisma", "sharp"],

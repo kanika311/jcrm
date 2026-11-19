@@ -45,7 +45,6 @@ export function buildCsp(nonce: string, isDev: boolean): string {
 
   const styleSrc = [
     "'self'",
-    `'nonce-${nonce}'`,
     "'unsafe-inline'",
     "https://fonts.googleapis.com",
   ].join(" ");

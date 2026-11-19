@@ -27,8 +27,7 @@ export default function VideoModalIsland() {
       <button
         type="button"
         onClick={() => setIsVideoOpen(true)}
-        className="px-5 py-3 sm:px-8 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-extrabold flex items-center justify-center gap-2 text-white transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-red-500/30 cursor-pointer"
-        style={{ background: "#FF0000" }}
+        className="px-5 py-3 sm:px-8 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-extrabold flex items-center justify-center gap-2 !text-white bg-[#FF0000] hover:bg-red-700 transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-red-500/30 cursor-pointer"
         aria-label="Watch video: Why choose JCRM Technologies?"
       >
         <svg className="w-5 h-5 sm:w-6 sm:h-6 shrink-0 text-white" fill="currentColor" viewBox="0 0 24 24">

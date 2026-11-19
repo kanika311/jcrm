@@ -32,8 +32,7 @@ export default function HeroSection({
         <div className="flex flex-row flex-wrap sm:flex-nowrap gap-3 mb-6 sm:mb-10 justify-center items-center w-full">
           <Link
             href="/contact"
-            className="px-5 py-3 sm:px-8 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-extrabold flex items-center justify-center gap-2 text-white transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-blue-500/30"
-            style={{ background: "#0055FF" }}
+            className="px-5 py-3 sm:px-8 sm:py-4 rounded-full text-xs sm:text-base md:text-lg font-extrabold flex items-center justify-center gap-2 !text-white bg-[#0055FF] hover:bg-blue-600 transition-all duration-300 hover:scale-105 shadow-xl hover:shadow-blue-500/30"
           >
             Request Free Demo
             <svg className="w-4 h-4 sm:w-5 sm:h-5 font-extrabold" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3">

@@ -140,6 +140,7 @@ export default function Navbar({
   const userFirstName = userFullName.split(" ")[0];
   const userEmail = user?.email || "";
   const userRole = (user?.role || "STUDENT").toUpperCase();
+  const clientUser = user && userRole !== "ADMIN" ? user : null;
 
   // Show ONLY ONE dashboard link according to the user's specific role
   let dashboardHref = "/student";
@@ -290,7 +291,7 @@ export default function Navbar({
 
           {/* Right Action: User Menu / Get Started */}
           <div className="hidden md:flex items-center gap-4 shrink-0">
-            {user ? (
+            {clientUser ? (
               /* User Avatar & Dropdown */
               <div className="relative" ref={dropdownRef}>
                 <button
@@ -298,9 +299,9 @@ export default function Navbar({
                   onClick={() => setUserDropdownOpen(!userDropdownOpen)}
                   className="flex items-center gap-2.5 p-1.5 pr-3 rounded-full hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors border border-slate-200 dark:border-gray-800 cursor-pointer"
                 >
-                  {user.image ? (
+                  {clientUser.image ? (
                     <img
-                      src={user.image}
+                      src={clientUser.image}
                       alt={userFullName}
                       className="w-9 h-9 rounded-full object-cover border border-blue-500/30"
                     />
@@ -327,9 +328,9 @@ export default function Navbar({
                     {/* Header Banner */}
                     <div className="bg-gradient-to-r from-slate-900 via-blue-900 to-[#0055FF] p-4 text-white">
                       <div className="flex items-center gap-3">
-                        {user.image ? (
+                        {clientUser.image ? (
                           <img
-                            src={user.image}
+                            src={clientUser.image}
                             alt={userFullName}
                             className="w-10 h-10 rounded-full object-cover border-2 border-white/50"
                           />
@@ -413,7 +414,7 @@ export default function Navbar({
 
           {/* Mobile Hamburger Toggle */}
           <div className="lg:hidden flex items-center gap-1.5 sm:gap-2 shrink-0">
-            {user && showDashboardLink && (
+            {clientUser && showDashboardLink && (
               <Link
                 href={dashboardHref}
                 className="w-8 h-8 rounded-full bg-[#0055FF] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs"
@@ -421,7 +422,7 @@ export default function Navbar({
                 {userFirstName[0]?.toUpperCase()}
               </Link>
             )}
-            {user && !showDashboardLink && (
+            {clientUser && !showDashboardLink && (
               <div className="w-8 h-8 rounded-full bg-[#0055FF] text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs">
                 {userFirstName[0]?.toUpperCase()}
               </div>
@@ -450,7 +451,7 @@ export default function Navbar({
       {mobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 w-full bg-white/95 dark:bg-gray-950/95 backdrop-blur-2xl border-b border-blue-100 shadow-2xl max-h-[80vh] overflow-y-auto">
           <div className="px-5 pt-3 pb-6 space-y-2">
-            {user && (
+            {clientUser && (
               <div className="p-3 mb-2 rounded-2xl bg-blue-50/80 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/40">
                 <p className="font-bold text-sm text-slate-900 dark:text-white">{userFullName}</p>
                 <p className="text-xs text-slate-500 dark:text-slate-400">{userEmail}</p>
@@ -533,7 +534,7 @@ export default function Navbar({
               );
             })}
 
-            {!user && (
+            {!clientUser && (
               <div className="pt-3 px-1 grid grid-cols-1 gap-2">
                 <Link
                   href="/auth?role=student&mode=login"
