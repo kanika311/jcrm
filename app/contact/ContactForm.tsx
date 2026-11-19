@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import "react-phone-number-input/style.css";
 
 export default function ContactForm() {
@@ -210,6 +211,7 @@ export default function ContactForm() {
               </label>
               <div className="w-full px-4 py-2 sm:py-2.5 rounded-2xl bg-blue-50/50 border border-blue-100/90 text-slate-900 focus-within:ring-2 focus-within:ring-[#0055FF] focus-within:bg-white transition-all flex items-center">
                 <PhoneInput
+                  flags={flags}
                   international
                   defaultCountry="IN"
                   value={phone}

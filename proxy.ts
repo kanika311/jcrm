@@ -59,6 +59,7 @@ export function buildCsp(nonce: string, isDev: boolean): string {
     "https://lh3.googleusercontent.com",
     "https://res.cloudinary.com",
     "https://firebasestorage.googleapis.com",
+    "https://purecatamphetamine.github.io",
     "https://*.google-analytics.com",
     "https://analytics.google.com",
     "https://www.googletagmanager.com",

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn, signOut, getSession } from "next-auth/react";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import "react-phone-number-input/style.css";
 
 function roleFromQuery(value: string | null): "STUDENT" | "INSTRUCTOR" {
@@ -658,6 +659,7 @@ export default function AuthClient({ cmsData }: { cmsData: any }) {
                   </label>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-1 focus-within:ring-2 focus-within:ring-[#0055FF] focus-within:bg-white transition-all">
                     <PhoneInput
+                      flags={flags}
                       international
                       defaultCountry="IN"
                       value={phoneNumber}

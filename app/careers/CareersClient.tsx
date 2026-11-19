@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import "react-phone-number-input/style.css";
 
 export default function CareersClient({ cmsData }: { cmsData?: any }) {
@@ -128,6 +129,7 @@ export default function CareersClient({ cmsData }: { cmsData?: any }) {
                     <label className="block text-sm font-bold mb-2">Phone Number</label>
                     <div className="input-premium px-3 py-1 flex items-center">
                       <PhoneInput
+                        flags={flags}
                         international
                         defaultCountry="IN"
                         value={formData.phone}

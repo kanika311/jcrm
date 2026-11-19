@@ -4,6 +4,7 @@ import LocationSelector from "@/components/LocationSelector";
 import LanguageSelector from "@/components/LanguageSelector";
 import ImageUpload from "@/components/ImageUpload";
 import PhoneInput from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import "react-phone-number-input/style.css";
 
 export default function SettingsClient() {
@@ -270,6 +271,7 @@ export default function SettingsClient() {
                     <div>
                       <label className={labelClass}>Phone Number</label>
                       <PhoneInput
+                        flags={flags}
                         international
                         defaultCountry="IN"
                         value={formData.phoneNumber}

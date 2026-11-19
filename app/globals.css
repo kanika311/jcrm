@@ -601,6 +601,22 @@ code, pre, .font-mono {
   border-radius: 3px;
   overflow: hidden;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.PhoneInputCountryIcon svg {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.PhoneInputCountryIcon img {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
 }
 
 .PhoneInputCountryIcon--border {

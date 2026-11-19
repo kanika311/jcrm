@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import PhoneInput, { isPossiblePhoneNumber } from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import "react-phone-number-input/style.css";
 
 interface ErpDemoModalProps {
@@ -156,6 +157,7 @@ export default function ErpDemoModal({ isOpen, onClose, productName = "JCRM Ente
                   </label>
                   <div className="w-full px-3.5 sm:px-4 py-2 sm:py-2.5 rounded-2xl bg-white border border-blue-100 text-slate-900 focus-within:ring-2 focus-within:ring-[#0055FF] shadow-xs flex items-center">
                     <PhoneInput
+                      flags={flags}
                       international
                       defaultCountry="IN"
                       value={formData.phone}

@@ -4,6 +4,7 @@ import LocationSelector from "@/components/LocationSelector";
 import LanguageSelector from "@/components/LanguageSelector";
 import ImageUpload from "@/components/ImageUpload";
 import PhoneInput from "react-phone-number-input";
+import flags from "react-phone-number-input/flags";
 import "react-phone-number-input/style.css";
 
 export default function SettingsClient({ cmsData }: { cmsData: any }) {
@@ -203,8 +204,9 @@ export default function SettingsClient({ cmsData }: { cmsData: any }) {
                            <div>
                               <label className="block text-sm font-medium mb-2">Phone Number</label>
                               <PhoneInput
+                                flags={flags}
                                 international
-                                defaultCountry="US"
+                                defaultCountry="IN"
                                 value={formData.phoneNumber}
                                 onChange={(val) => setFormData(prev => ({ ...prev, phoneNumber: val?.toString() || "" }))}
                                 className="input-premium w-full px-4 py-2.5 rounded-lg text-sm phone-input-container"
