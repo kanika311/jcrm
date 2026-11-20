@@ -3,6 +3,7 @@ import { getCandidateById, TEAM_MEMBERS, toPublicTeamMember, type TeamMember } f
 import CandidateDetailClient, { type CandidateSummary } from "../../im/[id]/CandidateDetailClient";
 import { prisma } from "@/lib/prisma";
 import { isOurTeamStatus } from "@/lib/teamStatus";
+import { DEFAULT_SPONSORED_AD, SponsoredAd } from "@/lib/sponsoredAd";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import Link from "next/link";
@@ -90,22 +91,32 @@ export default async function OurTeamCandidateDetailPage({ params }: { params: P
   // 1. Fetch active list to establish sequence and related candidates
   let activeList: CandidateSummary[] = [];
   let dbMember: any = null;
+  let sponsoredAd: SponsoredAd = DEFAULT_SPONSORED_AD;
 
   try {
-    const rawList = await prisma.teamMember.findMany({
-      where: {
-        status: { in: ["STUDENT", "APPROVED", "PLACED", "ALUMNI"] },
-      },
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        image: true,
-        city: true,
-        status: true,
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    const [rawList, adListRecord, legacyAdRecord, foundMember] = await Promise.all([
+      prisma.teamMember.findMany({
+        where: {
+          status: { in: ["STUDENT", "APPROVED", "PLACED", "ALUMNI"] },
+        },
+        select: {
+          id: true,
+          name: true,
+          role: true,
+          image: true,
+          city: true,
+          status: true,
+        },
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.siteContent.findUnique({
+        where: { pageId: "sponsored-ads-list" },
+      }),
+      prisma.siteContent.findUnique({
+        where: { pageId: "ourteam-sponsored-ad" },
+      }),
+      prisma.teamMember.findUnique({ where: { id } }),
+    ]);
 
     activeList = rawList.map((m) => ({
       id: m.id,
@@ -115,8 +126,18 @@ export default async function OurTeamCandidateDetailPage({ params }: { params: P
       city: m.city || "India",
     }));
 
-    dbMember = await prisma.teamMember.findUnique({ where: { id } });
-  } catch {}
+    dbMember = foundMember;
+
+    if (adListRecord && Array.isArray(adListRecord.content) && adListRecord.content.length > 0) {
+      const ads = adListRecord.content as unknown as SponsoredAd[];
+      const activeAd = ads.find((a) => a.isActive);
+      sponsoredAd = activeAd || ads[0] || DEFAULT_SPONSORED_AD;
+    } else if (legacyAdRecord && legacyAdRecord.content && typeof legacyAdRecord.content === "object") {
+      sponsoredAd = legacyAdRecord.content as unknown as SponsoredAd;
+    }
+  } catch (err) {
+    console.error("Error fetching candidate or sponsored ad:", err);
+  }
 
   if (activeList.length === 0) {
     activeList = TEAM_MEMBERS.map((m) => ({
@@ -198,6 +219,7 @@ export default async function OurTeamCandidateDetailPage({ params }: { params: P
       prevMemberId={prevMemberId}
       nextMemberId={nextMemberId}
       relatedMembers={relatedMembers}
+      sponsoredAd={sponsoredAd}
     />
   );
 }

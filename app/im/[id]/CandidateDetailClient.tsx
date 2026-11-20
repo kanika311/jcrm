@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { TeamMember, maskPhone } from "@/lib/teamData";
+import { SponsoredAd } from "@/lib/sponsoredAd";
 import HireModal from "../HireModal";
 import NameAvatar from "@/components/NameAvatar";
 import { FaWhatsapp } from "react-icons/fa";
@@ -21,7 +22,7 @@ import {
   FiMapPin,
   FiBriefcase,
   FiLock,
-  FiCalendar,
+  FiTag,
 } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 
@@ -38,6 +39,7 @@ interface CandidateDetailClientProps {
   prevMemberId?: string;
   nextMemberId?: string;
   relatedMembers?: CandidateSummary[];
+  sponsoredAd?: SponsoredAd;
 }
 
 export default function CandidateDetailClient({
@@ -45,6 +47,7 @@ export default function CandidateDetailClient({
   prevMemberId,
   nextMemberId,
   relatedMembers = [],
+  sponsoredAd,
 }: CandidateDetailClientProps) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -133,16 +136,16 @@ export default function CandidateDetailClient({
     relatedMembers.length > 0 ? relatedMembers[relatedIndex % relatedMembers.length] : null;
 
   return (
-    <div className="min-h-screen pt-24 sm:pt-28 pb-24 relative overflow-hidden bg-[#F8FAFC]">
+    <div className="min-h-screen pt-20 sm:pt-24 pb-24 relative bg-[#F8FAFC]">
       {/* Background Ambient Glow */}
-      <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-tr from-[#0055FF]/10 via-sky-400/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[800px] h-[550px] bg-gradient-to-tr from-[#0055FF]/10 via-sky-400/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
 
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
         {/* =================================================================== */}
-        {/* TOP NAVIGATION BAR (Back to Team Directory | Prev / Next | Share)    */}
+        {/* TOP NAVIGATION BAR: STICKY AT TOP (Back | Prev / Next | Share)      */}
         {/* =================================================================== */}
-        <div className="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-xs flex flex-wrap items-center justify-between gap-3">
-          {/* Left: Back button */}
+        <div className="sticky top-16 sm:top-20 z-30 bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3 sm:p-4 shadow-sm flex flex-wrap items-center justify-between gap-3">
+          {/* Left: Back to Team Directory */}
           <Link
             href="/ourteam"
             className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs sm:text-sm font-bold transition shadow-2xs"
@@ -210,9 +213,9 @@ export default function CandidateDetailClient({
         {/* =================================================================== */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 xl:gap-8 items-start">
           {/* =============================================================== */}
-          {/* 1. LEFT PANEL: Profile Photo Card, Bio Info & Direct Actions   */}
+          {/* 1. LEFT PANEL: STICKY Profile Photo Card & Direct Actions       */}
           {/* =============================================================== */}
-          <aside className="lg:col-span-3 space-y-5 lg:sticky lg:top-24">
+          <aside className="lg:col-span-3 space-y-5 lg:sticky lg:top-36 self-start">
             {/* Primary Profile Card */}
             <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm p-4 sm:p-5 text-center space-y-4">
               {/* Photo Box */}
@@ -424,7 +427,7 @@ export default function CandidateDetailClient({
               </div>
             </div>
 
-            {/* Card 4: Schedule an Interview Callout Banner (Matching Image 2) */}
+            {/* Card 4: Schedule an Interview Callout Banner */}
             <div className="p-6 sm:p-8 rounded-3xl bg-slate-900 text-white shadow-xl space-y-4 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-[#0055FF]/20 rounded-full blur-3xl pointer-events-none" />
 
@@ -483,52 +486,100 @@ export default function CandidateDetailClient({
           </main>
 
           {/* =============================================================== */}
-          {/* 3. RIGHT PANEL: Featured ERP Card & Other Candidate Profiles   */}
+          {/* 3. RIGHT PANEL: STICKY SPONSORED BANNER & RECOMMENDATIONS       */}
           {/* =============================================================== */}
-          <aside className="lg:col-span-3 space-y-5 lg:sticky lg:top-24">
-            {/* Card 1: Featured SaaS / ERP Solution Banner (Matching Image 2 Right Panel) */}
-            <div className="bg-gradient-to-br from-[#0055FF] via-blue-700 to-indigo-900 rounded-3xl p-5 text-white shadow-lg space-y-4 relative overflow-hidden">
-              <div className="absolute -top-12 -right-12 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
-
-              <div className="flex items-center justify-between">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/20 text-white border border-white/20">
-                  JCRM Enterprise
-                </span>
-                <span className="text-[10px] font-bold text-white/80">Corporate Hiring</span>
-              </div>
-
-              <div>
-                <h3 className="heading-font text-lg font-black leading-tight text-white">
-                  AI-Powered ERP & Custom Tech Squads
-                </h3>
-                <p className="text-xs text-white/80 mt-1">
-                  Hire pre-trained engineering teams with 0% recruitment fees for partner companies.
-                </p>
-              </div>
-
-              <div className="space-y-1.5 text-xs text-white/90 border-t border-white/15 pt-3">
-                <div className="flex items-center gap-2">
-                  <FiCheck className="w-3.5 h-3.5 text-emerald-300" />
-                  <span>Pre-Vetted Software Engineers</span>
+          <aside className="lg:col-span-3 space-y-5 lg:sticky lg:top-36 self-start">
+            {/* SPONSORED AD CARD (Matching other pages) */}
+            {sponsoredAd && sponsoredAd.isActive ? (
+              <div className="bg-white border border-[#D4E8F8] rounded-2xl shadow-xs p-5 space-y-3.5 relative overflow-hidden group hover:border-[#0055FF]/40 transition-all">
+                {/* Header: SPONSORED Badge & Company */}
+                <div className="flex items-center justify-between pb-3 border-b border-[#D4E8F8]">
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#0055FF] border border-[#D4E8F8] text-[10px] font-black tracking-wider uppercase flex items-center gap-1.5">
+                    <FiTag className="w-3 h-3 text-[#0055FF]" />
+                    <span>{sponsoredAd.badge || "SPONSORED"}</span>
+                  </span>
+                  {sponsoredAd.company && (
+                    <span className="text-[10px] font-bold text-slate-400 truncate max-w-[130px]">
+                      {sponsoredAd.company}
+                    </span>
+                  )}
                 </div>
-                <div className="flex items-center gap-2">
-                  <FiCheck className="w-3.5 h-3.5 text-emerald-300" />
-                  <span>0% Hiring Fee for Partners</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FiCheck className="w-3.5 h-3.5 text-emerald-300" />
-                  <span>Custom HRMS & CRM Modules</span>
-                </div>
-              </div>
 
-              <Link
-                href="/erp-solutions"
-                className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white text-[#0055FF] hover:bg-blue-50 text-xs font-black shadow-sm transition"
-              >
-                <span>Explore Solutions</span>
-                <FiExternalLink className="w-3.5 h-3.5" />
-              </Link>
-            </div>
+                {/* Banner Image */}
+                {sponsoredAd.image && (
+                  <div className="w-full h-36 rounded-xl overflow-hidden border border-[#D4E8F8] bg-slate-50 relative">
+                    <img
+                      src={sponsoredAd.image}
+                      alt={sponsoredAd.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
+                )}
+
+                {/* Headline & Description */}
+                <div className="space-y-1.5">
+                  <h4 className="text-sm font-black text-slate-900 group-hover:text-[#0055FF] transition-colors leading-snug">
+                    {sponsoredAd.title}
+                  </h4>
+                  <p className="text-xs text-slate-600 font-medium leading-relaxed line-clamp-3">
+                    {sponsoredAd.description}
+                  </p>
+                </div>
+
+                {/* CTA Action Button */}
+                {sponsoredAd.ctaLink && (
+                  <a
+                    href={sponsoredAd.ctaLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full py-2.5 rounded-xl bg-[#0055FF] hover:bg-blue-600 text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-2 cursor-pointer"
+                  >
+                    <span>{sponsoredAd.ctaText || "Learn More"}</span>
+                    <FiExternalLink className="w-3.5 h-3.5" />
+                  </a>
+                )}
+              </div>
+            ) : (
+              /* Fallback JCRM Enterprise ERP Card */
+              <div className="bg-gradient-to-br from-[#0055FF] via-blue-700 to-indigo-900 rounded-3xl p-5 text-white shadow-lg space-y-4 relative overflow-hidden">
+                <div className="absolute -top-12 -right-12 w-36 h-36 bg-white/10 rounded-full blur-2xl pointer-events-none" />
+
+                <div className="flex items-center justify-between">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-white/20 text-white border border-white/20">
+                    JCRM Enterprise
+                  </span>
+                  <span className="text-[10px] font-bold text-white/80">Corporate Hiring</span>
+                </div>
+
+                <div>
+                  <h3 className="heading-font text-lg font-black leading-tight text-white">
+                    AI-Powered ERP & Custom Tech Squads
+                  </h3>
+                  <p className="text-xs text-white/80 mt-1">
+                    Hire pre-trained engineering teams with 0% recruitment fees for partner companies.
+                  </p>
+                </div>
+
+                <div className="space-y-1.5 text-xs text-white/90 border-t border-white/15 pt-3">
+                  <div className="flex items-center gap-2">
+                    <FiCheck className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>Pre-Vetted Software Engineers</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <FiCheck className="w-3.5 h-3.5 text-emerald-300" />
+                    <span>0% Hiring Fee for Partners</span>
+                  </div>
+                </div>
+
+                <Link
+                  href="/erp-solutions"
+                  className="inline-flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-white text-[#0055FF] hover:bg-blue-50 text-xs font-black shadow-sm transition"
+                >
+                  <span>Explore Solutions</span>
+                  <FiExternalLink className="w-3.5 h-3.5" />
+                </Link>
+              </div>
+            )}
 
             {/* Card 2: Other Active Candidates (Recommendations with Mini Controls) */}
             {relatedMembers.length > 0 && currentRelated && (
