@@ -1,5 +1,6 @@
-import { getCandidateById, TEAM_MEMBERS, maskEmail, maskPhone, toPublicTeamMember } from "@/lib/teamData";
-import CandidateDetailClient from "../../im/[id]/CandidateDetailClient";
+import type { Metadata } from "next";
+import { getCandidateById, TEAM_MEMBERS, toPublicTeamMember, type TeamMember } from "@/lib/teamData";
+import CandidateDetailClient, { type CandidateSummary } from "../../im/[id]/CandidateDetailClient";
 import { prisma } from "@/lib/prisma";
 import { isOurTeamStatus } from "@/lib/teamStatus";
 import { getServerSession } from "next-auth/next";
@@ -26,16 +27,108 @@ export async function generateStaticParams() {
   }
 }
 
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  let dbMember = null;
+  try {
+    dbMember = await prisma.teamMember.findUnique({ where: { id } });
+  } catch {}
+
+  const member = dbMember ? toPublicTeamMember(dbMember) : getCandidateById(id);
+  const name = member?.name || "Candidate Profile";
+  const role = member?.role || "Software Engineering Intern";
+  const title = `${name} — ${role} | JCRM Technologies`;
+  const description = member?.bio
+    ? (member.bio.length > 155 ? `${member.bio.slice(0, 152)}...` : member.bio)
+    : `Explore the verified candidate profile of ${name}, ${role} at JCRM Technologies. View education, technical skills, and schedule an interview.`;
+
+  const baseUrl = "https://www.jcrm.in";
+  const pageUrl = `${baseUrl}/ourteam/${id}`;
+  let ogImage = `${baseUrl}/og-image.png`;
+  if (member?.image) {
+    if (member.image.startsWith("http://") || member.image.startsWith("https://")) {
+      ogImage = member.image;
+    } else if (member.image.startsWith("/")) {
+      ogImage = `${baseUrl}${member.image}`;
+    }
+  }
+
+  return {
+    title,
+    description,
+    alternates: {
+      canonical: pageUrl,
+    },
+    openGraph: {
+      title,
+      description,
+      url: pageUrl,
+      siteName: "JCRM Technologies",
+      locale: "en_IN",
+      type: "profile",
+      images: [
+        {
+          url: ogImage,
+          width: 800,
+          height: 800,
+          alt: `${name} - ${role}`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [ogImage],
+    },
+  };
+}
+
 export default async function OurTeamCandidateDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
 
-  // 1. Try finding in DB first
-  let dbMember = null;
+  // 1. Fetch active list to establish sequence and related candidates
+  let activeList: CandidateSummary[] = [];
+  let dbMember: any = null;
+
   try {
-    dbMember = await prisma.teamMember.findUnique({
-      where: { id },
+    const rawList = await prisma.teamMember.findMany({
+      where: {
+        status: { in: ["STUDENT", "APPROVED", "PLACED", "ALUMNI"] },
+      },
+      select: {
+        id: true,
+        name: true,
+        role: true,
+        image: true,
+        city: true,
+        status: true,
+      },
+      orderBy: { createdAt: "desc" },
     });
+
+    activeList = rawList.map((m) => ({
+      id: m.id,
+      name: m.name,
+      role: m.role || "Software Engineer",
+      image: m.image || "",
+      city: m.city || "India",
+    }));
+
+    dbMember = await prisma.teamMember.findUnique({ where: { id } });
   } catch {}
+
+  if (activeList.length === 0) {
+    activeList = TEAM_MEMBERS.map((m) => ({
+      id: m.id,
+      name: m.name,
+      role: m.role,
+      image: m.image,
+      city: m.city,
+    }));
+  }
+
+  let member: TeamMember | null = null;
 
   if (dbMember) {
     const isPubliclyActive = isOurTeamStatus(dbMember.status);
@@ -56,18 +149,18 @@ export default async function OurTeamCandidateDetailPage({ params }: { params: P
         );
       }
     }
-
-    const member = toPublicTeamMember(dbMember);
-    return <CandidateDetailClient member={member} />;
+    member = toPublicTeamMember(dbMember);
+  } else {
+    member = getCandidateById(id) || null;
   }
 
-  // 2. Static list check
-  const member = getCandidateById(id);
-
   if (!member) {
-    const fallbackMember = {
+    member = {
       id,
-      name: id.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '),
+      name: id
+        .split("_")
+        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(" "),
       role: "Software Engineering Intern",
       image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80",
       city: "Udupi",
@@ -79,10 +172,32 @@ export default async function OurTeamCandidateDetailPage({ params }: { params: P
       experience: "Fresher / Intern",
       skills: ["Python", "React", "Node.js", "Machine Learning"],
       bio: "Software engineering intern trained on enterprise software applications at JCRM Technologies.",
-      isVerified: true
+      isVerified: true,
     };
-    return <CandidateDetailClient member={fallbackMember} />;
   }
 
-  return <CandidateDetailClient member={member} />;
+  const currentIndex = activeList.findIndex((m) => m.id === member?.id);
+  const prevMemberId =
+    currentIndex > 0
+      ? activeList[currentIndex - 1]?.id
+      : activeList.length > 1
+      ? activeList[activeList.length - 1]?.id
+      : undefined;
+  const nextMemberId =
+    currentIndex >= 0 && currentIndex < activeList.length - 1
+      ? activeList[currentIndex + 1]?.id
+      : activeList.length > 1
+      ? activeList[0]?.id
+      : undefined;
+
+  const relatedMembers = activeList.filter((m) => m.id !== member?.id).slice(0, 4);
+
+  return (
+    <CandidateDetailClient
+      member={member}
+      prevMemberId={prevMemberId}
+      nextMemberId={nextMemberId}
+      relatedMembers={relatedMembers}
+    />
+  );
 }
