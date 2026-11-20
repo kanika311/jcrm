@@ -40,18 +40,23 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const role = member?.role || "Software Engineering Intern";
   const title = `${name} — ${role} | JCRM Technologies`;
   const description = member?.bio
-    ? (member.bio.length > 155 ? `${member.bio.slice(0, 152)}...` : member.bio)
-    : `Explore the verified candidate profile of ${name}, ${role} at JCRM Technologies. View education, technical skills, and schedule an interview.`;
+    ? `About ${name}: ${member.bio.length > 150 ? `${member.bio.slice(0, 147)}...` : member.bio}`
+    : `About ${name}: Verified ${role} at JCRM Technologies. Explore credentials, education, skills, and schedule an interview.`;
 
   const baseUrl = "https://www.jcrm.in";
   const pageUrl = `${baseUrl}/ourteam/${id}`;
   let ogImage = `${baseUrl}/og-image.png`;
-  if (member?.image) {
-    if (member.image.startsWith("http://") || member.image.startsWith("https://")) {
-      ogImage = member.image;
-    } else if (member.image.startsWith("/")) {
-      ogImage = `${baseUrl}${member.image}`;
+  if (member?.image && member.image.trim()) {
+    const cleanImg = member.image.trim();
+    if (cleanImg.startsWith("data:image/")) {
+      ogImage = `${baseUrl}/api/avatar/${id}?w=800&q=85`;
+    } else if (cleanImg.startsWith("http://") || cleanImg.startsWith("https://")) {
+      ogImage = cleanImg;
+    } else if (cleanImg.startsWith("/")) {
+      ogImage = `${baseUrl}${cleanImg}`;
     }
+  } else {
+    ogImage = `${baseUrl}/api/avatar/${id}?w=800&q=85`;
   }
 
   return {
@@ -70,6 +75,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       images: [
         {
           url: ogImage,
+          secureUrl: ogImage,
           width: 800,
           height: 800,
           alt: `${name} - ${role}`,

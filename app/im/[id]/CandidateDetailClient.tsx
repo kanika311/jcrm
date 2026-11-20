@@ -57,11 +57,8 @@ export default function CandidateDetailClient({
   const [copiedLink, setCopiedLink] = useState(false);
   const [relatedIndex, setRelatedIndex] = useState(0);
 
-  // Generate WhatsApp Share Message with complete meta details
+  // Always use the canonical public production domain for WhatsApp sharing so crawlers can unfurl rich meta preview cards (photo, title, bio)
   const getShareUrl = () => {
-    if (typeof window !== "undefined") {
-      return `${window.location.origin}/ourteam/${member.id}`;
-    }
     return `https://www.jcrm.in/ourteam/${member.id}`;
   };
 
@@ -69,20 +66,26 @@ export default function CandidateDetailClient({
     const url = getShareUrl();
     const skillsText =
       member.skills && member.skills.length > 0 ? member.skills.slice(0, 6).join(", ") : "Engineering & Tech";
+    const locationText = [member.city, member.state].filter(Boolean).join(", ");
+    const educationText = member.education
+      ? `${member.education}${member.college ? ` (${member.college})` : ""}`
+      : "";
+    const bioText = member.bio || `${member.name} is a software engineer and contributor at JCRM Technologies.`;
 
     return [
-      `🌟 *JCRM Technologies — Verified Candidate Profile*`,
-      `👤 *Candidate:* ${member.name} ${member.isVerified ? "✓ (Verified)" : ""}`,
-      `💼 *Role / Domain:* ${member.role}`,
-      member.education ? `🎓 *Education:* ${member.education} (${member.college})` : "",
+      url,
+      "",
+      `🌟 *${member.name}* ${member.isVerified ? "✓ (Verified Candidate)" : ""}`,
+      `💼 *Role:* ${member.role}`,
+      educationText ? `🎓 *Education:* ${educationText}` : "",
       member.experience ? `⏱️ *Experience:* ${member.experience}` : "",
-      member.city ? `📍 *Location:* ${member.city}, ${member.state}` : "",
+      locationText ? `📍 *Location:* ${locationText}` : "",
       `⚡ *Core Skills:* ${skillsText}`,
       "",
-      `📝 *Candidate Biography:*`,
-      `"${member.bio || `${member.name} is a software engineer and verified talent at JCRM Technologies.`}"`,
+      `📝 *About ${member.name}:*`,
+      `"${bioText}"`,
       "",
-      `🔗 *View Full Verified Profile & Schedule Interview:*`,
+      `👉 *Schedule an Interview:*`,
       url,
     ]
       .filter(Boolean)
