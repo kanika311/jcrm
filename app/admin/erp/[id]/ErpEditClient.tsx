@@ -641,7 +641,7 @@ export default function ErpEditClient({
                   Or Image URL
                 </label>
                 <input
-                  type="url"
+                  type="text"
                   value={form.image || ""}
                   onChange={e => setForm({ ...form, image: e.target.value })}
                   placeholder="https://images.unsplash.com/..."

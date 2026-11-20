@@ -641,7 +641,7 @@ export default function SponsoredManagementClient({
                         </button>
                       </div>
                       <input
-                        type="url"
+                        type="text"
                         value={formImage}
                         onChange={e => setFormImage(e.target.value)}
                         placeholder="Or paste external image URL..."

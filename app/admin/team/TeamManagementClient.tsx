@@ -142,6 +142,12 @@ export default function TeamManagementClient({
         quality: 0.85,
       }).catch(() => file);
 
+      // Optimistic preview immediately
+      try {
+        const previewUrl = URL.createObjectURL(webpFile);
+        if (target === "add") setNewImage(previewUrl);
+      } catch {}
+
       const formData = new FormData();
       formData.append("file", webpFile);
       const res = await fetch("/api/upload", { method: "POST", body: formData });
@@ -1240,7 +1246,12 @@ export default function TeamManagementClient({
                     <div className="flex items-center gap-4 p-3 rounded-xl border" style={{ background: "var(--bg-base)", borderColor: "var(--border-soft)" }}>
                       <div className="w-14 h-14 rounded-xl overflow-hidden shrink-0 border border-white/10 bg-black/20">
                         {newImage ? (
-                          <img src={newImage} alt="Preview" className="w-full h-full object-cover" />
+                          <img
+                            src={newImage}
+                            alt="Preview"
+                            className="w-full h-full object-cover"
+                            onError={() => setNewImage("")}
+                          />
                         ) : (
                           <span className="text-xs text-gray-500 flex items-center justify-center h-full">No img</span>
                         )}
@@ -1265,7 +1276,7 @@ export default function TeamManagementClient({
                           {isUploadingImage ? "Uploading..." : "📁 Upload Photo"}
                         </button>
                         <input
-                          type="url"
+                          type="text"
                           className="input-premium w-full px-3 py-1.5 rounded-lg text-xs mt-1"
                           placeholder="Or paste image URL"
                           value={newImage}

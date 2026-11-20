@@ -17,6 +17,7 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState<TeamMemberItem>(initialMember);
+  const [previewUrl, setPreviewUrl] = useState<string>(initialMember.image || "");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -37,17 +38,15 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
 
     setIsUploadingImage(true);
     try {
+      // Optimistic preview immediately so user sees the selected photo instantly
+      const localPreview = URL.createObjectURL(file);
+      setPreviewUrl(localPreview);
+
       const webpFile = await convertImageToWebP(file, {
         maxWidth: 800,
         maxHeight: 800,
         quality: 0.85,
       }).catch(() => file);
-
-      // Optimistic preview immediately
-      try {
-        const previewUrl = URL.createObjectURL(webpFile);
-        update("image", previewUrl);
-      } catch {}
 
       const formData = new FormData();
       formData.append("file", webpFile);
@@ -60,8 +59,10 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
         }
       }
       alert("Failed to upload image. Please try again.");
+      setPreviewUrl(form.image || "");
     } catch (err: any) {
       alert(err.message || "Failed to upload image.");
+      setPreviewUrl(form.image || "");
     } finally {
       setIsUploadingImage(false);
     }
@@ -69,6 +70,14 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!form.name?.trim()) {
+      setFeedback({ type: "error", text: "Please provide a member name." });
+      return;
+    }
+    if (!form.email?.trim()) {
+      setFeedback({ type: "error", text: "Please provide an email address." });
+      return;
+    }
     setIsSubmitting(true);
     setFeedback(null);
 
@@ -153,7 +162,7 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 shadow-xs space-y-5">
+      <form onSubmit={handleSubmit} noValidate className="bg-white border border-slate-200 rounded-2xl p-5 sm:p-8 shadow-xs space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className={labelClass}>Full name *</label>
@@ -278,14 +287,25 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
         <div>
           <label className={labelClass}>Profile picture</label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50">
-            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-white">
-              <NameAvatar
-                name={form.name}
-                src={form.image}
-                alt={form.name}
-                className="w-full h-full object-cover"
-                textClassName="text-sm font-bold"
-              />
+            <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-white flex items-center justify-center">
+              {previewUrl ? (
+                <img
+                  src={previewUrl}
+                  alt={form.name}
+                  className="w-full h-full object-cover"
+                  onError={() => {
+                    setPreviewUrl("");
+                  }}
+                />
+              ) : (
+                <NameAvatar
+                  name={form.name}
+                  src={form.image}
+                  alt={form.name}
+                  className="w-full h-full object-cover"
+                  textClassName="text-sm font-bold"
+                />
+              )}
             </div>
             <div className="flex-1 w-full space-y-2">
               <input
@@ -302,16 +322,19 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploadingImage}
-                className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#0055FF] text-white hover:bg-blue-600 disabled:opacity-60"
+                className="px-4 py-2 rounded-xl text-sm font-semibold bg-[#0055FF] text-white hover:bg-blue-600 disabled:opacity-60 transition-colors cursor-pointer"
               >
                 {isUploadingImage ? "Uploading..." : "Upload photo"}
               </button>
               <input
-                type="url"
+                type="text"
                 className={inputClass}
                 placeholder="Or paste image URL"
                 value={form.image || ""}
-                onChange={(e) => update("image", e.target.value)}
+                onChange={(e) => {
+                  update("image", e.target.value);
+                  setPreviewUrl(e.target.value);
+                }}
               />
             </div>
           </div>
