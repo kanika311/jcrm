@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import type { TeamMemberItem } from "../TeamManagementClient";
 import { convertImageToWebP } from "@/lib/imageWebp";
 import { formatIndianPhone } from "@/lib/phoneUtils";
+import NameAvatar from "@/components/NameAvatar";
 
 const labelClass = "block text-sm font-semibold text-slate-700 mb-1.5 tracking-normal";
 const inputClass =
@@ -41,6 +42,12 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
         maxHeight: 800,
         quality: 0.85,
       }).catch(() => file);
+
+      // Optimistic preview immediately
+      try {
+        const previewUrl = URL.createObjectURL(webpFile);
+        update("image", previewUrl);
+      } catch {}
 
       const formData = new FormData();
       formData.append("file", webpFile);
@@ -88,6 +95,7 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
           company: form.company,
           status: form.status,
           isVerified: form.isVerified,
+          remark: form.remark || null,
         }),
       });
 
@@ -271,11 +279,13 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
           <label className={labelClass}>Profile picture</label>
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-xl border border-slate-200 bg-slate-50">
             <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 border border-slate-200 bg-white">
-              {form.image ? (
-                <img src={form.image} alt={form.name} className="w-full h-full object-cover" />
-              ) : (
-                <span className="text-xs text-slate-400 flex items-center justify-center h-full">No photo</span>
-              )}
+              <NameAvatar
+                name={form.name}
+                src={form.image}
+                alt={form.name}
+                className="w-full h-full object-cover"
+                textClassName="text-sm font-bold"
+              />
             </div>
             <div className="flex-1 w-full space-y-2">
               <input
@@ -318,6 +328,20 @@ export default function TeamEditClient({ initialMember }: { initialMember: TeamM
           />
           <p className="text-xs text-slate-500 mt-1">
             Required for homepage when status is Placed or Alumni.
+          </p>
+        </div>
+
+        <div>
+          <label className={labelClass}>Admin Remark / Notes</label>
+          <textarea
+            rows={3}
+            className={`${inputClass} resize-y min-h-[85px]`}
+            placeholder="e.g. Cleared round 2 interview, needs certificate verification, etc."
+            value={form.remark || ""}
+            onChange={(e) => update("remark", e.target.value)}
+          />
+          <p className="text-xs text-slate-500 mt-1">
+            Internal remark/notes visible to administrators in the trainer management console.
           </p>
         </div>
 

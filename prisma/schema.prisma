@@ -417,6 +417,7 @@ model TeamMember {
   skills      String[]           @default([])
   bio         String?
   company     String?
+  remark      String?
   status      TeamApprovalStatus @default(CANDIDATE)
   isVerified  Boolean            @default(true) @map("is_verified")
   createdAt   DateTime           @default(now()) @map("created_at")

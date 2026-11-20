@@ -117,6 +117,7 @@ export async function POST(req: Request) {
       bio,
       status,
       isVerified,
+      remark,
     } = body;
 
     if (!name || !email) {
@@ -151,6 +152,7 @@ export async function POST(req: Request) {
         bio: bio || null,
         status: status || "STUDENT",
         isVerified: isVerified ?? true,
+        remark: remark || null,
       },
     });
 
@@ -183,7 +185,7 @@ export async function PUT(req: Request) {
     const allowed = [
       "name", "email", "phone", "role", "department", "image", "city", "state",
       "country", "pinCode", "dateOfBirth", "college", "education", "experience",
-      "skills", "bio", "company", "status", "isVerified",
+      "skills", "bio", "company", "status", "isVerified", "remark",
     ];
     const data: Record<string, any> = {};
     for (const key of allowed) {

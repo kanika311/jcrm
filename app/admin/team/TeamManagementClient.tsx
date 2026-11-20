@@ -30,6 +30,7 @@ export interface TeamMemberItem {
   skills: string[];
   bio?: string | null;
   company?: string | null;
+  remark?: string | null;
   status: "PENDING" | "APPROVED" | "REJECTED" | "CANDIDATE" | "STUDENT" | "PLACED" | "ALUMNI";
   isVerified: boolean;
   createdAt: string;
@@ -81,8 +82,14 @@ export default function TeamManagementClient({
   const [newSkills, setNewSkills] = useState("Python, React, Machine Learning");
   const [newBio, setNewBio] = useState("");
   const [newImage, setNewImage] = useState("");
+  const [newRemark, setNewRemark] = useState("");
   const [newStatus, setNewStatus] = useState<"CANDIDATE" | "STUDENT" | "PLACED" | "ALUMNI">("STUDENT");
   const [newIsVerified, setNewIsVerified] = useState(true);
+
+  // Quick Remark Edit Modal state
+  const [editingRemarkMember, setEditingRemarkMember] = useState<TeamMemberItem | null>(null);
+  const [remarkDraft, setRemarkDraft] = useState("");
+  const [isSavingRemark, setIsSavingRemark] = useState(false);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -357,6 +364,47 @@ export default function TeamManagementClient({
     }
   };
 
+  const openRemarkModal = (member: TeamMemberItem) => {
+    setEditingRemarkMember(member);
+    setRemarkDraft(member.remark || "");
+  };
+
+  const handleSaveRemark = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!editingRemarkMember) return;
+    setIsSavingRemark(true);
+    setFeedbackMsg(null);
+    try {
+      const res = await fetch("/api/admin/team", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: editingRemarkMember.id,
+          remark: remarkDraft.trim() || null,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || "Failed to save remark");
+
+      setMembers((prev) =>
+        prev.map((m) =>
+          m.id === editingRemarkMember.id
+            ? { ...m, remark: remarkDraft.trim() || null }
+            : m
+        )
+      );
+      setEditingRemarkMember(null);
+      setFeedbackMsg({
+        type: "success",
+        text: `Remark for "${editingRemarkMember.name}" saved successfully.`,
+      });
+    } catch (err: any) {
+      setFeedbackMsg({ type: "error", text: err.message || "Failed to save remark" });
+    } finally {
+      setIsSavingRemark(false);
+    }
+  };
+
   // Handle Add New Member Form Submit
   const handleAddMember = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -384,6 +432,7 @@ export default function TeamManagementClient({
           image: newImage,
           status: newStatus,
           isVerified: newIsVerified,
+          remark: newRemark.trim() || null,
         }),
       });
 
@@ -401,6 +450,8 @@ export default function TeamManagementClient({
       setNewCollege("");
       setNewEducation("");
       setNewBio("");
+      setNewRemark("");
+      setNewImage("");
     } catch (err: any) {
       setFeedbackMsg({ type: "error", text: err.message || "Failed to add member" });
     } finally {
@@ -735,6 +786,7 @@ export default function TeamManagementClient({
                 <th className="p-3 font-bold">City</th>
                 <th className="p-3 font-bold">State</th>
                 <th className="p-3 font-bold">Plan / Role</th>
+                <th className="p-3 font-bold">Remark</th>
                 <th className="p-3 font-bold text-center">Status</th>
                 <th className="p-3 font-bold text-right">Actions</th>
               </tr>
@@ -848,6 +900,32 @@ export default function TeamManagementClient({
                       {member.role || "Software Engineering Intern"}
                     </td>
 
+                    {/* Remark */}
+                    <td className="p-3 text-xs">
+                      {member.remark ? (
+                        <button
+                          type="button"
+                          onClick={() => openRemarkModal(member)}
+                          className="group text-left max-w-[160px] block focus:outline-none"
+                          title={`Click to edit remark: ${member.remark}`}
+                        >
+                          <div className="px-2 py-1 rounded-md bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/80 transition flex items-center gap-1.5 cursor-pointer">
+                            <span className="truncate font-medium">{member.remark}</span>
+                            <span className="text-[10px] text-amber-600 opacity-60 group-hover:opacity-100 shrink-0">✎</span>
+                          </div>
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => openRemarkModal(member)}
+                          className="inline-flex items-center gap-1 text-[11px] font-semibold text-slate-400 hover:text-[#0055FF] hover:bg-blue-50 px-2 py-1 rounded-md border border-dashed border-slate-200 hover:border-blue-300 transition cursor-pointer"
+                          title="Add Remark"
+                        >
+                          <span>+ Remark</span>
+                        </button>
+                      )}
+                    </td>
+
                     {/* STATUS (Yogsathi Clickable Round Dot: 🟢 Active / 🔴 Inactive) */}
                     <td className="p-3 text-center">
                       <button
@@ -901,7 +979,7 @@ export default function TeamManagementClient({
 
               {paginatedMembers.length === 0 && (
                 <tr>
-                  <td colSpan={10} className="p-12 text-center text-slate-500 font-medium">
+                  <td colSpan={11} className="p-12 text-center text-slate-500 font-medium">
                     No records found matching criteria.
                   </td>
                 </tr>
@@ -1197,6 +1275,19 @@ export default function TeamManagementClient({
                     </div>
                   </div>
 
+                  <div>
+                    <label className="block text-xs font-bold mb-1 uppercase text-slate-300">
+                      Remark / Notes (Internal Admin)
+                    </label>
+                    <textarea
+                      rows={2}
+                      className="input-premium w-full px-4 py-2 rounded-xl text-xs"
+                      placeholder="e.g. Cleared round 2 interview, needs certificate verification, etc."
+                      value={newRemark}
+                      onChange={e => setNewRemark(e.target.value)}
+                    />
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                     <div>
                       <label className="block text-xs font-bold mb-1 text-slate-300">
@@ -1382,6 +1473,71 @@ export default function TeamManagementClient({
           setFeedbackMsg({ type: "success", text: "Sponsored banner published and live on Our Team!" });
         }}
       />
+
+      {/* Quick Remark Modal */}
+      {editingRemarkMember && mounted && (
+        createPortal(
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+            <div className="bg-white rounded-2xl max-w-md w-full shadow-2xl border border-slate-200 overflow-hidden">
+              <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Edit Remark
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    For {editingRemarkMember.name} ({editingRemarkMember.email})
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditingRemarkMember(null)}
+                  className="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:text-slate-800 flex items-center justify-center text-sm font-bold cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <form onSubmit={handleSaveRemark} className="p-5 space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1.5">
+                    Trainer Remark / Notes
+                  </label>
+                  <textarea
+                    rows={4}
+                    autoFocus
+                    value={remarkDraft}
+                    onChange={(e) => setRemarkDraft(e.target.value)}
+                    placeholder="Enter admin notes or remarks (e.g. Cleared round 2, document pending, top performer, etc.)..."
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#0055FF] resize-y"
+                  />
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    This remark is internal and visible to administrators in the trainer table.
+                  </p>
+                </div>
+
+                <div className="flex items-center justify-end gap-2.5 pt-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditingRemarkMember(null)}
+                    disabled={isSavingRemark}
+                    className="px-4 py-2 rounded-xl text-xs font-semibold border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={isSavingRemark}
+                    className="px-5 py-2 rounded-xl text-xs font-semibold bg-[#0055FF] text-white hover:bg-blue-600 disabled:opacity-60 cursor-pointer shadow-sm"
+                  >
+                    {isSavingRemark ? "Saving..." : "Save Remark"}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>,
+          document.body
+        )
+      )}
 
     </div>
   );

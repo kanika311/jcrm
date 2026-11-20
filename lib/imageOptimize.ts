@@ -18,9 +18,8 @@ export function getOptimizedImageUrl(
   const trimmed = url.trim();
   if (!trimmed) return "";
 
-  // 0. Data URLs (SVG, PNG, JPEG, WebP, etc.) - NEVER route through GET query params!
-  // URLs in GET requests have 2KB-8KB length limits. Passing base64 in query string causes 414 URI Too Long!
-  if (trimmed.startsWith("data:")) return trimmed;
+  // 0. Data URLs & Blob URLs - NEVER route through GET query params!
+  if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) return trimmed;
 
   const { width = 320, height, quality = 80, fit = "cover" } = options;
 
