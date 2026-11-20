@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { TeamMember, maskPhone } from "@/lib/teamData";
+import { TeamMember, maskPhone, toCandidateSlug } from "@/lib/teamData";
 import { SponsoredAd } from "@/lib/sponsoredAd";
 import HireModal from "../HireModal";
 import NameAvatar from "@/components/NameAvatar";
@@ -57,9 +57,10 @@ export default function CandidateDetailClient({
   const [copiedLink, setCopiedLink] = useState(false);
   const [relatedIndex, setRelatedIndex] = useState(0);
 
-  // Always use the canonical public production domain for WhatsApp sharing so crawlers can unfurl rich meta preview cards (photo, title, bio)
+  // Always use canonical production URL with candidate name slug
   const getShareUrl = () => {
-    return `https://www.jcrm.in/ourteam/${member.id}`;
+    const slug = toCandidateSlug(member.name);
+    return `https://www.jcrm.in/ourteam/${slug}`;
   };
 
   const getShareMessage = () => {
@@ -82,7 +83,6 @@ export default function CandidateDetailClient({
       locationText ? `📍 *Location:* ${locationText}` : "",
       `⚡ *Core Skills:* ${skillsText}`,
       "",
-      `📝 *About ${member.name}:*`,
       `"${bioText}"`,
       "",
       `👉 *Schedule an Interview:*`,
@@ -633,7 +633,7 @@ export default function CandidateDetailClient({
                 </div>
 
                 <Link
-                  href={`/ourteam/${currentRelated.id}`}
+                  href={`/ourteam/${toCandidateSlug(currentRelated.name)}`}
                   className="w-full py-2 rounded-xl border border-blue-200 bg-blue-50/60 hover:bg-blue-100/80 text-[#0055FF] text-xs font-bold transition flex items-center justify-center gap-1.5"
                 >
                   <span>View Profile</span>

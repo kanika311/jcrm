@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getCandidateById, TEAM_MEMBERS, toPublicTeamMember, type TeamMember } from "@/lib/teamData";
+import { getCandidateById, TEAM_MEMBERS, toCandidateSlug, toPublicTeamMember, type TeamMember } from "@/lib/teamData";
+import { findTeamMemberByIdOrSlug } from "@/lib/teamDb";
 import CandidateDetailClient, { type CandidateSummary } from "./CandidateDetailClient";
 import { prisma } from "@/lib/prisma";
 import { isOurTeamStatus } from "@/lib/teamStatus";
@@ -12,7 +13,7 @@ export const dynamicParams = true;
 
 export async function generateStaticParams() {
   const staticList = TEAM_MEMBERS.map((member) => ({
-    id: member.id,
+    id: toCandidateSlug(member.name),
   }));
 
   try {
@@ -20,9 +21,13 @@ export async function generateStaticParams() {
       where: {
         status: { in: ["STUDENT", "APPROVED", "PLACED", "ALUMNI"] },
       },
-      select: { id: true },
+      select: { id: true, name: true },
     });
-    return [...staticList, ...dbMembers.map((m) => ({ id: m.id }))];
+    return [
+      ...staticList,
+      ...dbMembers.map((m) => ({ id: toCandidateSlug(m.name) })),
+      ...dbMembers.map((m) => ({ id: m.id })),
+    ];
   } catch {
     return staticList;
   }
@@ -32,31 +37,35 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const { id } = await params;
   let dbMember = null;
   try {
-    dbMember = await prisma.teamMember.findUnique({ where: { id } });
+    dbMember = await findTeamMemberByIdOrSlug(id);
   } catch {}
 
   const member = dbMember ? toPublicTeamMember(dbMember) : getCandidateById(id);
   const name = member?.name || "Candidate Profile";
   const role = member?.role || "Software Engineering Intern";
   const title = `${name} — ${role} | JCRM Technologies`;
-  const description = member?.bio
-    ? `About ${name}: ${member.bio.length > 150 ? `${member.bio.slice(0, 147)}...` : member.bio}`
-    : `About ${name}: Verified ${role} at JCRM Technologies. Explore credentials, education, skills, and schedule an interview.`;
+
+  // Clean description without "About [Name] :" prefix
+  const cleanBio = member?.bio?.trim();
+  const description = cleanBio
+    ? (cleanBio.length > 160 ? `${cleanBio.slice(0, 157)}...` : cleanBio)
+    : `${name} is a verified ${role} at JCRM Technologies. Explore credentials, education, skills, and schedule an interview.`;
 
   const baseUrl = "https://www.jcrm.in";
-  const pageUrl = `${baseUrl}/ourteam/${id}`;
+  const slug = member ? toCandidateSlug(member.name) : toCandidateSlug(id);
+  const pageUrl = `${baseUrl}/ourteam/${slug}`;
   let ogImage = `${baseUrl}/og-image.png`;
   if (member?.image && member.image.trim()) {
     const cleanImg = member.image.trim();
     if (cleanImg.startsWith("data:image/")) {
-      ogImage = `${baseUrl}/api/avatar/${id}?w=800&q=85`;
+      ogImage = `${baseUrl}/api/avatar/${member.id}?w=800&q=85`;
     } else if (cleanImg.startsWith("http://") || cleanImg.startsWith("https://")) {
       ogImage = cleanImg;
     } else if (cleanImg.startsWith("/")) {
       ogImage = `${baseUrl}${cleanImg}`;
     }
-  } else {
-    ogImage = `${baseUrl}/api/avatar/${id}?w=800&q=85`;
+  } else if (member?.id) {
+    ogImage = `${baseUrl}/api/avatar/${member.id}?w=800&q=85`;
   }
 
   return {
@@ -121,7 +130,7 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
       prisma.siteContent.findUnique({
         where: { pageId: "ourteam-sponsored-ad" },
       }),
-      prisma.teamMember.findUnique({ where: { id } }),
+      findTeamMemberByIdOrSlug(id),
     ]);
 
     activeList = rawList.map((m) => ({
@@ -204,18 +213,21 @@ export default async function CandidateDetailPage({ params }: { params: Promise<
   }
 
   const currentIndex = activeList.findIndex((m) => m.id === member?.id);
-  const prevMemberId =
+  const prevMember =
     currentIndex > 0
-      ? activeList[currentIndex - 1]?.id
+      ? activeList[currentIndex - 1]
       : activeList.length > 1
-      ? activeList[activeList.length - 1]?.id
+      ? activeList[activeList.length - 1]
       : undefined;
-  const nextMemberId =
+  const nextMember =
     currentIndex >= 0 && currentIndex < activeList.length - 1
-      ? activeList[currentIndex + 1]?.id
+      ? activeList[currentIndex + 1]
       : activeList.length > 1
-      ? activeList[0]?.id
+      ? activeList[0]
       : undefined;
+
+  const prevMemberId = prevMember ? toCandidateSlug(prevMember.name) : undefined;
+  const nextMemberId = nextMember ? toCandidateSlug(nextMember.name) : undefined;
 
   const relatedMembers = activeList.filter((m) => m.id !== member?.id).slice(0, 4);
 

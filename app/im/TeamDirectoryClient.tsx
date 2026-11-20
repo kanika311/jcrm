@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
-import { TeamMember } from "@/lib/teamData";
+import { TeamMember, toCandidateSlug } from "@/lib/teamData";
 import { SponsoredAd, DEFAULT_SPONSORED_AD } from "@/lib/sponsoredAd";
 import SponsoredAdModal from "@/components/SponsoredAdModal";
 import NameAvatar from "@/components/NameAvatar";
@@ -707,7 +707,7 @@ export default function TeamDirectoryClient({
 
                       {/* View Profile */}
                       <Link
-                        href={`/ourteam/${member.id}`}
+                        href={`/ourteam/${toCandidateSlug(member.name)}`}
                         className="w-full py-2 rounded-xl text-xs font-bold text-[#0055FF] bg-white hover:bg-blue-50 border border-[#0055FF] transition-all flex items-center justify-center gap-1.5"
                       >
                         <span>View Profile</span>

@@ -199,6 +199,25 @@ export function toPublicTeamMember(m: {
   };
 }
 
-export function getCandidateById(id: string): TeamMember | undefined {
-  return TEAM_MEMBERS.find((m) => m.id === id);
+export function toCandidateSlug(name: string): string {
+  if (!name) return "candidate";
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+export function getCandidateById(idOrSlug: string): TeamMember | undefined {
+  if (!idOrSlug) return undefined;
+  const decoded = decodeURIComponent(idOrSlug).trim().toLowerCase();
+  const targetSlug = toCandidateSlug(decoded);
+  return TEAM_MEMBERS.find((m) => {
+    return (
+      m.id.toLowerCase() === decoded ||
+      toCandidateSlug(m.name) === targetSlug ||
+      toCandidateSlug(m.id) === targetSlug
+    );
+  });
 }
