@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import ContactForm from "./ContactForm";
 import { getSiteContent } from "@/lib/cms";
+import { getSeoMetadata } from "@/lib/seoConfig";
+
+export const metadata: Metadata = getSeoMetadata("/contact");
 
 export default async function ContactPage() {
   const cmsData = await getSiteContent("public-contact");

@@ -9,6 +9,7 @@ import Footer from "@/components/Footer";
 import ClientOverlays from "@/components/ClientOverlays";
 import CookieConsent from "@/components/CookieConsent";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 const fontHeading = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -24,61 +25,7 @@ const fontBody = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.jcrm.in"),
-  alternates: {
-    canonical: "/",
-    languages: {
-      "en-IN": "/",
-    },
-  },
-  title: {
-    default: "JCRM Technologies | Engineering Courses & ERP Software",
-    template: "%s | JCRM Technologies",
-  },
-  description:
-    "JCRM Technologies offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
-  keywords: [
-    "JCRM Technologies",
-    "engineering courses",
-    "ERP software",
-    "internship and training",
-    "placement assistance",
-    "full stack web development",
-    "machine learning courses",
-    "hospital ERP software",
-    "LMS software",
-  ],
-  
-  openGraph: {
-    title: "JCRM Technologies | Engineering Courses & ERP Software",
-    description:
-      "JCRM Technologies offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
-    url: "https://www.jcrm.in",
-    siteName: "JCRM Technologies",
-    images: [
-      {
-        url: "https://www.jcrm.in/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "JCRM Technologies - Engineering Courses & Enterprise ERP Solutions",
-      },
-    ],
-    locale: "en_IN",
-    type: "website",
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: "JCRM Technologies | Engineering Courses & ERP Software",
-    description:
-      "JCRM Technologies offers engineering courses, enterprise ERP software, internship and training with 100% placement assistance in India.",
-    images: [
-      {
-        url: "https://www.jcrm.in/og-image.png",
-        width: 1200,
-        height: 630,
-        alt: "JCRM Technologies - Engineering Courses & Enterprise ERP Solutions",
-      },
-    ],
-  },
+  ...getSeoMetadata("/"),
 };
 
 export default async function RootLayout({

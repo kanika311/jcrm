@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import CurriculumAccordion from "./CurriculumAccordion";
 import { prisma } from "@/lib/prisma";
@@ -5,8 +6,18 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/authOptions";
 import EnrollButton from "./EnrollButton";
 import { DEFAULT_REGISTRATION_FEE, getRegistrationState } from "@/lib/courseAccess";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 export const dynamicParams = true;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ course_id: string }>;
+}): Promise<Metadata> {
+  const { course_id } = await params;
+  return getSeoMetadata(`/courses/${course_id}`);
+}
 
 export async function generateStaticParams() {
   const staticList = [

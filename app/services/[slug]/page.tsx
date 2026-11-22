@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_SERVICES, ServiceCategory } from "@/lib/servicesData";
 import ServicesClient from "../ServicesClient";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 export const dynamic = "force-dynamic";
 
@@ -12,23 +13,7 @@ interface PageProps {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  if (slug === "seo") {
-    return {
-      title: "AI-Powered SEO Packages | JCRM Technologies",
-      description:
-        "Dominate search rankings with AI-powered SEO packages from JCRM Technologies. Higher ranks, maximum results.",
-    };
-  }
-  if (slug === "social-media") {
-    return {
-      title: "Social Media Management Services | JCRM Technologies",
-      description:
-        "Build brand authority, viral reach, and high ROI on Facebook, LinkedIn, Instagram, and YouTube.",
-    };
-  }
-  return {
-    title: "Services & Growth Packages | JCRM Technologies",
-  };
+  return getSeoMetadata(`/services/${slug}`);
 }
 
 export default async function ServiceSlugPage({ params }: PageProps) {

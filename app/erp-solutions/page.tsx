@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getSiteContent } from "@/lib/cms";
 import ErpCatalogClient from "./ErpCatalogClient";
 import { prisma } from "@/lib/prisma";
@@ -5,8 +6,11 @@ import { ERP_PRODUCTS, ErpProduct } from "@/lib/erpData";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { DEFAULT_SPONSORED_AD, SponsoredAd } from "@/lib/sponsoredAd";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = getSeoMetadata("/erp-solutions");
 
 export default async function ErpSolutionsPage() {
   const session = await getServerSession(authOptions);

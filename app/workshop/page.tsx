@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import { WORKSHOPS } from "@/lib/workshopData";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/authOptions";
 import { DEFAULT_SPONSORED_AD, SponsoredAd } from "@/lib/sponsoredAd";
 import WorkshopCatalogClient from "./WorkshopCatalogClient";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = getSeoMetadata("/workshop");
 
 export default async function WorkshopPage() {
   const session = await getServerSession(authOptions);

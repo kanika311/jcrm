@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import { getSiteContent } from "@/lib/cms";
 import CoursesCatalogClient from "./CoursesCatalogClient";
+import { getSeoMetadata } from "@/lib/seoConfig";
+
+export const metadata: Metadata = getSeoMetadata("/courses");
 
 const courses = [
   {

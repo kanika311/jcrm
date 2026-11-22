@@ -1,9 +1,13 @@
+import type { Metadata } from "next";
 import { TEAM_MEMBERS, toPublicTeamMember } from "@/lib/teamData";
 import TeamDirectoryClient from "../im/TeamDirectoryClient";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_SPONSORED_AD, SponsoredAd } from "@/lib/sponsoredAd";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = getSeoMetadata("/ourteam");
 
 export default async function OurTeamAliasPage() {
   let displayMembers = TEAM_MEMBERS;

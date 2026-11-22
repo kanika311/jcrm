@@ -2,14 +2,11 @@ import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_SERVICES, ServiceCategory } from "@/lib/servicesData";
 import ServicesClient from "./ServicesClient";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
-  title: "Services & Growth Packages | JCRM Technologies",
-  description:
-    "AI-Powered SEO Packages and High-Impact Social Media Management Services by JCRM Technologies.",
-};
+export const metadata: Metadata = getSeoMetadata("/services");
 
 export default async function ServicesPage() {
   let services: ServiceCategory[] = DEFAULT_SERVICES;

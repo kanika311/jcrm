@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getSiteContent } from "@/lib/cms";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_PLACED_CANDIDATES } from "@/lib/placedCandidatesData";
@@ -20,7 +21,9 @@ import TalentNetworkSection from "@/components/home/TalentNetworkSection";
 import TestimonialsSection from "@/components/home/TestimonialsSection";
 import TrustAuthoritySection from "@/components/home/TrustAuthoritySection";
 import FaqSection, { FAQS } from "@/components/home/FaqSection";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
+export const metadata: Metadata = getSeoMetadata("/");
 export const revalidate = 3600;
 
 export default async function Home() {

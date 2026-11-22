@@ -1,11 +1,9 @@
 import { getSiteContent } from "@/lib/cms";
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy | JCRM Technologies",
-  description: "Learn how JCRM Technologies collects, processes, and safeguards user data and personal information.",
-};
+export const metadata: Metadata = getSeoMetadata("/legal/privacy");
 
 export const dynamic = "force-dynamic";
 

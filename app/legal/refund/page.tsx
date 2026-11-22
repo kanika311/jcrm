@@ -1,11 +1,9 @@
 import { getSiteContent } from "@/lib/cms";
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
-export const metadata: Metadata = {
-  title: "Refund & Cancellation Policy | JCRM Technologies",
-  description: "Learn about refund and cancellation policies for JCRM courses and software products.",
-};
+export const metadata: Metadata = getSeoMetadata("/legal/refund");
 
 export const dynamic = "force-dynamic";
 

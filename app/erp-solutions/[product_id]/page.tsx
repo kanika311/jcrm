@@ -1,15 +1,30 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import ErpDetailClient from "./ErpDetailClient";
+import { getSeoMetadata } from "@/lib/seoConfig";
+
+export const dynamicParams = true;
 
 export async function generateStaticParams() {
   return [
     { product_id: 'institute-lms-erp' },
+    { product_id: 'coaching-edtech-erp' },
     { product_id: 'healthcare-hospital-erp' },
+    { product_id: 'clinic-dental-pharmacy-erp' },
     { product_id: 'manufacturing-scm-erp' },
     { product_id: 'retail-pos-inventory-erp' },
     { product_id: 'finance-hrms-erp' },
     { product_id: 'realestate-crm-erp' }
   ];
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ product_id: string }>;
+}): Promise<Metadata> {
+  const { product_id } = await params;
+  return getSeoMetadata(`/erp-solutions/${product_id}`);
 }
 
 const ERP_DETAILS_DATA: Record<string, any> = {

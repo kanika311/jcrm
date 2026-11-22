@@ -2,17 +2,11 @@ import { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
 import { DEFAULT_REVIEWS, ReviewItem } from "@/lib/reviewsData";
 import ReviewsPageClient from "@/components/reviews/ReviewsPageClient";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
 export const revalidate = 3600;
 
-export const metadata: Metadata = {
-  title: "Client & Trainee Reviews | Ratings & Testimonials | JCRM Technologies",
-  description:
-    "Read genuine reviews and feedback from enterprise clients, engineering graduates, and placed alumni trained by JCRM Technologies.",
-  alternates: {
-    canonical: "https://www.jcrm.in/reviews",
-  },
-};
+export const metadata: Metadata = getSeoMetadata("/testimonials");
 
 export default async function TestimonialsPage() {
   let reviews: ReviewItem[] = DEFAULT_REVIEWS;

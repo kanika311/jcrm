@@ -1,11 +1,9 @@
 import { getSiteContent } from "@/lib/cms";
 import Link from "next/link";
-import { Metadata } from "next";
+import type { Metadata } from "next";
+import { getSeoMetadata } from "@/lib/seoConfig";
 
-export const metadata: Metadata = {
-  title: "Terms and Conditions | JCRM Technologies",
-  description: "Terms and Conditions governing the use of JCRM Technologies courses, software, and services.",
-};
+export const metadata: Metadata = getSeoMetadata("/legal/terms");
 
 export const dynamic = "force-dynamic";
 
