@@ -19,6 +19,11 @@ import {
   FiCode,
   FiFilm,
   FiSmartphone,
+  FiSliders,
+  FiChevronLeft,
+  FiChevronRight,
+  FiX,
+  FiCopy,
 } from "react-icons/fi";
 import {
   FaFacebookF,
@@ -33,6 +38,7 @@ import {
   FaReact,
   FaNodeJs,
   FaWordpress,
+  FaWhatsapp,
 } from "react-icons/fa";
 
 interface ServicesClientProps {
@@ -50,6 +56,9 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
   const [selectedPlan, setSelectedPlan] = useState<ServicePlan | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({});
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
 
   const toggleExpand = (planId: string) => {
     setExpandedPlans((prev) => ({
@@ -61,10 +70,48 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
   const activeService =
     services.find((s) => s.slug === currentSlug) || services[0];
 
+  const currentIndex = services.findIndex((s) => s.slug === currentSlug);
+  const safeCurrentIndex = currentIndex !== -1 ? currentIndex : 0;
+
   const handleSelectService = (slug: string) => {
     setCurrentSlug(slug);
     // update URL without full page reload
     window.history.pushState(null, "", `/services/${slug}`);
+  };
+
+  const handlePrev = () => {
+    if (safeCurrentIndex > 0) {
+      handleSelectService(services[safeCurrentIndex - 1].slug);
+    }
+  };
+
+  const handleNext = () => {
+    if (safeCurrentIndex < services.length - 1) {
+      handleSelectService(services[safeCurrentIndex + 1].slug);
+    }
+  };
+
+  const handleShare = async () => {
+    const shareUrl =
+      typeof window !== "undefined"
+        ? window.location.href
+        : `https://www.jcrm.in/services/${currentSlug}`;
+    const shareTitle = `${activeService?.title || "Services"} | JCRM Technologies`;
+    const shareText = `Check out ${activeService?.title || "Services"} - ${activeService?.headline || ""} at JCRM Technologies:`;
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch (err) {
+        // user cancelled or fallback to modal
+      }
+    }
+    setShareModalOpen(true);
   };
 
   const handleOpenCheckout = (service: ServiceCategory, plan: ServicePlan) => {
@@ -118,12 +165,77 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
 
       {/* Main 2-Panel Container */}
       <div className="max-w-[1550px] mx-auto px-4 sm:px-6 lg:px-8">
+        
+        {/* ========================================================= */}
+        {/* TOP BAR: Filter Icon (Blue) | Prev & Next | Share Button  */}
+        {/* ========================================================= */}
+        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-2.5 sm:p-3.5 shadow-sm flex items-center justify-between gap-3 mb-6">
+          {/* Left: Blue Filter Button */}
+          <button
+            type="button"
+            onClick={() => setMobileFilterOpen(true)}
+            className="inline-flex items-center gap-2 px-3 py-1.5 sm:px-3.5 sm:py-2 rounded-full border-2 border-[#0055FF] bg-blue-50/90 dark:bg-blue-950/60 text-[#0055FF] font-black text-xs sm:text-sm shadow-xs hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-all cursor-pointer"
+            title="Filter / Select Service"
+            aria-label="Filter Services"
+          >
+            <FiSliders className="w-4 h-4 stroke-[2.5]" />
+            <span className="w-5 h-5 rounded-full bg-[#0055FF] text-white text-[11px] font-black flex items-center justify-center">
+              {safeCurrentIndex + 1}
+            </span>
+          </button>
+
+          {/* Center: Prev / Next Navigation Controls */}
+          <div className="inline-flex items-center gap-1 bg-slate-100/90 dark:bg-slate-800/90 p-1 rounded-full border border-slate-200/80 dark:border-slate-700/80">
+            <button
+              type="button"
+              onClick={handlePrev}
+              disabled={safeCurrentIndex === 0}
+              className={`inline-flex items-center gap-1 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-xs font-black transition-all ${
+                safeCurrentIndex === 0
+                  ? "text-slate-300 dark:text-slate-600 cursor-not-allowed"
+                  : "text-slate-700 dark:text-slate-200 hover:text-[#0055FF] hover:bg-white dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+              }`}
+              title="Previous Service"
+              aria-label="Previous Service"
+            >
+              <FiChevronLeft className="w-3.5 h-3.5" />
+              <span>Prev</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleNext}
+              disabled={safeCurrentIndex === services.length - 1}
+              className={`inline-flex items-center gap-1 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full text-xs font-black transition-all ${
+                safeCurrentIndex === services.length - 1
+                  ? "text-slate-300 dark:text-slate-600 cursor-not-allowed"
+                  : "text-slate-700 dark:text-slate-200 hover:text-[#0055FF] hover:bg-white dark:hover:bg-slate-700 cursor-pointer shadow-2xs"
+              }`}
+              title="Next Service"
+              aria-label="Next Service"
+            >
+              <span>Next</span>
+              <FiChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Right: Share Button */}
+          <button
+            type="button"
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs sm:text-sm font-black transition shadow-xs cursor-pointer hover:text-[#0055FF] hover:border-[#0055FF]"
+            title="Share this service"
+          >
+            <FiShare2 className="w-3.5 h-3.5 text-[#0055FF]" />
+            <span>Share</span>
+          </button>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* ========================================================= */}
-          {/* LEFT PANEL: TOPIC OF SERVICES (Sidebar)                   */}
+          {/* LEFT PANEL: TOPIC OF SERVICES (Sidebar, hidden on mobile) */}
           {/* ========================================================= */}
-          <aside className="lg:col-span-3 space-y-4 lg:sticky lg:top-28">
+          <aside className="hidden lg:block lg:col-span-3 space-y-4 lg:sticky lg:top-28">
             <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-[0_10px_30px_rgba(0,85,255,0.05)]">
               {/* Header: Our Service + Count Badge */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 mb-4">
@@ -210,14 +322,26 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
                   </div>
                 </div>
 
-                {/* Primary Title & Headline */}
-                <div>
-                  <h1 className="heading-font text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
-                    {activeService.title}
-                  </h1>
-                  <p className="text-[#0055FF] font-extrabold text-sm sm:text-base uppercase tracking-wider mt-1.5">
-                    {activeService.headline} &bull; {activeService.subtitle}
-                  </p>
+                {/* Primary Title & Headline + Circular Share Button */}
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <h1 className="heading-font text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white uppercase tracking-tight">
+                      {activeService.title}
+                    </h1>
+                    <p className="text-[#0055FF] font-extrabold text-sm sm:text-base uppercase tracking-wider mt-1.5">
+                      {activeService.headline} &bull; {activeService.subtitle}
+                    </p>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={handleShare}
+                    className="w-10 h-10 rounded-full border border-blue-200 dark:border-blue-800 bg-blue-50/60 dark:bg-blue-950/40 hover:bg-[#0055FF] hover:text-white text-[#0055FF] flex items-center justify-center transition-all shadow-xs shrink-0 cursor-pointer hover:scale-105"
+                    title="Share this service"
+                    aria-label="Share service"
+                  >
+                    <FiShare2 className="w-4 h-4" />
+                  </button>
                 </div>
 
                 {/* Narrative Description */}
@@ -398,6 +522,138 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
           service={selectedService}
           plan={selectedPlan}
         />
+      )}
+
+      {/* Mobile Services Selector Drawer / Bottom Sheet */}
+      {mobileFilterOpen && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-xs p-0 sm:p-4 animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0"
+            onClick={() => setMobileFilterOpen(false)}
+          />
+          <div className="relative w-full sm:max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl p-5 sm:p-6 shadow-2xl border border-slate-200 dark:border-slate-800 z-10 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800 mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-blue-50 dark:bg-blue-900/40 text-[#0055FF] flex items-center justify-center">
+                  <FiSliders className="w-4 h-4" />
+                </div>
+                <h3 className="heading-font text-base font-black text-slate-900 dark:text-white">
+                  Our Services ({services.length})
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMobileFilterOpen(false)}
+                className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-2.5">
+              {services.map((srv, idx) => {
+                const isSelected = srv.slug === currentSlug;
+                return (
+                  <button
+                    key={srv.id}
+                    type="button"
+                    onClick={() => {
+                      handleSelectService(srv.slug);
+                      setMobileFilterOpen(false);
+                    }}
+                    className={`w-full flex items-center justify-between p-3.5 rounded-2xl font-black text-xs sm:text-sm text-left transition-all cursor-pointer ${
+                      isSelected
+                        ? "bg-blue-50 dark:bg-blue-950/60 text-[#0055FF] border-2 border-[#0055FF] shadow-xs"
+                        : "bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <span
+                        className={`w-2.5 h-2.5 rounded-full shrink-0 ${
+                          isSelected ? "bg-[#0055FF] shadow-[0_0_8px_#0055FF]" : "bg-slate-300 dark:bg-slate-600"
+                        }`}
+                      />
+                      <span className="truncate uppercase font-black">{srv.title}</span>
+                    </div>
+                    <span className="text-[11px] font-extrabold text-[#0055FF] bg-blue-100/60 dark:bg-blue-900/40 px-2 py-0.5 rounded-md">
+                      #{idx + 1}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Share Modal Dialog */}
+      {shareModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
+          <div
+            className="fixed inset-0"
+            onClick={() => setShareModalOpen(false)}
+          />
+          <div className="relative w-full max-w-sm bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-2xl border border-slate-200 dark:border-slate-800 z-10 space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+              <h3 className="heading-font text-base font-black text-slate-900 dark:text-white flex items-center gap-2">
+                <FiShare2 className="w-4 h-4 text-[#0055FF]" />
+                <span>Share Service</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShareModalOpen(false)}
+                className="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition"
+              >
+                <FiX className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-500 font-semibold leading-relaxed">
+              Share <strong className="text-slate-900 dark:text-white">{activeService.title}</strong> with your network or clients:
+            </p>
+
+            <div className="space-y-2.5 pt-1">
+              <a
+                href={`https://api.whatsapp.com/send?text=${encodeURIComponent(
+                  `Check out ${activeService.title} by JCRM Technologies - ${activeService.headline}: https://www.jcrm.in/services/${activeService.slug}`
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setShareModalOpen(false)}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20ba59] text-white text-xs font-black shadow-sm transition cursor-pointer"
+              >
+                <FaWhatsapp className="w-4 h-4" />
+                <span>Share on WhatsApp</span>
+              </a>
+
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(
+                    typeof window !== "undefined"
+                      ? window.location.href
+                      : `https://www.jcrm.in/services/${activeService.slug}`
+                  );
+                  setShareCopied(true);
+                  setTimeout(() => setShareCopied(false), 2000);
+                }}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-black transition cursor-pointer"
+              >
+                {shareCopied ? (
+                  <>
+                    <FiCheck className="w-4 h-4 text-emerald-600" />
+                    <span className="text-emerald-600">Link Copied to Clipboard!</span>
+                  </>
+                ) : (
+                  <>
+                    <FiCopy className="w-4 h-4 text-[#0055FF]" />
+                    <span>Copy Page Link</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
