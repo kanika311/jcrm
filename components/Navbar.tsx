@@ -19,6 +19,7 @@ export default function Navbar({
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [mobileServicesOpen, setMobileServicesOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
@@ -45,6 +46,7 @@ export default function Navbar({
   useEffect(() => {
     setUserDropdownOpen(false);
     setMobileMenuOpen(false);
+    setMobileServicesOpen(false);
   }, [pathname]);
 
   // Hide on admin console, auth, onboarding, and hidden admin routes
@@ -481,36 +483,77 @@ export default function Navbar({
               if (link.href === "/services") {
                 return (
                   <div key={link.name} className="space-y-1">
-                    <Link
-                      href={link.href}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={`flex items-center justify-between px-4 py-3.5 text-base font-extrabold rounded-xl transition-all ${
+                    <div
+                      onClick={() => setMobileServicesOpen((prev) => !prev)}
+                      className={`flex items-center justify-between px-4 py-3.5 text-base font-extrabold rounded-xl transition-all cursor-pointer ${
                         isActive
                           ? "text-[#0055FF] bg-blue-50/90 border-l-4 border-[#0055FF]"
-                          : "text-slate-700 dark:text-slate-300 hover:text-[#0055FF] hover:bg-slate-50"
+                          : "text-slate-700 dark:text-slate-300 hover:text-[#0055FF] hover:bg-slate-50 dark:hover:bg-gray-800"
                       }`}
                     >
-                      <span>{link.name}</span>
-                      {isActive && (
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#0055FF]"></span>
-                      )}
-                    </Link>
-                    <div className="pl-6 pr-2 py-1 space-y-1 border-l-2 border-blue-100 dark:border-blue-900/40 ml-4">
-                      <Link
-                        href="/services/seo"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-[#0055FF]"
+                      <div className="flex items-center gap-2">
+                        <span>{link.name}</span>
+                        {isActive && (
+                          <span className="w-2.5 h-2.5 rounded-full bg-[#0055FF]"></span>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setMobileServicesOpen((prev) => !prev);
+                        }}
+                        aria-label="Toggle Services Dropdown"
+                        className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                          mobileServicesOpen
+                            ? "rotate-180 bg-[#0055FF] text-white border-[#0055FF] shadow-xs"
+                            : "bg-white dark:bg-slate-800 text-slate-500 border-slate-200 dark:border-slate-700 hover:text-[#0055FF]"
+                        }`}
                       >
-                        ⚡ AI-Powered SEO Packages
-                      </Link>
-                      <Link
-                        href="/services/social-media"
-                        onClick={() => setMobileMenuOpen(false)}
-                        className="block px-3 py-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-[#0055FF]"
-                      >
-                        🚀 Social Media Management
-                      </Link>
+                        <FiChevronDown className="w-4 h-4" />
+                      </button>
                     </div>
+
+                    {mobileServicesOpen && (
+                      <div className="pl-4 pr-2 py-1.5 space-y-1.5 border-l-2 border-blue-200 dark:border-blue-900/40 ml-5 my-1 animate-in fade-in duration-200">
+                        <Link
+                          href="/services/seo"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
+                            pathname === "/services/seo"
+                              ? "text-[#0055FF] bg-blue-50 dark:bg-blue-950/40"
+                              : "text-slate-600 dark:text-slate-300 hover:text-[#0055FF] hover:bg-blue-50/60 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          <span>⚡</span>
+                          <span>AI-Powered SEO Packages</span>
+                        </Link>
+                        <Link
+                          href="/services/social-media"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
+                            pathname === "/services/social-media"
+                              ? "text-[#0055FF] bg-blue-50 dark:bg-blue-950/40"
+                              : "text-slate-600 dark:text-slate-300 hover:text-[#0055FF] hover:bg-blue-50/60 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          <span>🚀</span>
+                          <span>Social Media Management</span>
+                        </Link>
+                        <Link
+                          href="/services"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`block px-3 py-1.5 text-[11px] font-extrabold hover:underline ${
+                            pathname === "/services"
+                              ? "text-[#0055FF]"
+                              : "text-slate-500 dark:text-slate-400 hover:text-[#0055FF]"
+                          }`}
+                        >
+                          Explore All Services →
+                        </Link>
+                      </div>
+                    )}
                   </div>
                 );
               }
