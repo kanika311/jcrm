@@ -50,15 +50,11 @@ export default function TestimonialsSection({ initialReviews }: TestimonialsSect
         {/* Section Header */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 sm:mb-14">
           <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-50 border border-blue-200 text-[#0055FF] text-xs font-black uppercase tracking-wider mb-2">
-              <span>★ 4.9 / 5.0 Average Rating</span>
-            </div>
+           
             <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 tracking-tight">
               What <span className="text-[#0055FF]">Clients & Trainees Say</span>
             </h2>
-            <p className="text-sm sm:text-base text-slate-600 mt-2">
-              Authentic reviews from engineers and enterprise partners who built, scaled, and transformed with JCRM Technologies.
-            </p>
+
           </div>
 
           <div className="flex items-center gap-3 shrink-0 flex-wrap">

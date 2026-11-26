@@ -42,19 +42,13 @@ export default function TrustAuthoritySection() {
     <section className="py-10 sm:py-16 relative z-10 bg-gradient-to-b from-blue-50/40 via-white/80 to-blue-50/30 border-y border-blue-100/70" id="trust-credentials">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-3xl mx-auto mb-8 sm:mb-12">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-blue-100/70 text-[#0055FF] text-xs font-black uppercase tracking-wider mb-2">
-            <span>Verified Industry Credentials &amp; Freshness</span>
-          </div>
+         
           <h2 className="heading-font text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 mb-2">
             Trust &amp; Authority <span className="text-[#0055FF]">Signals</span>
           </h2>
-        
-          <div className="mt-3 text-[11px] sm:text-xs font-bold text-slate-500">
-            <span>Last updated: October 2026</span>
-            <span className="mx-2">•</span>
-            <span>Audited for 2026 Curriculum &amp; Placement Standards</span>
           </div>
-        </div>
+        
+      
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {credentials.map((item, idx) => (
