@@ -31,7 +31,10 @@ export default async function AdminServicesPage() {
       Array.isArray(servicesRecord.content) &&
       servicesRecord.content.length > 0
     ) {
-      services = servicesRecord.content as unknown as ServiceCategory[];
+      const dbServices = servicesRecord.content as unknown as ServiceCategory[];
+      const existingSlugs = new Set(dbServices.map((s) => s.slug));
+      const missingDefaults = DEFAULT_SERVICES.filter((ds) => !existingSlugs.has(ds.slug));
+      services = [...dbServices, ...missingDefaults];
     }
 
     if (ordersRecord && Array.isArray(ordersRecord.content)) {

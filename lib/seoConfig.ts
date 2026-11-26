@@ -65,6 +65,33 @@ export const SEO_CONFIG: Record<string, PageSeoItem> = {
       "social media management Noida, SMM packages India, Instagram marketing agency, social media agency for small business",
     url: "https://www.jcrm.in/services/social-media",
   },
+  "/services/website-development": {
+    page: "Website Development",
+    metaTitle: "Website & Web App Development Services Noida | JCRM Technologies",
+    metaDescription:
+      "Custom, high-converting websites and full-stack web applications by JCRM Technologies Noida. Next.js, React, Node.js, and e-commerce solutions built for speed and ROI.",
+    keywords:
+      "website development Noida, web development company India, Next.js web development, custom web app development, ecommerce website Noida",
+    url: "https://www.jcrm.in/services/website-development",
+  },
+  "/services/mobile-app-development": {
+    page: "Mobile App Development",
+    metaTitle: "Mobile App Development Services Noida | iOS & Android Apps JCRM",
+    metaDescription:
+      "Build high-performance iOS, Android, and Flutter mobile applications with JCRM Technologies. Native & cross-platform solutions with intuitive UI/UX and store publishing.",
+    keywords:
+      "mobile app development Noida, iOS app developers India, Android app development, Flutter app development company, cross-platform apps",
+    url: "https://www.jcrm.in/services/mobile-app-development",
+  },
+  "/services/ai-video-production": {
+    page: "AI Video Production & Editing",
+    metaTitle: "AI Video Production & Editing Services | JCRM Technologies",
+    metaDescription:
+      "High-retention AI videos, digital spokesperson avatars, viral Reels and commercial ads by JCRM Technologies. Studio-grade editing, AI voiceovers & 4K production.",
+    keywords:
+      "AI video production, AI video editing services India, Instagram reels video editor, AI avatar video generator, corporate video production Noida",
+    url: "https://www.jcrm.in/services/ai-video-production",
+  },
   "/about": {
     page: "About Us",
     metaTitle: "About JCRM Technologies - ISO Certified IT Company Noida",

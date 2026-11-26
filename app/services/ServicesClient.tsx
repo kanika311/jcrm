@@ -16,6 +16,9 @@ import {
   FiZap,
   FiChevronDown,
   FiChevronUp,
+  FiCode,
+  FiFilm,
+  FiSmartphone,
 } from "react-icons/fi";
 import {
   FaFacebookF,
@@ -25,6 +28,11 @@ import {
   FaGem,
   FaCrown,
   FaGoogle,
+  FaApple,
+  FaAndroid,
+  FaReact,
+  FaNodeJs,
+  FaWordpress,
 } from "react-icons/fa";
 
 interface ServicesClientProps {
@@ -77,9 +85,31 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
     }
   };
 
+  const getPlatformIcon = (platform: string) => {
+    const p = platform.toUpperCase().trim();
+    if (p.includes("FACEBOOK")) return <FaFacebookF className="text-[#1877F2]" />;
+    if (p.includes("LINKEDIN")) return <FaLinkedinIn className="text-[#0A66C2]" />;
+    if (p.includes("INSTAGRAM")) return <FaInstagram className="text-[#E1306C]" />;
+    if (p.includes("YOUTUBE")) return <FaYoutube className="text-[#FF0000]" />;
+    if (p.includes("IOS") || p.includes("APPLE")) return <FaApple className="text-slate-800 dark:text-white" />;
+    if (p.includes("ANDROID")) return <FaAndroid className="text-[#3DDC84]" />;
+    if (p.includes("REACT") || p.includes("FLUTTER")) return <FaReact className="text-[#61DAFB]" />;
+    if (p.includes("NEXT") || p.includes("CODE")) return <FiCode className="text-[#0055FF]" />;
+    if (p.includes("NODE")) return <FaNodeJs className="text-[#68A063]" />;
+    if (p.includes("WORDPRESS")) return <FaWordpress className="text-[#21759B]" />;
+    if (p.includes("VIDEO") || p.includes("PREMIERE") || p.includes("AFTER")) return <FiFilm className="text-pink-500" />;
+    if (p.includes("AI") || p.includes("RUNWAY") || p.includes("MIDJOURNEY")) return <FiZap className="text-amber-500" />;
+    return <FiCheck className="text-blue-500" />;
+  };
+
   if (!activeService) return null;
 
-  const lowestPrice = Math.min(...activeService.plans.map((p) => p.price));
+  const lowestPricePlan = activeService.plans.reduce(
+    (min, p) => (p.price < min.price ? p : min),
+    activeService.plans[0]
+  );
+  const lowestPrice = lowestPricePlan ? lowestPricePlan.price : 0;
+  const lowestPricePeriod = lowestPricePlan?.period || "month";
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-blue-50/40 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 text-slate-800 dark:text-slate-100 pb-28 pt-24 sm:pt-28">
@@ -168,14 +198,14 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
                     {activeService.badge}
                   </div>
 
-                  {/* Starting Price Pill (matching YogaSathi "From ₹25,000" style) */}
+                  {/* Starting Price Pill */}
                   <div className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950/40 dark:to-orange-950/30 border border-amber-300 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-black text-xs sm:text-sm shadow-xs">
                     <span>From</span>
                     <strong className="text-amber-800 dark:text-amber-200 text-sm sm:text-base">
                       ₹{lowestPrice.toLocaleString("en-IN")}
                     </strong>
                     <span className="text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-                      /month
+                      /{lowestPricePeriod}
                     </span>
                   </div>
                 </div>
@@ -195,28 +225,21 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
                   {activeService.description}
                 </p>
 
-                {/* Supported Platform Badges */}
+                {/* Supported Platform / Coverage Badges */}
                 {activeService.platforms && activeService.platforms.length > 0 ? (
                   <div className="flex flex-wrap items-center gap-2.5 pt-2">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-wider mr-1">
-                      Target Networks:
+                      Target Networks & Platforms:
                     </span>
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200">
-                      <FaFacebookF className="text-[#1877F2]" />
-                      <span>Facebook</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200">
-                      <FaLinkedinIn className="text-[#0A66C2]" />
-                      <span>LinkedIn</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200">
-                      <FaInstagram className="text-[#E1306C]" />
-                      <span>Instagram</span>
-                    </div>
-                    <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200">
-                      <FaYoutube className="text-[#FF0000]" />
-                      <span>YouTube</span>
-                    </div>
+                    {activeService.platforms.map((p) => (
+                      <div
+                        key={p}
+                        className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-200 border border-slate-200/60 dark:border-slate-700/60 shadow-2xs"
+                      >
+                        {getPlatformIcon(p)}
+                        <span>{p}</span>
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="flex flex-wrap items-center gap-2.5 pt-2">

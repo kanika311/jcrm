@@ -17,7 +17,10 @@ export default async function ServicesPage() {
     });
 
     if (record && Array.isArray(record.content) && record.content.length > 0) {
-      services = record.content as unknown as ServiceCategory[];
+      const dbServices = record.content as unknown as ServiceCategory[];
+      const existingSlugs = new Set(dbServices.map((s) => s.slug));
+      const missingDefaults = DEFAULT_SERVICES.filter((ds) => !existingSlugs.has(ds.slug));
+      services = [...dbServices, ...missingDefaults];
     }
   } catch (err) {
     console.error("Failed to load services:", err);

@@ -223,20 +223,20 @@ export default function Navbar({
                     </Link>
 
                     {/* Services Dropdown Card */}
-                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-80 invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto z-50">
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 pt-2 w-[390px] invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-200 pointer-events-none group-hover:pointer-events-auto z-50">
                       <div className="rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-blue-100 dark:border-slate-800 p-2.5 space-y-1">
                         <Link
                           href="/services/seo"
-                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
+                          className="flex items-start gap-3 p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
                         >
-                          <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 text-[#0055FF] flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
+                          <div className="w-8 h-8 rounded-lg bg-blue-100 dark:bg-blue-900/40 text-[#0055FF] flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
                             SEO
                           </div>
-                          <div>
+                          <div className="flex-1 min-w-0">
                             <p className="text-xs font-black text-slate-900 dark:text-white group-hover/item:text-[#0055FF] transition-colors">
                               AI-Powered SEO Packages
                             </p>
-                            <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
+                            <p className="text-[11px] text-slate-500 font-medium truncate">
                               Rank higher on Google, ChatGPT & Gemini
                             </p>
                             <span className="text-[10px] font-extrabold text-blue-600">
@@ -247,16 +247,16 @@ export default function Navbar({
 
                         <Link
                           href="/services/social-media"
-                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
+                          className="flex items-start gap-3 p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
                         >
-                          <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
+                          <div className="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
                             SMM
                           </div>
-                          <div>
+                          <div className="flex-1 min-w-0">
                             <p className="text-xs font-black text-slate-900 dark:text-white group-hover/item:text-[#0055FF] transition-colors">
                               Social Media Management
                             </p>
-                            <p className="text-[11px] text-slate-500 font-medium line-clamp-1">
+                            <p className="text-[11px] text-slate-500 font-medium truncate">
                               Facebook, LinkedIn, Instagram & YouTube
                             </p>
                             <span className="text-[10px] font-extrabold text-indigo-600">
@@ -264,6 +264,75 @@ export default function Navbar({
                             </span>
                           </div>
                         </Link>
+
+                        <Link
+                          href="/services/website-development"
+                          className="flex items-start gap-3 p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
+                            WEB
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-black text-slate-900 dark:text-white group-hover/item:text-[#0055FF] transition-colors">
+                              Website Development
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium truncate">
+                              Next.js, Modern Full-Stack & E-Commerce
+                            </p>
+                            <span className="text-[10px] font-extrabold text-emerald-600">
+                              From ₹14,999
+                            </span>
+                          </div>
+                        </Link>
+
+                        <Link
+                          href="/services/mobile-app-development"
+                          className="flex items-start gap-3 p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-violet-100 dark:bg-violet-900/40 text-violet-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
+                            APP
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-black text-slate-900 dark:text-white group-hover/item:text-[#0055FF] transition-colors">
+                              Mobile App Development
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium truncate">
+                              iOS, Android, Flutter & React Native
+                            </p>
+                            <span className="text-[10px] font-extrabold text-violet-600">
+                              From ₹24,999
+                            </span>
+                          </div>
+                        </Link>
+
+                        <Link
+                          href="/services/ai-video-production"
+                          className="flex items-start gap-3 p-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors group/item"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-pink-100 dark:bg-pink-900/40 text-pink-600 flex items-center justify-center font-bold text-xs shrink-0 group-hover/item:scale-105 transition-transform">
+                            AI
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-black text-slate-900 dark:text-white group-hover/item:text-[#0055FF] transition-colors">
+                              AI Video Production & Editing
+                            </p>
+                            <p className="text-[11px] text-slate-500 font-medium truncate">
+                              AI Avatars, Cinematic Reels & Commercials
+                            </p>
+                            <span className="text-[10px] font-extrabold text-pink-600">
+                              From ₹9,999/mo
+                            </span>
+                          </div>
+                        </Link>
+
+                        <div className="pt-1.5 border-t border-slate-100 dark:border-slate-800">
+                          <Link
+                            href="/services"
+                            className="block text-center py-1.5 px-3 text-[11px] font-extrabold text-[#0055FF] hover:bg-blue-50 dark:hover:bg-blue-950/40 rounded-lg transition-colors"
+                          >
+                            Explore All Services & Pricing Plans →
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -540,6 +609,42 @@ export default function Navbar({
                         >
                           <span>🚀</span>
                           <span>Social Media Management</span>
+                        </Link>
+                        <Link
+                          href="/services/website-development"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
+                            pathname === "/services/website-development"
+                              ? "text-[#0055FF] bg-blue-50 dark:bg-blue-950/40"
+                              : "text-slate-600 dark:text-slate-300 hover:text-[#0055FF] hover:bg-blue-50/60 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          <span>💻</span>
+                          <span>Website Development</span>
+                        </Link>
+                        <Link
+                          href="/services/mobile-app-development"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
+                            pathname === "/services/mobile-app-development"
+                              ? "text-[#0055FF] bg-blue-50 dark:bg-blue-950/40"
+                              : "text-slate-600 dark:text-slate-300 hover:text-[#0055FF] hover:bg-blue-50/60 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          <span>📱</span>
+                          <span>Mobile App Development</span>
+                        </Link>
+                        <Link
+                          href="/services/ai-video-production"
+                          onClick={() => setMobileMenuOpen(false)}
+                          className={`flex items-center gap-2 px-3 py-2 text-xs font-bold rounded-lg transition-colors ${
+                            pathname === "/services/ai-video-production"
+                              ? "text-[#0055FF] bg-blue-50 dark:bg-blue-950/40"
+                              : "text-slate-600 dark:text-slate-300 hover:text-[#0055FF] hover:bg-blue-50/60 dark:hover:bg-slate-800"
+                          }`}
+                        >
+                          <span>🎬</span>
+                          <span>AI Video Production & Editing</span>
                         </Link>
                         <Link
                           href="/services"

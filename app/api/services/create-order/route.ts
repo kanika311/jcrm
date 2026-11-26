@@ -11,7 +11,10 @@ async function getServicesConfig(): Promise<ServiceCategory[]> {
       where: { pageId: "services-config" },
     });
     if (record && Array.isArray(record.content) && record.content.length > 0) {
-      return record.content as unknown as ServiceCategory[];
+      const dbServices = record.content as unknown as ServiceCategory[];
+      const existingSlugs = new Set(dbServices.map((s) => s.slug));
+      const missingDefaults = DEFAULT_SERVICES.filter((ds) => !existingSlugs.has(ds.slug));
+      return [...dbServices, ...missingDefaults];
     }
   } catch (err) {
     console.error("Failed to read services-config from DB:", err);
