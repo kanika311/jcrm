@@ -168,8 +168,9 @@ export default function ServicesClient({ services, activeSlug }: ServicesClientP
         
         {/* ========================================================= */}
         {/* TOP BAR: Filter Icon (Blue) | Prev & Next | Share Button  */}
+        {/* (Mobile & Tablet Only - Hidden on Laptop/Desktop)         */}
         {/* ========================================================= */}
-        <div className="bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-2.5 sm:p-3.5 shadow-sm flex items-center justify-between gap-3 mb-6">
+        <div className="lg:hidden bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border border-slate-200/90 dark:border-slate-800 rounded-2xl p-2.5 sm:p-3.5 shadow-sm flex items-center justify-between gap-3 mb-6">
           {/* Left: Blue Filter Button */}
           <button
             type="button"
